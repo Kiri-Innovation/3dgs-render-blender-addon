@@ -19,7 +19,7 @@ By bridging the gap between 3DGS technology and Blender's powerful ecosystem, th
 
 
 ## Installation:
-❗❗Please note❗❗ The addon was made for the most current version of Blender at the time of writing - Blender 4.2 – the addon will NOT work with previous versions of Blender.
+❗❗Please note❗❗ The addon was made for the most current version of Blender at the time of writing - Blender 4.2 version. The addon will NOT work with previous versions of Blender.
 
 Please follow the installation guide in the [doc](https://www.kiriengine.app/blender-addon/3dgs-render).
 
