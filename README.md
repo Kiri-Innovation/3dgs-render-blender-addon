@@ -25,7 +25,7 @@ Please follow the installation guide in the [doc](https://www.kiriengine.app/ble
 
 ## Tutorial:
 The instructions can be found in [doc](https://www.kiriengine.app/blender-addon/3dgs-render).
-The tutorial video can be found [here]().
+The tutorial video can be found [here](https://www.youtube.com/watch?v=j9BDi4dMC-A).
 
 ## Acknowledgement:
 Thanks to everybody who contributes to this good work from the KIRI Engine team.
