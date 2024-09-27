@@ -1,4 +1,4 @@
-# 3DGS Render blender addon by KIRI Engine
+# 3DGS Render Blender Addon by KIRI Engine
 <a href="./LICENSE">
         <img alt="License" src="https://img.shields.io/badge/License-Apache_2.0-blue.svg"></a>
 
