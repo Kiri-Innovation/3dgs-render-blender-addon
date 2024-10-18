@@ -23,6 +23,15 @@ By bridging the gap between 3DGS technology and Blender's powerful ecosystem, th
 
 Please follow the installation guide in the [doc](https://www.kiriengine.app/blender-addon/3dgs-render).
 
+## FAQ:
+Fixing the error when clicking on Start camera update button
+Download the addon from GitHub
+Unzip the file
+Rename the folder to gs_render_by_kiri_engine
+Zip it to gs_render_by_kiri_engine.zip
+Install the addon inside Blender
+Enjoy!
+
 ## Tutorial:
 The instructions can be found in [doc](https://www.kiriengine.app/blender-addon/3dgs-render).
 The tutorial video can be found [here](https://youtu.be/u6ELrBT6FXw?si=MmRzhqWX123Z4StC).
