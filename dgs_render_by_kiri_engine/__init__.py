@@ -14,11 +14,11 @@
 bl_info = {
     "name" : "3DGS Render by KIRI Engine",
     "author" : "KIRI ENGINE TEAM", 
-    "description" : "Import, edit and render and animate 3DGS scans",
+    "description" : "Import, edit, render and animate 3DGS scans",
     "blender" : (4, 2, 0),
-    "version" : (2, 0, 0),
+    "version" : (2, 1, 0),
     "location" : "",
-    "warning" : "Please restart Blender after install/uninstall",
+    "warning" : "Restart Blender after install/uninstall",
     "doc_url": "", 
     "tracker_url": "", 
     "category" : "3D View" 
@@ -30,9 +30,6 @@ import bpy.utils.previews
 import webbrowser
 import os
 from bpy.app.handlers import persistent
-import numpy as np
-from multiprocessing import shared_memory
-import time
 from bpy_extras.io_utils import ImportHelper, ExportHelper
 from mathutils import Matrix
 import math
@@ -40,10 +37,25 @@ import sys
 from mathutils import Vector, Matrix
 
 
+
+
+def string_to_int(value):
+    if value.isdigit():
+        return int(value)
+    return 0
+
+
+def string_to_icon(value):
+    if value in bpy.types.UILayout.bl_rna.functions["prop"].parameters["icon"].enum_items.keys():
+        return bpy.types.UILayout.bl_rna.functions["prop"].parameters["icon"].enum_items[value].value
+    return string_to_int(value)
+
+
 addon_keymaps = {}
 _icons = None
 kiri_3dgs_render__active_object_update = {'sna_apply_modifier_list': [], 'sna_in_camera_view': False, }
-kiri_3dgs_render__hq_render = {'sna_hq_render_base_object_list': [], 'sna_hq_render_origpos_duplicate_list': [], }
+kiri_3dgs_render__collection_snippets = {'sna_collections_temp_list': [], }
+kiri_3dgs_render__hq_mode = {'sna_hq_base_object_list': [], }
 
 
 kiri_3dgs_render__import_ply = {'sna_dgs_lq_active': None, }
@@ -85,6 +97,73 @@ def sna_add_geo_nodes__append_group_2D522_F22B7(Append_Path, Node_Group_Name, Ob
     modifier_D540A = Objects.modifiers.new(name=Modifier_Name, type='NODES', )
     modifier_D540A.node_group = bpy.data.node_groups[Node_Group_Name]
     return modifier_D540A
+
+
+def sna_update_sna_kiri3dgs_lq_mode__hq_mode_0B3A9(self, context):
+    sna_updated_prop = self.sna_kiri3dgs_lq_mode__hq_mode
+    if bool(bpy.data.materials.find('KIRI_3DGS_Render_Material')):
+        bpy.data.materials['KIRI_3DGS_Render_Material'].surface_render_method = ('BLENDED' if (sna_updated_prop == 'HQ Mode (Blended Alpha)') else 'DITHERED')
+    if (sna_updated_prop == 'HQ Mode (Blended Alpha)'):
+        for i_26967 in range(len(bpy.data.objects)):
+            if (property_exists("bpy.data.objects[i_26967].modifiers", globals(), locals()) and 'KIRI_3DGS_Sorter_GN' in bpy.data.objects[i_26967].modifiers):
+                bpy.data.objects[i_26967].modifiers['KIRI_3DGS_Sorter_GN'].show_viewport = True
+                bpy.data.objects[i_26967].modifiers['KIRI_3DGS_Sorter_GN'].show_render = True
+                bpy.data.objects[i_26967].update_tag(refresh={'DATA'}, )
+        if bpy.context and bpy.context.screen:
+            for a in bpy.context.screen.areas:
+                a.tag_redraw()
+    else:
+        for i_2A560 in range(len(bpy.data.objects)):
+            if (property_exists("bpy.data.objects[i_2A560].modifiers", globals(), locals()) and 'KIRI_3DGS_Sorter_GN' in bpy.data.objects[i_2A560].modifiers):
+                bpy.data.objects[i_2A560].modifiers['KIRI_3DGS_Sorter_GN'].show_viewport = False
+                bpy.data.objects[i_2A560].modifiers['KIRI_3DGS_Sorter_GN'].show_render = False
+                bpy.data.objects[i_2A560].update_tag(refresh={'DATA'}, )
+        if bpy.context and bpy.context.screen:
+            for a in bpy.context.screen.areas:
+                a.tag_redraw()
+    if (property_exists("bpy.context.scene.objects", globals(), locals()) and 'KIRI_HQ_Merged_Object' in bpy.context.scene.objects):
+        if (sna_updated_prop == 'HQ Mode (Blended Alpha)'):
+            for i_348A3 in range(len(bpy.context.scene.objects)):
+                if (bpy.context.scene.objects[i_348A3] == None):
+                    pass
+                else:
+                    if ((property_exists("bpy.context.scene.objects[i_348A3].material_slots", globals(), locals()) and 'KIRI_3DGS_Render_Material' in bpy.context.scene.objects[i_348A3].material_slots) or (property_exists("bpy.context.scene.objects[i_348A3].modifiers", globals(), locals()) and 'KIRI_3DGS_Sorter_GN' in bpy.context.scene.objects[i_348A3].modifiers)):
+                        bpy.context.scene.objects[i_348A3].hide_viewport = True
+                        bpy.context.scene.objects[i_348A3].hide_render = True
+            bpy.data.objects['KIRI_HQ_Merged_Object'].hide_viewport = False
+            bpy.data.objects['KIRI_HQ_Merged_Object'].hide_render = False
+        else:
+            bpy.data.objects['KIRI_HQ_Merged_Object'].hide_viewport = True
+            bpy.data.objects['KIRI_HQ_Merged_Object'].hide_render = True
+            for i_414C1 in range(len(bpy.context.scene.objects)):
+                if (bpy.context.scene.objects[i_414C1] == None):
+                    pass
+                else:
+                    if ((property_exists("bpy.context.scene.objects[i_414C1].material_slots", globals(), locals()) and 'KIRI_3DGS_Render_Material' in bpy.context.scene.objects[i_414C1].material_slots) or (property_exists("bpy.context.scene.objects[i_414C1].modifiers", globals(), locals()) and 'KIRI_3DGS_Sorter_GN' in bpy.context.scene.objects[i_414C1].modifiers)):
+                        bpy.context.scene.objects[i_414C1].hide_viewport = False
+                        bpy.context.scene.objects[i_414C1].hide_render = False
+
+
+def sna_add_geo_nodes__append_group_2D522_0741E(Append_Path, Node_Group_Name, Objects, Modifier_Name):
+    if property_exists("bpy.data.node_groups[Node_Group_Name]", globals(), locals()):
+        pass
+    else:
+        before_data = list(bpy.data.node_groups)
+        bpy.ops.wm.append(directory=Append_Path + r'\NodeTree', filename=Node_Group_Name, link=False)
+        new_data = list(filter(lambda d: not d in before_data, list(bpy.data.node_groups)))
+        appended_C35B3 = None if not new_data else new_data[0]
+    modifier_D540A = Objects.modifiers.new(name=Modifier_Name, type='NODES', )
+    modifier_D540A.node_group = bpy.data.node_groups[Node_Group_Name]
+    return modifier_D540A
+
+
+def sna_update_sna_kiri3dgs_hq_objects_overlap_DDF15(self, context):
+    sna_updated_prop = self.sna_kiri3dgs_hq_objects_overlap
+    if sna_updated_prop:
+        pass
+    else:
+        if (property_exists("bpy.context.scene.objects", globals(), locals()) and 'KIRI_HQ_Merged_Object' in bpy.context.scene.objects):
+            bpy.ops.sna.disable_hq_overlap_34678('INVOKE_DEFAULT', )
 
 
 def sna_add_geo_nodes__append_group_2D522_BF551(Append_Path, Node_Group_Name, Objects, Modifier_Name):
@@ -204,6 +283,19 @@ def sna_add_geo_nodes__append_group_2D522_74B9D(Append_Path, Node_Group_Name, Ob
     return modifier_D540A
 
 
+def sna_add_geo_nodes__append_group_2D522_03222(Append_Path, Node_Group_Name, Objects, Modifier_Name):
+    if property_exists("bpy.data.node_groups[Node_Group_Name]", globals(), locals()):
+        pass
+    else:
+        before_data = list(bpy.data.node_groups)
+        bpy.ops.wm.append(directory=Append_Path + r'\NodeTree', filename=Node_Group_Name, link=False)
+        new_data = list(filter(lambda d: not d in before_data, list(bpy.data.node_groups)))
+        appended_C35B3 = None if not new_data else new_data[0]
+    modifier_D540A = Objects.modifiers.new(name=Modifier_Name, type='NODES', )
+    modifier_D540A.node_group = bpy.data.node_groups[Node_Group_Name]
+    return modifier_D540A
+
+
 def sna_update_sna_kiri3dgs_modifier_enable_animate_1F5D0(self, context):
     sna_updated_prop = self.sna_kiri3dgs_modifier_enable_animate
     bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN'].show_viewport = sna_updated_prop
@@ -238,6 +330,58 @@ def sna_update_sna_kiri3dgs_modifier_enable_remove_stray_488C9(self, context):
     sna_updated_prop = self.sna_kiri3dgs_modifier_enable_remove_stray
     bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Remove_Stray_GN'].show_viewport = sna_updated_prop
     bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Remove_Stray_GN'].show_render = sna_updated_prop
+
+
+def sna_add_geo_nodes__append_group_2D522_90019(Append_Path, Node_Group_Name, Objects, Modifier_Name):
+    if property_exists("bpy.data.node_groups[Node_Group_Name]", globals(), locals()):
+        pass
+    else:
+        before_data = list(bpy.data.node_groups)
+        bpy.ops.wm.append(directory=Append_Path + r'\NodeTree', filename=Node_Group_Name, link=False)
+        new_data = list(filter(lambda d: not d in before_data, list(bpy.data.node_groups)))
+        appended_C35B3 = None if not new_data else new_data[0]
+    modifier_D540A = Objects.modifiers.new(name=Modifier_Name, type='NODES', )
+    modifier_D540A.node_group = bpy.data.node_groups[Node_Group_Name]
+    return modifier_D540A
+
+
+def sna_add_geo_nodes__append_group_2D522_9D3B3(Append_Path, Node_Group_Name, Objects, Modifier_Name):
+    if property_exists("bpy.data.node_groups[Node_Group_Name]", globals(), locals()):
+        pass
+    else:
+        before_data = list(bpy.data.node_groups)
+        bpy.ops.wm.append(directory=Append_Path + r'\NodeTree', filename=Node_Group_Name, link=False)
+        new_data = list(filter(lambda d: not d in before_data, list(bpy.data.node_groups)))
+        appended_C35B3 = None if not new_data else new_data[0]
+    modifier_D540A = Objects.modifiers.new(name=Modifier_Name, type='NODES', )
+    modifier_D540A.node_group = bpy.data.node_groups[Node_Group_Name]
+    return modifier_D540A
+
+
+def sna_add_geo_nodes__append_group_2D522_E5645(Append_Path, Node_Group_Name, Objects, Modifier_Name):
+    if property_exists("bpy.data.node_groups[Node_Group_Name]", globals(), locals()):
+        pass
+    else:
+        before_data = list(bpy.data.node_groups)
+        bpy.ops.wm.append(directory=Append_Path + r'\NodeTree', filename=Node_Group_Name, link=False)
+        new_data = list(filter(lambda d: not d in before_data, list(bpy.data.node_groups)))
+        appended_C35B3 = None if not new_data else new_data[0]
+    modifier_D540A = Objects.modifiers.new(name=Modifier_Name, type='NODES', )
+    modifier_D540A.node_group = bpy.data.node_groups[Node_Group_Name]
+    return modifier_D540A
+
+
+def sna_add_geo_nodes__append_group_2D522_9D9CF(Append_Path, Node_Group_Name, Objects, Modifier_Name):
+    if property_exists("bpy.data.node_groups[Node_Group_Name]", globals(), locals()):
+        pass
+    else:
+        before_data = list(bpy.data.node_groups)
+        bpy.ops.wm.append(directory=Append_Path + r'\NodeTree', filename=Node_Group_Name, link=False)
+        new_data = list(filter(lambda d: not d in before_data, list(bpy.data.node_groups)))
+        appended_C35B3 = None if not new_data else new_data[0]
+    modifier_D540A = Objects.modifiers.new(name=Modifier_Name, type='NODES', )
+    modifier_D540A.node_group = bpy.data.node_groups[Node_Group_Name]
+    return modifier_D540A
 
 
 def property_exists(prop_path, glob, loc):
@@ -1116,6 +1260,27 @@ def load_pre_handler_F6F13(dummy):
             a.tag_redraw()
 
 
+def sna_move_object_to_collection_create_if_missingfunction_execute_AB682(Object_to_move, Target_Collection, Collection_Color_Tag):
+    if (property_exists("bpy.data.collections", globals(), locals()) and Target_Collection in bpy.data.collections):
+        pass
+    else:
+        collection_CF177 = bpy.data.collections.new(name=Target_Collection, )
+        bpy.context.scene.collection.children.link(child=collection_CF177, )
+        bpy.data.collections[Target_Collection].color_tag = Collection_Color_Tag
+    if (property_exists("bpy.data.collections[Target_Collection].objects", globals(), locals()) and Object_to_move in bpy.data.collections[Target_Collection].objects):
+        pass
+    else:
+        bpy.data.collections[Target_Collection].objects.link(object=bpy.data.objects[Object_to_move], )
+    for i_7587C in range(len(bpy.context.scene.collection.children)):
+        if (property_exists("bpy.context.scene.collection.children[i_7587C].objects", globals(), locals()) and Object_to_move in bpy.context.scene.collection.children[i_7587C].objects):
+            if (bpy.context.scene.collection.children[i_7587C].name == Target_Collection):
+                pass
+            else:
+                bpy.context.scene.collection.children[i_7587C].objects.unlink(object=bpy.data.objects[Object_to_move], )
+    if (property_exists("bpy.context.scene.collection.objects", globals(), locals()) and Object_to_move in bpy.context.scene.collection.objects):
+        bpy.context.scene.collection.objects.unlink(object=bpy.data.objects[Object_to_move], )
+
+
 class SNA_OT_Open_Blender_Splat_Render_Documentation_1Eac5(bpy.types.Operator):
     bl_idname = "sna.open_blender_splat_render_documentation_1eac5"
     bl_label = "Open Blender Splat Render Documentation"
@@ -1152,7 +1317,7 @@ class SNA_OT_Open_Blender_Splat_Render_Tutorial_Video_A4Fe6(bpy.types.Operator):
         return not False
 
     def execute(self, context):
-        url = 'https://youtu.be/vBU8b9vrKrk'
+        url = 'https://youtu.be/ubeD3Vp_7hU'
         # Open the web browser and go to the specified URL
         webbrowser.open(url)
         print(f"Opening web browser to {url}")
@@ -1332,30 +1497,31 @@ def sna_edit_points_import_function_interface_8E4CD(layout_function, ):
 
 
 def sna_edit_points_modifier_properties_function_interface_1EEBD(layout_function, ):
-    box_81CE8 = layout_function.box()
-    box_81CE8.alert = False
-    box_81CE8.enabled = True
-    box_81CE8.active = True
-    box_81CE8.use_property_split = False
-    box_81CE8.use_property_decorate = False
-    box_81CE8.alignment = 'Expand'.upper()
-    box_81CE8.scale_x = 1.0
-    box_81CE8.scale_y = 1.0
-    if not True: box_81CE8.operator_context = "EXEC_DEFAULT"
-    row_69E53 = box_81CE8.row(heading='', align=False)
-    row_69E53.alert = False
-    row_69E53.enabled = True
-    row_69E53.active = True
-    row_69E53.use_property_split = False
-    row_69E53.use_property_decorate = False
-    row_69E53.scale_x = 1.0
-    row_69E53.scale_y = 1.0
-    row_69E53.alignment = 'Expand'.upper()
-    row_69E53.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
-    row_69E53.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Point_Edit_GN'], 'show_viewport', text='', icon_value=0, emboss=True)
-    op = row_69E53.operator('sna.remove_point_edit_modifier_47851', text='', icon_value=load_preview_icon(os.path.join(os.path.dirname(__file__), 'assets', 'cancel-7207310 - white.png')), emboss=True, depress=False)
-    op = row_69E53.operator('sna.refresh_point_edit_modifier_ec829', text='Refresh', icon_value=load_preview_icon(os.path.join(os.path.dirname(__file__), 'assets', 'refresh-7390745 - white.png')), emboss=True, depress=False)
-    op = row_69E53.operator('sna.apply_point_edit_modifier_d6b08', text='Apply', icon_value=36, emboss=True, depress=False)
+    if 'OBJECT'==bpy.context.mode:
+        box_81CE8 = layout_function.box()
+        box_81CE8.alert = False
+        box_81CE8.enabled = True
+        box_81CE8.active = True
+        box_81CE8.use_property_split = False
+        box_81CE8.use_property_decorate = False
+        box_81CE8.alignment = 'Expand'.upper()
+        box_81CE8.scale_x = 1.0
+        box_81CE8.scale_y = 1.0
+        if not True: box_81CE8.operator_context = "EXEC_DEFAULT"
+        row_69E53 = box_81CE8.row(heading='', align=False)
+        row_69E53.alert = False
+        row_69E53.enabled = True
+        row_69E53.active = True
+        row_69E53.use_property_split = False
+        row_69E53.use_property_decorate = False
+        row_69E53.scale_x = 1.0
+        row_69E53.scale_y = 1.0
+        row_69E53.alignment = 'Expand'.upper()
+        row_69E53.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
+        row_69E53.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Point_Edit_GN'], 'show_viewport', text='', icon_value=0, emboss=True)
+        op = row_69E53.operator('sna.remove_point_edit_modifier_47851', text='', icon_value=load_preview_icon(os.path.join(os.path.dirname(__file__), 'assets', 'cancel-7207310 - white.png')), emboss=True, depress=False)
+        op = row_69E53.operator('sna.refresh_point_edit_modifier_ec829', text='Refresh', icon_value=load_preview_icon(os.path.join(os.path.dirname(__file__), 'assets', 'refresh-7390745 - white.png')), emboss=True, depress=False)
+        op = row_69E53.operator('sna.apply_point_edit_modifier_d6b08', text='Apply', icon_value=36, emboss=True, depress=False)
     box_86931 = layout_function.box()
     box_86931.alert = False
     box_86931.enabled = True
@@ -1613,12 +1779,86 @@ class SNA_OT_Apply_Point_Edit_Modifier_D6B08(bpy.types.Operator):
         return self.execute(context)
 
 
-class SNA_OT_Hq_Render_B89Bf(bpy.types.Operator):
-    bl_idname = "sna.hq_render_b89bf"
-    bl_label = "HQ Render"
-    bl_description = "Offline renders maximum quality (blended alpha) versions of all enabled 3DGS objects using current render settings."
+def sna_hq_mode_function_interface_17C41(layout_function, ):
+    if (bpy.context.scene.camera == None):
+        box_9AC8C = layout_function.box()
+        box_9AC8C.alert = True
+        box_9AC8C.enabled = True
+        box_9AC8C.active = True
+        box_9AC8C.use_property_split = False
+        box_9AC8C.use_property_decorate = False
+        box_9AC8C.alignment = 'Expand'.upper()
+        box_9AC8C.scale_x = 1.0
+        box_9AC8C.scale_y = 1.0
+        if not True: box_9AC8C.operator_context = "EXEC_DEFAULT"
+        box_9AC8C.label(text='No active camera in scene', icon_value=load_preview_icon(os.path.join(os.path.dirname(__file__), 'assets', 'warning-7381086-red.png')))
+    else:
+        col_249D2 = layout_function.column(heading='', align=False)
+        col_249D2.alert = False
+        col_249D2.enabled = True
+        col_249D2.active = True
+        col_249D2.use_property_split = False
+        col_249D2.use_property_decorate = False
+        col_249D2.scale_x = 1.0
+        col_249D2.scale_y = 1.0
+        col_249D2.alignment = 'Expand'.upper()
+        col_249D2.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
+        col_50F78 = col_249D2.column(heading='', align=False)
+        col_50F78.alert = False
+        col_50F78.enabled = True
+        col_50F78.active = True
+        col_50F78.use_property_split = False
+        col_50F78.use_property_decorate = False
+        col_50F78.scale_x = 1.0
+        col_50F78.scale_y = 1.0
+        col_50F78.alignment = 'Expand'.upper()
+        col_50F78.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
+        col_50F78.prop(bpy.context.scene, 'sna_kiri3dgs_lq_mode__hq_mode', text='', icon_value=0, emboss=True)
+        col_249D2.separator(factor=1.0)
+        box_D2847 = col_249D2.box()
+        box_D2847.alert = False
+        box_D2847.enabled = True
+        box_D2847.active = True
+        box_D2847.use_property_split = False
+        box_D2847.use_property_decorate = False
+        box_D2847.alignment = 'Expand'.upper()
+        box_D2847.scale_x = 1.0
+        box_D2847.scale_y = 1.0
+        if not True: box_D2847.operator_context = "EXEC_DEFAULT"
+        box_D2847.prop(bpy.context.scene, 'sna_kiri3dgs_hq_objects_overlap', text='Objects Overlap?', icon_value=load_preview_icon(os.path.join(os.path.dirname(__file__), 'assets', 'noun-layer-7392514-FFFFFF.svg')), emboss=True)
+        if bpy.context.scene.sna_kiri3dgs_hq_objects_overlap:
+            box_0826A = col_249D2.box()
+            box_0826A.alert = False
+            box_0826A.enabled = True
+            box_0826A.active = True
+            box_0826A.use_property_split = False
+            box_0826A.use_property_decorate = False
+            box_0826A.alignment = 'Expand'.upper()
+            box_0826A.scale_x = 1.0
+            box_0826A.scale_y = 1.0
+            if not True: box_0826A.operator_context = "EXEC_DEFAULT"
+            if (property_exists("bpy.context.scene.objects", globals(), locals()) and 'KIRI_HQ_Merged_Object' in bpy.context.scene.objects):
+                box_BEFDD = box_0826A.box()
+                box_BEFDD.alert = True
+                box_BEFDD.enabled = False
+                box_BEFDD.active = True
+                box_BEFDD.use_property_split = False
+                box_BEFDD.use_property_decorate = False
+                box_BEFDD.alignment = 'Expand'.upper()
+                box_BEFDD.scale_x = 1.0
+                box_BEFDD.scale_y = 1.0
+                if not True: box_BEFDD.operator_context = "EXEC_DEFAULT"
+                box_BEFDD.label(text='HQ Object already exists', icon_value=load_preview_icon(os.path.join(os.path.dirname(__file__), 'assets', 'info-3016385-white.png')))
+                op = box_BEFDD.operator('sna.generate_hq_object_55455', text='Generate HQ Object', icon_value=load_preview_icon(os.path.join(os.path.dirname(__file__), 'assets', 'camera-7348910-white.png')), emboss=True, depress=False)
+            else:
+                op = box_0826A.operator('sna.generate_hq_object_55455', text='Generate HQ Object', icon_value=load_preview_icon(os.path.join(os.path.dirname(__file__), 'assets', 'camera-7348910-white.png')), emboss=True, depress=False)
+
+
+class SNA_OT_Generate_Hq_Object_55455(bpy.types.Operator):
+    bl_idname = "sna.generate_hq_object_55455"
+    bl_label = "Generate HQ Object"
+    bl_description = ""
     bl_options = {"REGISTER", "UNDO"}
-    sna_render_animation: bpy.props.BoolProperty(name='Render Animation', description='', default=False)
 
     @classmethod
     def poll(cls, context):
@@ -1627,603 +1867,114 @@ class SNA_OT_Hq_Render_B89Bf(bpy.types.Operator):
         return not False
 
     def execute(self, context):
-        import subprocess
-        from mathutils import Matrix, Vector
-        import os
-        if property_exists("bpy.data.materials['KIRI_3DGS_Render_Material']", globals(), locals()):
-            pass
-        else:
-            before_data = list(bpy.data.materials)
-            bpy.ops.wm.append(directory=os.path.join(os.path.dirname(__file__), 'assets', '3DGS Render APPEND.blend') + r'\Material', filename='KIRI_3DGS_Render_Material', link=False)
-            new_data = list(filter(lambda d: not d in before_data, list(bpy.data.materials)))
-            appended_54167 = None if not new_data else new_data[0]
-        if property_exists("bpy.data.node_groups['KIRI_3DGS_Restore_Origpos_GN']", globals(), locals()):
-            pass
-        else:
-            before_data = list(bpy.data.node_groups)
-            bpy.ops.wm.append(directory=os.path.join(os.path.dirname(__file__), 'assets', '3DGS Render APPEND.blend') + r'\NodeTree', filename='KIRI_3DGS_Restore_Origpos_GN', link=False)
-            new_data = list(filter(lambda d: not d in before_data, list(bpy.data.node_groups)))
-            appended_D2ADF = None if not new_data else new_data[0]
-        bpy.data.materials['KIRI_3DGS_Render_Material'].surface_render_method = 'BLENDED'
-        kiri_3dgs_render__hq_render['sna_hq_render_base_object_list'] = []
-        kiri_3dgs_render__hq_render['sna_hq_render_origpos_duplicate_list'] = []
-        for i_534B6 in range(len(bpy.data.objects)):
-            if ('GS_ID' in bpy.data.objects[i_534B6] and (not bpy.data.objects[i_534B6].hide_render)):
-                kiri_3dgs_render__hq_render['sna_hq_render_base_object_list'].append(bpy.data.objects[i_534B6])
-        for i_86401 in range(len(kiri_3dgs_render__hq_render['sna_hq_render_base_object_list'])):
-            source_obj_name = kiri_3dgs_render__hq_render['sna_hq_render_base_object_list'][i_86401].name
-            offset_x = 0.0
-            new_object_name = None
-            # Input variables
-            #source_obj_name = "Cube"  # Change this to your object's name
-            #offset_x = 0.0  # Input float variable for X offset
-            # Get the source object
-            source_obj = bpy.data.objects.get(source_obj_name)
-            # Check if the object exists
-            if source_obj:
-                # Create a copy of the object
-                new_obj = source_obj.copy()
-                new_obj.data = source_obj.data.copy()
-                # Link the new object to the scene
-                bpy.context.scene.collection.objects.link(new_obj)
-                # Apply the offset if any
-                new_obj.location.x += offset_x
-                # Store the new object's name in a variable
-                new_object_name = new_obj.name
-            else:
-                new_object_name = "ERROR: Source object not found"
-            # Output the new object's name (this will be captured by Serpens)
-            print(new_object_name)
-            kiri_3dgs_render__hq_render['sna_hq_render_origpos_duplicate_list'].append(new_object_name)
-        for i_10AF9 in range(len(kiri_3dgs_render__hq_render['sna_hq_render_origpos_duplicate_list'])):
-            object_name = kiri_3dgs_render__hq_render['sna_hq_render_origpos_duplicate_list'][i_10AF9]
-            # Replace this with your object's name
-            #object_name = "YourObjectName"
-            # Get the object
-            obj = bpy.data.objects.get(object_name)
-            if obj:
-                # Make sure the object is selected and active
-                bpy.context.view_layer.objects.active = obj
-                obj.select_set(True)
-                # Apply all modifiers
-                for modifier in obj.modifiers[:]:  # [:] creates a copy of the list to avoid modification issues
-                    try:
-                        bpy.ops.object.modifier_apply(modifier=modifier.name)
-                        print(f"Applied modifier: {modifier.name}")
-                    except Exception as e:
-                        print(f"Failed to apply modifier {modifier.name}: {str(e)}")
-            else:
-                print(f"Object '{object_name}' not found")
-            modifier_9CFE8 = bpy.data.objects[kiri_3dgs_render__hq_render['sna_hq_render_origpos_duplicate_list'][i_10AF9]].modifiers.new(name='KIRI_3DGS_Restore_Origpos_GN', type='NODES', )
-            modifier_9CFE8.node_group = bpy.data.node_groups['KIRI_3DGS_Restore_Origpos_GN']
-            object_name = kiri_3dgs_render__hq_render['sna_hq_render_origpos_duplicate_list'][i_10AF9]
-            # Replace this with your object's name
-            #object_name = "YourObjectName"
-            # Get the object
-            obj = bpy.data.objects.get(object_name)
-            if obj:
-                # Make sure the object is selected and active
-                bpy.context.view_layer.objects.active = obj
-                obj.select_set(True)
-                # Apply all modifiers
-                for modifier in obj.modifiers[:]:  # [:] creates a copy of the list to avoid modification issues
-                    try:
-                        bpy.ops.object.modifier_apply(modifier=modifier.name)
-                        print(f"Applied modifier: {modifier.name}")
-                    except Exception as e:
-                        print(f"Failed to apply modifier {modifier.name}: {str(e)}")
-            else:
-                print(f"Object '{object_name}' not found")
-            modifier_1E994 = bpy.data.objects[kiri_3dgs_render__hq_render['sna_hq_render_origpos_duplicate_list'][i_10AF9]].modifiers.new(name='KIRI_3DGS_Render_GN', type='NODES', )
-            modifier_1E994.node_group = bpy.data.node_groups['KIRI_3DGS_Render_GN']
-        for i_9B7EB in range(len(kiri_3dgs_render__hq_render['sna_hq_render_base_object_list'])):
-            kiri_3dgs_render__hq_render['sna_hq_render_base_object_list'][i_9B7EB].hide_render = True
-        render_animation = self.sna_render_animation
-        sorter_path = bpy.context.preferences.addons['dgs_render_by_kiri_engine'].preferences.sna_hq_sorter_directory
+        for i_3F5D0 in range(len(bpy.data.objects)):
+            if (property_exists("bpy.data.objects[i_3F5D0].modifiers", globals(), locals()) and 'KIRI_3DGS_Render_GN' in bpy.data.objects[i_3F5D0].modifiers):
+                bpy.data.objects[i_3F5D0].sna_kiri3dgs_active_object_enable_active_camera = True
+                bpy.data.objects[i_3F5D0].modifiers['KIRI_3DGS_Render_GN']['Socket_54'] = True
 
-        def check_operating_system():
-            from platform import system
-            os_name = system()
-            if os_name == "Windows":
-                return True
-            elif os_name == "Darwin":
-                return False
-            else:
-                print("This addon doesn't support " + os_name)
-                print("please try window or mac")
-                exit(0)
+        def delayed_CB67D():
+            sna_dgs__update_camera_single_time_function_execute_9C695()
 
-        def create_render_object(obj : bpy.types.Object, splatID_array):
-            orig_mesh : bpy.types.Mesh = obj.data
-            new_mesh : bpy.types.Mesh = orig_mesh.copy()
-            new_obj : bpy.types.Object = bpy.data.objects.new(f"{obj.name}_temp_render_object", new_mesh)
-            # Copy transform exactly as original does
-            new_obj.location = obj.location.copy()
-            new_obj.rotation_euler = obj.rotation_euler.copy()
-            new_obj.scale = obj.scale.copy()    
-            splat_count = len(orig_mesh.polygons) // 2
-            # Initialize arrays exactly as original does
-            Vrk_1 = [0.0] * splat_count * 2 * 1 
-            Vrk_2 = [0.0] * splat_count * 2 * 1
-            Vrk_3 = [0.0] * splat_count * 2 * 1
-            Vrk_4 = [0.0] * splat_count * 2 * 1
-            Vrk_5 = [0.0] * splat_count * 2 * 1
-            Vrk_6 = [0.0] * splat_count * 2 * 1
-            center = [0.0] * splat_count * 2 * 3 
-            color = [0.0] * splat_count * 2 * 4
-            # Copy data using original exact indexing pattern
-            for i in range(splat_count):
-                splat_id = splatID_array[i] 
-                # Vrk values - using exact 2 * splat_id + 0 indexing
-                Vrk_1[2 * i + 0] = orig_mesh.attributes["Vrk_1"].data[2 * splat_id + 0].value
-                Vrk_1[2 * i + 1] = orig_mesh.attributes["Vrk_1"].data[2 * splat_id + 0].value
-                Vrk_2[2 * i + 0] = orig_mesh.attributes["Vrk_2"].data[2 * splat_id + 0].value
-                Vrk_2[2 * i + 1] = orig_mesh.attributes["Vrk_2"].data[2 * splat_id + 0].value
-                Vrk_3[2 * i + 0] = orig_mesh.attributes["Vrk_3"].data[2 * splat_id + 0].value
-                Vrk_3[2 * i + 1] = orig_mesh.attributes["Vrk_3"].data[2 * splat_id + 0].value
-                Vrk_4[2 * i + 0] = orig_mesh.attributes["Vrk_4"].data[2 * splat_id + 0].value
-                Vrk_4[2 * i + 1] = orig_mesh.attributes["Vrk_4"].data[2 * splat_id + 0].value
-                Vrk_5[2 * i + 0] = orig_mesh.attributes["Vrk_5"].data[2 * splat_id + 0].value
-                Vrk_5[2 * i + 1] = orig_mesh.attributes["Vrk_5"].data[2 * splat_id + 0].value
-                Vrk_6[2 * i + 0] = orig_mesh.attributes["Vrk_6"].data[2 * splat_id + 0].value
-                Vrk_6[2 * i + 1] = orig_mesh.attributes["Vrk_6"].data[2 * splat_id + 0].value
-                # Center values - maintaining original exact indexing
-                orig_center = orig_mesh.attributes["center"].data[2 * splat_id].vector
-                center[6 * i + 0] = orig_center[0]
-                center[6 * i + 1] = orig_center[1]
-                center[6 * i + 2] = orig_center[2]
-                center[6 * i + 3] = orig_center[0]
-                center[6 * i + 4] = orig_center[1]
-                center[6 * i + 5] = orig_center[2]
-                # Color values - maintaining original exact indexing
-                orig_color = orig_mesh.attributes["color"].data[2 * splat_id].color
-                color[8 * i + 0] = orig_color[0]
-                color[8 * i + 1] = orig_color[1]
-                color[8 * i + 2] = orig_color[2]
-                color[8 * i + 3] = orig_color[3]
-                color[8 * i + 4] = orig_color[0]
-                color[8 * i + 5] = orig_color[1]
-                color[8 * i + 6] = orig_color[2]
-                color[8 * i + 7] = orig_color[3]
-                #tex_coord[12 * i + 0] = -2.0
-                #tex_coord[12 * i + 1] = -2.0
-                #tex_coord[12 * i + 2] = float(i)
-                #tex_coord[12 * i + 3] = 2.0
-                #tex_coord[12 * i + 4] = -2.0
-                #tex_coord[12 * i + 5] = float(i)
-                #tex_coord[12 * i + 6] = 2.0
-                #tex_coord[12 * i + 7] = 2.0
-                #tex_coord[12 * i + 8] = float(i)
-                #tex_coord[12 * i + 9] = -2.0
-                #tex_coord[12 * i + 10] = 2.0
-                #tex_coord[12 * i + 11] = float(i)
-            # Create attributes exactly as original does
-            # center_attr : bpy.types.FloatVectorAttribute = new_mesh.attributes.new(name="center", type='FLOAT_VECTOR', domain='FACE')
-            center_attr : bpy.types.FloatVectorAttribute = new_mesh.attributes.get("center")
-            center_attr.data.foreach_set("vector", center)
-            #color_attr : bpy.types.ByteColorAttribute = new_mesh.attributes.new(name="color", type='FLOAT_COLOR', domain='FACE')
-            color_attr : bpy.types.ByteColorAttribute = new_mesh.attributes.get("color")
-            color_attr.data.foreach_set("color", color)
-            # Create Vrk attributes with original exact pattern
-            #Vrk_1_attr = new_mesh.attributes.new(name="Vrk_1", type='FLOAT', domain='FACE')
-            Vrk_1_attr = new_mesh.attributes.get("Vrk_1")
-            Vrk_1_attr.data.foreach_set("value", Vrk_1)
-            #Vrk_2_attr = new_mesh.attributes.new(name="Vrk_2", type='FLOAT', domain='FACE')
-            Vrk_2_attr = new_mesh.attributes.get("Vrk_2")
-            Vrk_2_attr.data.foreach_set("value", Vrk_2)
-            #Vrk_3_attr = new_mesh.attributes.new(name="Vrk_3", type='FLOAT', domain='FACE')
-            Vrk_3_attr = new_mesh.attributes.get("Vrk_3")
-            Vrk_3_attr.data.foreach_set("value", Vrk_3)
-            #Vrk_4_attr = new_mesh.attributes.new(name="Vrk_4", type='FLOAT', domain='FACE')
-            Vrk_4_attr = new_mesh.attributes.get("Vrk_4")
-            Vrk_4_attr.data.foreach_set("value", Vrk_4)
-            #Vrk_5_attr = new_mesh.attributes.new(name="Vrk_5", type='FLOAT', domain='FACE')
-            Vrk_5_attr = new_mesh.attributes.get("Vrk_5")
-            Vrk_5_attr.data.foreach_set("value", Vrk_5)
-            #Vrk_6_attr = new_mesh.attributes.new(name="Vrk_6", type='FLOAT', domain='FACE')
-            Vrk_6_attr = new_mesh.attributes.get("Vrk_6")
-            Vrk_6_attr.data.foreach_set("value", Vrk_6)
-            # Set up node group and material with high quality render material
-            """
-            node_group = bpy.data.node_groups['KIRI_3DGS_Render_GN']
-            node_modifier : bpy.types.NodesModifier = new_obj.modifiers.new(name="KIRI_3DGS_Render_GN", type='NODES')
-            node_modifier.node_group = node_group
-            """
-            for i in range(splat_count):
-                new_mesh.polygons[2 * i   ].vertices = orig_mesh.polygons[2 * splatID_array[i]    ].vertices
-                new_mesh.polygons[2 * i +1].vertices = orig_mesh.polygons[2 * splatID_array[i] + 1].vertices
-            new_mesh.update()
-            # Find and assign high quality render material
-            material = None
-            for mat in bpy.data.materials:
-                if mat.name == "KIRI_3DGS_Render_Material":
-                    material = mat
-                    break
-            if new_obj and new_obj.data:
-                if len(new_obj.material_slots) < 1:
-                    new_obj.data.materials.append(material)
-                else:
-                    new_obj.material_slots[0].material = material
-            bpy.context.collection.objects.link(new_obj)
-            return new_obj
-
-        def update_camera_matrices(obj, camera):
-            # Get matrices exactly as original does
-            view_matrix = camera.matrix_world.inverted()
-            depsgraph = bpy.context.evaluated_depsgraph_get()
-            scene = bpy.context.scene
-            resolution_x = scene.render.resolution_x
-            resolution_y = scene.render.resolution_y
-            proj_matrix = camera.calc_matrix_camera(depsgraph,
-                                                  x=resolution_x,
-                                                  y=resolution_y)
-            # Get modifier using exact name
-            geometryNodes_modifier = obj.modifiers['KIRI_3DGS_Render_GN']
-            # View matrix assignments in exact same order as original
-            geometryNodes_modifier['Socket_2'] = view_matrix[0][0]
-            geometryNodes_modifier['Socket_3'] = view_matrix[1][0]
-            geometryNodes_modifier['Socket_4'] = view_matrix[2][0]
-            geometryNodes_modifier['Socket_5'] = view_matrix[3][0]
-            geometryNodes_modifier['Socket_6'] = view_matrix[0][1]
-            geometryNodes_modifier['Socket_7'] = view_matrix[1][1]
-            geometryNodes_modifier['Socket_8'] = view_matrix[2][1]
-            geometryNodes_modifier['Socket_9'] = view_matrix[3][1]
-            geometryNodes_modifier['Socket_10'] = view_matrix[0][2]
-            geometryNodes_modifier['Socket_11'] = view_matrix[1][2]
-            geometryNodes_modifier['Socket_12'] = view_matrix[2][2]
-            geometryNodes_modifier['Socket_13'] = view_matrix[3][2]
-            geometryNodes_modifier['Socket_14'] = view_matrix[0][3]
-            geometryNodes_modifier['Socket_15'] = view_matrix[1][3]
-            geometryNodes_modifier['Socket_16'] = view_matrix[2][3]
-            geometryNodes_modifier['Socket_17'] = view_matrix[3][3]
-            # Projection matrix assignments with exact duplicate pattern from original
-            geometryNodes_modifier['Socket_18'] = proj_matrix[0][0]
-            geometryNodes_modifier['Socket_19'] = proj_matrix[1][0]
-            geometryNodes_modifier['Socket_20'] = proj_matrix[2][0]
-            geometryNodes_modifier['Socket_21'] = proj_matrix[3][0]
-            geometryNodes_modifier['Socket_22'] = proj_matrix[0][1]
-            geometryNodes_modifier['Socket_23'] = proj_matrix[1][1]
-            geometryNodes_modifier['Socket_24'] = proj_matrix[2][1]
-            geometryNodes_modifier['Socket_25'] = proj_matrix[3][1]
-            geometryNodes_modifier['Socket_22'] = proj_matrix[0][1]  # Intentional duplicate as in original code
-            geometryNodes_modifier['Socket_23'] = proj_matrix[1][1]
-            geometryNodes_modifier['Socket_24'] = proj_matrix[2][1]
-            geometryNodes_modifier['Socket_25'] = proj_matrix[3][1]
-            geometryNodes_modifier['Socket_26'] = proj_matrix[0][2]
-            geometryNodes_modifier['Socket_27'] = proj_matrix[1][2]
-            geometryNodes_modifier['Socket_28'] = proj_matrix[2][2]
-            geometryNodes_modifier['Socket_29'] = proj_matrix[3][2]
-            geometryNodes_modifier['Socket_30'] = proj_matrix[0][3]
-            geometryNodes_modifier['Socket_31'] = proj_matrix[1][3]
-            geometryNodes_modifier['Socket_32'] = proj_matrix[2][3]
-            geometryNodes_modifier['Socket_33'] = proj_matrix[3][3]
-            geometryNodes_modifier['Socket_34'] = resolution_x
-            geometryNodes_modifier['Socket_35'] = resolution_y
-            # Update trigger exactly as in original code
-            geometryNodes_modifier.show_on_cage = True
-            geometryNodes_modifier.show_on_cage = False
-
-        def sort_splats(obj, sorter):
-            splat_count = len(obj.data.polygons) // 2
-            # Create shared memory exactly as original does
-            splatID_shm = shared_memory.SharedMemory(create=True, size=splat_count * np.dtype('int32').itemsize)
-            camera_shm = shared_memory.SharedMemory(create=True, size=6 * np.dtype('float32').itemsize)
-            center_shm = shared_memory.SharedMemory(create=True, size=splat_count * 3 * np.dtype('float32').itemsize)
-            # Create numpy arrays with exact same dtypes as original
-            splatID_array = np.ndarray((splat_count,), dtype='int32', buffer=splatID_shm.buf)
-            camera_array = np.ndarray((6,), dtype='float32', buffer=camera_shm.buf)
-            center_array = np.ndarray((splat_count * 3,), dtype='float32', buffer=center_shm.buf)
-            # Get camera info using original exact method in obj space
-            camera : bpy.types.Camera = bpy.context.scene.camera
-            # Camera position exactly as original does
-            camera_array[0] =  camera.matrix_world[0][3]
-            camera_array[1] =  camera.matrix_world[1][3]
-            camera_array[2] =  camera.matrix_world[2][3]
-            # Camera direction using original exact Vector.Fill method
-            direction : Vector = Vector.Fill(3,0)
-            direction.x = camera.matrix_world[0][2]
-            direction.y = camera.matrix_world[1][2]
-            direction.z = camera.matrix_world[2][2]
-            direction.normalize()
-            camera_array[3] = direction.x
-            camera_array[4] = direction.y
-            camera_array[5] = direction.z
-            # Get center data using original indexing
-            center_data = [0.0] * splat_count * 6
-            position_attr = obj.data.attributes["position"]
-            position_data = [0.0] * (len(position_attr.data) * 3)
-            obj.data.attributes["position"].data.foreach_get("vector", position_data)
-            obj.data.attributes["center"].data.foreach_get("vector", center_data)
-            for i in range(splat_count):
-                center_array[i * 3 + 0] = (position_data[i*12 + 0] + position_data[i*12 + 3] + position_data[i*12 + 6] +position_data[i*12 + 9])/4
-                center_array[i * 3 + 1] = (position_data[i*12 + 1] + position_data[i*12 + 4] + position_data[i*12 + 7] +position_data[i*12 + 10])/4
-                center_array[i * 3 + 2] = (position_data[i*12 + 2] + position_data[i*12 + 5] + position_data[i*12 + 8] +position_data[i*12 + 11])/4
-                #center_array[i * 3 + 0] = center_data[6 * i+0]
-                #center_array[i * 3 + 1] = center_data[6 * i+1]
-                #center_array[i * 3 + 2] = center_data[6 * i+2]
-            # Call sorter using original exact command format
-            is_windows = check_operating_system()
-            prefix = '' if is_windows else '/'
-            print("begin sort")
-            command = f"0 {splat_count} {prefix}{splatID_shm.name} {prefix}{camera_shm.name} {prefix}{center_shm.name}\n"
-            sorter.stdin.write(command)
-            sorter.stdin.flush()
-            sorter.stdout.readline()
-            print("end sort")
-            print(splatID_array)
-            print(command)
-            # Create render object
-            render_obj = create_render_object(joined_obj, splatID_array)
-            render_obj.name = "render_object"
-            # Cleanup shared memory in original order
-            splatID_shm.close()
-            camera_shm.close()
-            center_shm.close()
-            splatID_shm.unlink()
-            camera_shm.unlink()
-            center_shm.unlink()
-            return render_obj
-        # Serpens inputs
-        #render_animation = False  # Will be set by Serpens
-        #sorter_path = r"C:/Users/xiaoh/Desktop/project/3DGS/3DGS-Blender-Addon/3DGS_Sort/win/x64/Release/3DGS_Sort.exe"  # Will be set by Serpens
-        # Main render process
-        gs_objects = [obj for obj in bpy.context.scene.objects if "GS_ID" in obj and not obj.hide_render]
-        print(gs_objects)
-        if gs_objects:
-            # Start sorter process
-            sorter = subprocess.Popen([sorter_path], stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True)
-            try:
-                if render_animation:
-                    scene = bpy.context.scene
-                    orig_frame = scene.frame_current
-                    # Check if output format is a movie format
-                    is_movie_format = scene.render.image_settings.file_format in ['FFMPEG', 'AVI_JPEG', 'AVI_RAW']
-                    # If it's a movie format, we don't modify the filepath for each frame
-                    if not is_movie_format:
-                        original_filepath = scene.render.filepath
-                    for frame in range(scene.frame_start, scene.frame_end + 1):
-                        scene.frame_set(frame)
-                        copied_objects = []
-                        # Apply modifiers to ALL objects
-                        for obj in gs_objects:
-                            bpy.ops.object.select_all(action='DESELECT')
-                            obj.select_set(True)
-                            bpy.ops.object.duplicate(linked=False)
-                            copied_obj = bpy.context.selected_objects[0]
-                            bpy.context.view_layer.objects.active = copied_obj
-                            update_camera_matrices(copied_obj, bpy.context.scene.camera)
-                            bpy.ops.object.modifier_apply(modifier="KIRI_3DGS_Render_GN")
-                            bpy.ops.object.transform_apply(
-                                location=True,  
-                                rotation=True,  
-                                scale=True      
-                            )
-                            obj.hide_render = True
-                            copied_objects.append(copied_obj)
-                        if copied_objects:
-                            # join objects as one , and sort it
-                            bpy.ops.object.select_all(action='DESELECT')
-                            for obj in copied_objects:
-                                obj.select_set(True)
-                            bpy.context.view_layer.objects.active = copied_objects[0]
-                            copied_objects[0].name = "joined_temp_render_object"
-                            bpy.ops.object.join()
-                            joined_obj = copied_objects[0]
-                            render_obj = sort_splats(joined_obj, sorter)
-                            joined_obj.hide_render = True
-                            if is_movie_format:
-                                # For movie formats, render without write_still
-                                bpy.ops.render.render()
-                            else:
-                                # For image sequences, use write_still and numbered files
-                                scene.render.filepath = f"{original_filepath}_{frame:04d}"
-                                bpy.ops.render.render(write_still=True)
-                            # Safe cleanup with name checking
-                            bpy.data.objects.remove(render_obj, do_unlink=True)
-                            bpy.data.objects.remove(joined_obj, do_unlink=True)
-                    # Restore original filepath if we modified it
-                    if not is_movie_format:
-                        scene.render.filepath = original_filepath
-                    scene.frame_set(orig_frame)
-                else:
-                    # Single frame render
-                    copied_objects = []
-                    # Apply modifiers to ALL objects
-                    for obj in gs_objects:
-                        bpy.ops.object.select_all(action='DESELECT')
-                        obj.select_set(True)
-                        bpy.ops.object.duplicate(linked=False)
-                        copied_obj = bpy.context.selected_objects[0]
-                        bpy.context.view_layer.objects.active = copied_obj
-                        update_camera_matrices(copied_obj, bpy.context.scene.camera)
-                        bpy.ops.object.modifier_apply(modifier="KIRI_3DGS_Render_GN")
-                        bpy.ops.object.transform_apply(
-                            location=True,  
-                            rotation=True,  
-                            scale=True      
-                        )
-                        obj.hide_render = True
-                        copied_objects.append(copied_obj)
-                    if copied_objects:
-                         # join objects as one , and sort it
-                        bpy.ops.object.select_all(action='DESELECT')
-                        for obj in copied_objects:
-                            obj.select_set(True)
-                        bpy.context.view_layer.objects.active = copied_objects[0]
-                        copied_objects[0].name = "joined_temp_render_object"
-                        bpy.ops.object.join()
-                        joined_obj = copied_objects[0]
-                        render_obj = sort_splats(joined_obj, sorter)
-                        joined_obj.hide_render = True
-                        bpy.ops.render.render(write_still=True)
-                        # Safe cleanup with name checking
-                        bpy.data.objects.remove(render_obj, do_unlink=True)
-                        bpy.data.objects.remove(joined_obj, do_unlink=True)
-                # Restore visibility
-                for obj in gs_objects:
-                    obj.hide_render = False
-            finally:
-                # Always cleanup sorter
-                if sorter:
-                    sorter.terminate()
-        for i_3A153 in range(len(kiri_3dgs_render__hq_render['sna_hq_render_origpos_duplicate_list'])):
-            bpy.data.objects.remove(object=bpy.data.objects[kiri_3dgs_render__hq_render['sna_hq_render_origpos_duplicate_list'][i_3A153]], do_unlink=True, )
-        for i_30800 in range(len(kiri_3dgs_render__hq_render['sna_hq_render_base_object_list'])):
-            kiri_3dgs_render__hq_render['sna_hq_render_base_object_list'][i_30800].hide_render = False
-            bpy.data.materials['KIRI_3DGS_Render_Material'].surface_render_method = 'DITHERED'
+            def delayed_013E4():
+                bpy.data.objects[i_3F5D0].update_tag(refresh={'OBJECT'}, )
+                if bpy.context and bpy.context.screen:
+                    for a in bpy.context.screen.areas:
+                        a.tag_redraw()
+                for i_294E7 in range(len(bpy.context.scene.objects)):
+                    if (bpy.context.scene.objects[i_294E7] == None):
+                        pass
+                    else:
+                        if ((property_exists("bpy.context.scene.objects[i_294E7].material_slots", globals(), locals()) and 'KIRI_3DGS_Render_Material' in bpy.context.scene.objects[i_294E7].material_slots) or (property_exists("bpy.context.scene.objects[i_294E7].modifiers", globals(), locals()) and 'KIRI_3DGS_Sorter_GN' in bpy.context.scene.objects[i_294E7].modifiers)):
+                            bpy.context.scene.objects[i_294E7].hide_viewport = True
+                            bpy.context.scene.objects[i_294E7].hide_render = True
+                            sna_move_object_to_collection_create_if_missingfunction_execute_AB682(bpy.context.scene.objects[i_294E7].name, '3DGS_LQ_Objects', 'COLOR_06')
+                before_data = list(bpy.data.objects)
+                bpy.ops.wm.append(directory=os.path.join(os.path.dirname(__file__), 'assets', '3DGS Render APPEND.blend') + r'\Object', filename='KIRI_HQ_Merged_Object', link=False)
+                new_data = list(filter(lambda d: not d in before_data, list(bpy.data.objects)))
+                appended_D9EAC = None if not new_data else new_data[0]
+                sna_move_object_to_collection_create_if_missingfunction_execute_AB682('KIRI_HQ_Merged_Object', '3DGS_HQ_Object', 'COLOR_05')
+                geonodemodreturn_0_0741e = sna_add_geo_nodes__append_group_2D522_0741E(os.path.join(os.path.dirname(__file__), 'assets', '3DGS Render APPEND.blend'), 'KIRI_3DGS_Instance_HQ', bpy.data.objects['KIRI_HQ_Merged_Object'], 'KIRI_3DGS_Instance_HQ')
+                bpy.data.objects['KIRI_HQ_Merged_Object'].modifiers['KIRI_3DGS_Instance_HQ']['Socket_2'] = bpy.data.collections['3DGS_LQ_Objects']
+                bpy.data.objects['KIRI_HQ_Merged_Object'].update_tag(refresh={'OBJECT'}, )
+                bpy.data.materials['KIRI_3DGS_Render_Material'].surface_render_method = 'BLENDED'
+                bpy.context.scene.sna_kiri3dgs_lq_mode__hq_mode = 'HQ Mode (Blended Alpha)'
+                if bpy.context and bpy.context.screen:
+                    for a in bpy.context.screen.areas:
+                        a.tag_redraw()
+            bpy.app.timers.register(delayed_013E4, first_interval=0.10000000149011612)
+        bpy.app.timers.register(delayed_CB67D, first_interval=0.10000000149011612)
         return {"FINISHED"}
 
     def draw(self, context):
         layout = self.layout
-        box_2C0C3 = layout.box()
-        box_2C0C3.alert = True
-        box_2C0C3.enabled = True
-        box_2C0C3.active = True
-        box_2C0C3.use_property_split = False
-        box_2C0C3.use_property_decorate = False
-        box_2C0C3.alignment = 'Expand'.upper()
-        box_2C0C3.scale_x = 1.0
-        box_2C0C3.scale_y = 1.0
-        if not True: box_2C0C3.operator_context = "EXEC_DEFAULT"
-        box_2C0C3.label(text='This is a very performance intensive process - it may take some time', icon_value=load_preview_icon(os.path.join(os.path.dirname(__file__), 'assets', 'info-3016385-white.png')))
-        box_2C0C3.label(text='         The rendered object will not respect edit/animate modifiers', icon_value=0)
-        box_2C0C3.label(text='         To cancel rendering - force close Blender', icon_value=0)
+        box_B5524 = layout.box()
+        box_B5524.alert = True
+        box_B5524.enabled = True
+        box_B5524.active = True
+        box_B5524.use_property_split = False
+        box_B5524.use_property_decorate = False
+        box_B5524.alignment = 'Expand'.upper()
+        box_B5524.scale_x = 1.0
+        box_B5524.scale_y = 1.0
+        if not True: box_B5524.operator_context = "EXEC_DEFAULT"
+        box_B5524.label(text="All original 'LQ' objects will be moved into '3DGS_LQ_Objects' collection", icon_value=load_preview_icon(os.path.join(os.path.dirname(__file__), 'assets', 'info-3016385-white.png')))
+        box_B5524.label(text="        A new object -'KIRI_HQ_Merged_Object' - will be created", icon_value=0)
+        box_B5524.label(text='        Use the LQ / HQ drop down to toggle between original and HQ object visibilities', icon_value=0)
+        box_B5524.label(text='        Do not rename the created collections', icon_value=0)
 
     def invoke(self, context, event):
         return context.window_manager.invoke_props_dialog(self, width=500)
 
 
-def sna_hq_render_function_interface_17C41(layout_function, ):
-    col_249D2 = layout_function.column(heading='', align=False)
-    col_249D2.alert = False
-    col_249D2.enabled = True
-    col_249D2.active = True
-    col_249D2.use_property_split = False
-    col_249D2.use_property_decorate = False
-    col_249D2.scale_x = 1.0
-    col_249D2.scale_y = 1.0
-    col_249D2.alignment = 'Expand'.upper()
-    col_249D2.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
-    if ((bpy.context.preferences.addons['dgs_render_by_kiri_engine'].preferences.sna_hq_sorter_directory == 'SELECT SORT FILE') or (bpy.context.preferences.addons['dgs_render_by_kiri_engine'].preferences.sna_hq_sorter_directory == '')):
-        box_30157 = col_249D2.box()
-        box_30157.alert = True
-        box_30157.enabled = True
-        box_30157.active = True
-        box_30157.use_property_split = False
-        box_30157.use_property_decorate = False
-        box_30157.alignment = 'Expand'.upper()
-        box_30157.scale_x = 1.0
-        box_30157.scale_y = 1.0
-        if not True: box_30157.operator_context = "EXEC_DEFAULT"
-        box_30157.label(text="Specify 'SORT' file in preferences", icon_value=load_preview_icon(os.path.join(os.path.dirname(__file__), 'assets', 'warning-7381086-red.png')))
-    else:
-        if (bpy.context.scene.camera == None):
-            box_9AC8C = col_249D2.box()
-            box_9AC8C.alert = True
-            box_9AC8C.enabled = True
-            box_9AC8C.active = True
-            box_9AC8C.use_property_split = False
-            box_9AC8C.use_property_decorate = False
-            box_9AC8C.alignment = 'Expand'.upper()
-            box_9AC8C.scale_x = 1.0
-            box_9AC8C.scale_y = 1.0
-            if not True: box_9AC8C.operator_context = "EXEC_DEFAULT"
-            box_9AC8C.label(text='No active camera in scene', icon_value=load_preview_icon(os.path.join(os.path.dirname(__file__), 'assets', 'warning-7381086-red.png')))
+class SNA_OT_Disable_Hq_Overlap_34678(bpy.types.Operator):
+    bl_idname = "sna.disable_hq_overlap_34678"
+    bl_label = "Disable HQ Overlap"
+    bl_description = ""
+    bl_options = {"REGISTER", "UNDO"}
+
+    @classmethod
+    def poll(cls, context):
+        if bpy.app.version >= (3, 0, 0) and True:
+            cls.poll_message_set('')
+        return not False
+
+    def execute(self, context):
+        bpy.data.objects.remove(object=bpy.data.objects['KIRI_HQ_Merged_Object'], do_unlink=True, do_id_user=True, do_ui_user=True, )
+        if property_exists("bpy.data.collections['3DGS_HQ_Object']", globals(), locals()):
+            bpy.data.collections.remove(collection=bpy.data.collections['3DGS_HQ_Object'], do_unlink=True, do_id_user=True, do_ui_user=True, )
         else:
-            if (bpy.context.scene.render.filepath == ''):
-                box_EAECE = col_249D2.box()
-                box_EAECE.alert = True
-                box_EAECE.enabled = True
-                box_EAECE.active = True
-                box_EAECE.use_property_split = False
-                box_EAECE.use_property_decorate = False
-                box_EAECE.alignment = 'Expand'.upper()
-                box_EAECE.scale_x = 1.0
-                box_EAECE.scale_y = 1.0
-                if not True: box_EAECE.operator_context = "EXEC_DEFAULT"
-                box_EAECE.label(text='Output path is empty', icon_value=load_preview_icon(os.path.join(os.path.dirname(__file__), 'assets', 'warning-7381086-red.png')))
-            else:
-                col_203A5 = col_249D2.column(heading='', align=False)
-                col_203A5.alert = False
-                col_203A5.enabled = True
-                col_203A5.active = True
-                col_203A5.use_property_split = False
-                col_203A5.use_property_decorate = False
-                col_203A5.scale_x = 1.0
-                col_203A5.scale_y = 1.0
-                col_203A5.alignment = 'Expand'.upper()
-                col_203A5.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
-                box_66291 = col_203A5.box()
-                box_66291.alert = (bpy.context.scene.view_settings.view_transform != 'Standard')
-                box_66291.enabled = True
-                box_66291.active = True
-                box_66291.use_property_split = False
-                box_66291.use_property_decorate = False
-                box_66291.alignment = 'Expand'.upper()
-                box_66291.scale_x = 1.0
-                box_66291.scale_y = 1.0
-                if not True: box_66291.operator_context = "EXEC_DEFAULT"
-                if (bpy.context.scene.view_settings.view_transform != 'Standard'):
-                    box_66291.label(text='Standard gives most accurate colours', icon_value=0)
-                split_B6534 = box_66291.split(factor=0.5111111402511597, align=False)
-                split_B6534.alert = False
-                split_B6534.enabled = True
-                split_B6534.active = True
-                split_B6534.use_property_split = False
-                split_B6534.use_property_decorate = False
-                split_B6534.scale_x = 1.0
-                split_B6534.scale_y = 1.0
-                split_B6534.alignment = 'Expand'.upper()
-                if not True: split_B6534.operator_context = "EXEC_DEFAULT"
-                split_B6534.label(text='View Transform', icon_value=0)
-                split_B6534.prop(bpy.context.scene.view_settings, 'view_transform', text='', icon_value=0, emboss=True)
-                split_C7F1C = box_66291.split(factor=0.5111111402511597, align=False)
-                split_C7F1C.alert = False
-                split_C7F1C.enabled = True
-                split_C7F1C.active = True
-                split_C7F1C.use_property_split = False
-                split_C7F1C.use_property_decorate = False
-                split_C7F1C.scale_x = 1.0
-                split_C7F1C.scale_y = 1.0
-                split_C7F1C.alignment = 'Expand'.upper()
-                if not True: split_C7F1C.operator_context = "EXEC_DEFAULT"
-                split_C7F1C.label(text='Look', icon_value=0)
-                split_C7F1C.prop(bpy.context.scene.view_settings, 'look', text='', icon_value=0, emboss=True)
-                col_203A5.prop(bpy.context.scene.eevee, 'taa_render_samples', text='Samples', icon_value=0, emboss=True)
-                col_203A5.prop(bpy.context.scene.render.image_settings, 'file_format', text='', icon_value=0, emboss=True)
-                if (bpy.context.scene.render.image_settings.file_format == 'FFMPEG'):
-                    box_A372C = col_203A5.box()
-                    box_A372C.alert = True
-                    box_A372C.enabled = True
-                    box_A372C.active = True
-                    box_A372C.use_property_split = False
-                    box_A372C.use_property_decorate = False
-                    box_A372C.alignment = 'Expand'.upper()
-                    box_A372C.scale_x = 1.0
-                    box_A372C.scale_y = 1.0
-                    if not True: box_A372C.operator_context = "EXEC_DEFAULT"
-                    box_A372C.label(text='Use an image format', icon_value=0)
-                else:
-                    box_93DA8 = col_203A5.box()
-                    box_93DA8.alert = False
-                    box_93DA8.enabled = True
-                    box_93DA8.active = True
-                    box_93DA8.use_property_split = False
-                    box_93DA8.use_property_decorate = False
-                    box_93DA8.alignment = 'Expand'.upper()
-                    box_93DA8.scale_x = 1.0
-                    box_93DA8.scale_y = 1.0
-                    if not True: box_93DA8.operator_context = "EXEC_DEFAULT"
-                    op = box_93DA8.operator('sna.hq_render_b89bf', text='HQ Render Offline (Image)', icon_value=load_preview_icon(os.path.join(os.path.dirname(__file__), 'assets', 'images-7391277-white.png')), emboss=True, depress=False)
-                    op.sna_render_animation = False
-                    op = box_93DA8.operator('sna.hq_render_b89bf', text='HQ Render Offline (Animation)', icon_value=load_preview_icon(os.path.join(os.path.dirname(__file__), 'assets', 'movie-7390465-white.png')), emboss=True, depress=False)
-                    op.sna_render_animation = True
+            if property_exists("bpy.data.collections['3DGS_LQ_Objects']", globals(), locals()):
+                for i_EF373 in range(len(bpy.data.collections['3DGS_LQ_Objects'].all_objects)):
+                    bpy.data.collections['3DGS_LQ_Objects'].all_objects[i_EF373].hide_viewport = False
+                    bpy.data.collections['3DGS_LQ_Objects'].all_objects[i_EF373].hide_render = False
+            if bpy.context and bpy.context.screen:
+                for a in bpy.context.screen.areas:
+                    a.tag_redraw()
+        return {"FINISHED"}
+
+    def draw(self, context):
+        layout = self.layout
+        box_2D485 = layout.box()
+        box_2D485.alert = True
+        box_2D485.enabled = True
+        box_2D485.active = True
+        box_2D485.use_property_split = False
+        box_2D485.use_property_decorate = False
+        box_2D485.alignment = 'Expand'.upper()
+        box_2D485.scale_x = 1.0
+        box_2D485.scale_y = 1.0
+        if not True: box_2D485.operator_context = "EXEC_DEFAULT"
+        box_2D485.label(text='HQ Object found in scene', icon_value=string_to_icon('QUESTION'))
+        box_2D485.label(text='        Delete it?', icon_value=0)
+
+    def invoke(self, context, event):
+        return context.window_manager.invoke_props_dialog(self, width=300)
 
 
 class SNA_OT_Import_Ply_As_Splats_8458E(bpy.types.Operator, ImportHelper):
     bl_idname = "sna.import_ply_as_splats_8458e"
     bl_label = "Import PLY As Splats"
-    bl_description = "Imports a .ply file and adds a series of 3DGS modifiers"
+    bl_description = "Import a .PLY using the chosen 3DGS import settings"
     bl_options = {"REGISTER", "UNDO"}
     filter_glob: bpy.props.StringProperty( default='*.ply', options={'HIDDEN'} )
 
@@ -2234,7 +1985,6 @@ class SNA_OT_Import_Ply_As_Splats_8458E(bpy.types.Operator, ImportHelper):
         return not False
 
     def execute(self, context):
-        bpy.context.scene.view_settings.view_transform = 'Standard'
         import os
 
         def stop_gaussian_splat_updates():
@@ -2460,16 +2210,16 @@ class SNA_OT_Import_Ply_As_Splats_8458E(bpy.types.Operator, ImportHelper):
                 bpy.context.view_layer.objects.active = obj
                 obj.select_set(True)
                 print(f"Created Gaussian Splat object {obj.name}")
-        if (bpy.context.preferences.addons['dgs_render_by_kiri_engine'].preferences.sna_default_face_alignment_edit_mode == 'To X Axis'):
+        if (bpy.context.scene.sna_kiri3dgs_import_face_alignment == 'To X Axis'):
             sna_align_active_values_to_x_function_execute_03E8D()
         else:
-            if bpy.context.preferences.addons['dgs_render_by_kiri_engine'].preferences.sna_auto_rotate_for_blender_axes_z_up:
-                if (bpy.context.preferences.addons['dgs_render_by_kiri_engine'].preferences.sna_default_face_alignment_edit_mode == 'To Y Axis'):
+            if bpy.context.scene.sna_kiri3dgs_import_auto_rotate:
+                if (bpy.context.scene.sna_kiri3dgs_import_face_alignment == 'To Y Axis'):
                     sna_align_active_values_to_z_function_execute_62C4D()
                 else:
                     sna_align_active_values_to_y_function_execute_89335()
             else:
-                if (bpy.context.preferences.addons['dgs_render_by_kiri_engine'].preferences.sna_default_face_alignment_edit_mode == 'To Y Axis'):
+                if (bpy.context.scene.sna_kiri3dgs_import_face_alignment == 'To Y Axis'):
                     sna_align_active_values_to_y_function_execute_89335()
                 else:
                     sna_align_active_values_to_z_function_execute_62C4D()
@@ -2486,6 +2236,7 @@ class SNA_OT_Import_Ply_As_Splats_8458E(bpy.types.Operator, ImportHelper):
         bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_55'] = True
         geonodemodreturn_0_5fbae = sna_add_geo_nodes__append_group_2D522_5FBAE(os.path.join(os.path.dirname(__file__), 'assets', '3DGS Render APPEND.blend'), 'KIRI_3DGS_Animate_GN', bpy.context.view_layer.objects.active, 'KIRI_3DGS_Animate_GN')
         geonodemodreturn_0_74b9d = sna_add_geo_nodes__append_group_2D522_74B9D(os.path.join(os.path.dirname(__file__), 'assets', '3DGS Render APPEND.blend'), 'KIRI_3DGS_Set_Material_GN', bpy.context.view_layer.objects.active, 'KIRI_3DGS_Set_Material_GN')
+        geonodemodreturn_0_03222 = sna_add_geo_nodes__append_group_2D522_03222(os.path.join(os.path.dirname(__file__), 'assets', '3DGS Render APPEND.blend'), 'KIRI_3DGS_Sorter_GN', bpy.context.view_layer.objects.active, 'KIRI_3DGS_Sorter_GN')
         bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Camera_Cull_GN'].show_viewport = False
         bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Crop_Box_GN'].show_viewport = False
         bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Colour_Edit_GN'].show_viewport = False
@@ -2493,12 +2244,14 @@ class SNA_OT_Import_Ply_As_Splats_8458E(bpy.types.Operator, ImportHelper):
         bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Decimate_GN'].show_viewport = False
         bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN'].show_viewport = False
         bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN'].show_viewport = False
+        bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Sorter_GN'].show_viewport = False
         bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Camera_Cull_GN'].show_render = False
         bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Crop_Box_GN'].show_render = False
         bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Colour_Edit_GN'].show_render = False
         bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Remove_Stray_GN'].show_render = False
         bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Decimate_GN'].show_render = False
         bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN'].show_render = False
+        bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Sorter_GN'].show_render = False
         bpy.context.view_layer.objects.active.sna_kiri3dgs_active_object_update_mode = 'Disable Camera Updates'
         bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_50'] = 1
         bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN'].show_on_cage = True
@@ -2512,11 +2265,13 @@ class SNA_OT_Import_Ply_As_Splats_8458E(bpy.types.Operator, ImportHelper):
         bpy.context.view_layer.objects.active.sna_kiri3dgs_modifier_enable_crop_box = False
         bpy.context.view_layer.objects.active.sna_kiri3dgs_modifier_enable_decimate = False
         bpy.context.view_layer.objects.active.sna_kiri3dgs_modifier_enable_remove_stray = False
+        bpy.context.scene.sna_kiri3dgs_lq_mode__hq_mode = 'LQ Mode (Dithered Alpha)'
+        bpy.data.materials['KIRI_3DGS_Render_Material'].surface_render_method = 'DITHERED'
         bpy.context.view_layer.objects.active.update_tag(refresh={'OBJECT'}, )
         if bpy.context and bpy.context.screen:
             for a in bpy.context.screen.areas:
                 a.tag_redraw()
-        if bpy.context.preferences.addons['dgs_render_by_kiri_engine'].preferences.sna_auto_rotate_for_blender_axes_z_up:
+        if bpy.context.scene.sna_kiri3dgs_import_auto_rotate:
             bpy.context.view_layer.objects.active.rotation_euler = (math.radians(-90.0), 0.0, math.radians(180.0))
         return {"FINISHED"}
 
@@ -2583,7 +2338,7 @@ def sna_import_ply_as_splats_function_interface_94FB1(layout_function, ):
     box_5C3FC.scale_x = 1.0
     box_5C3FC.scale_y = 1.0
     if not True: box_5C3FC.operator_context = "EXEC_DEFAULT"
-    op = box_5C3FC.operator('sna.import_ply_as_splats_8458e', text='Import PLY As Splats', icon_value=load_preview_icon(os.path.join(os.path.dirname(__file__), 'assets', 'import-7102651-white.png')), emboss=True, depress=False)
+    op = box_5C3FC.operator('sna.dgs_import_settings_bf139', text='Import PLY As Splats', icon_value=load_preview_icon(os.path.join(os.path.dirname(__file__), 'assets', 'import-7102651-white.png')), emboss=True, depress=False)
 
 
 def sna_align_active_values_to_y_function_execute_89335():
@@ -2668,9 +2423,66 @@ def sna_align_active_values_to_z_function_execute_62C4D():
             a.tag_redraw()
 
 
-class SNA_PT_DGS_RENDER_BY_KIRI_ENGINE_F216E(bpy.types.Panel):
+class SNA_OT_Dgs_Import_Settings_Bf139(bpy.types.Operator):
+    bl_idname = "sna.dgs_import_settings_bf139"
+    bl_label = "3DGS Import Settings"
+    bl_description = "Imports a .ply file and adds a series of 3DGS modifiers"
+    bl_options = {"REGISTER", "UNDO"}
+
+    @classmethod
+    def poll(cls, context):
+        if bpy.app.version >= (3, 0, 0) and True:
+            cls.poll_message_set('')
+        return not False
+
+    def execute(self, context):
+        bpy.ops.sna.import_ply_as_splats_8458e('INVOKE_DEFAULT', )
+        return {"FINISHED"}
+
+    def draw(self, context):
+        layout = self.layout
+        box_D19E8 = layout.box()
+        box_D19E8.alert = False
+        box_D19E8.enabled = True
+        box_D19E8.active = True
+        box_D19E8.use_property_split = False
+        box_D19E8.use_property_decorate = False
+        box_D19E8.alignment = 'Expand'.upper()
+        box_D19E8.scale_x = 1.0
+        box_D19E8.scale_y = 1.0
+        if not True: box_D19E8.operator_context = "EXEC_DEFAULT"
+        box_D19E8.label(text='Import Settings', icon_value=string_to_icon('QUESTION'))
+        box_30638 = box_D19E8.box()
+        box_30638.alert = False
+        box_30638.enabled = True
+        box_30638.active = True
+        box_30638.use_property_split = False
+        box_30638.use_property_decorate = False
+        box_30638.alignment = 'Expand'.upper()
+        box_30638.scale_x = 1.0
+        box_30638.scale_y = 1.0
+        if not True: box_30638.operator_context = "EXEC_DEFAULT"
+        box_30638.label(text='Default Face Alignment (Edit Mode)', icon_value=0)
+        box_30638.prop(bpy.context.scene, 'sna_kiri3dgs_import_face_alignment', text='', icon_value=0, emboss=True)
+        box_513D7 = box_D19E8.box()
+        box_513D7.alert = False
+        box_513D7.enabled = True
+        box_513D7.active = True
+        box_513D7.use_property_split = False
+        box_513D7.use_property_decorate = False
+        box_513D7.alignment = 'Expand'.upper()
+        box_513D7.scale_x = 1.0
+        box_513D7.scale_y = 1.0
+        if not True: box_513D7.operator_context = "EXEC_DEFAULT"
+        box_513D7.prop(bpy.context.scene, 'sna_kiri3dgs_import_auto_rotate', text='Auto Rotate For Blender Axes (Z Up)', icon_value=string_to_icon('EMPTY_AXIS'), emboss=True)
+
+    def invoke(self, context, event):
+        return context.window_manager.invoke_props_dialog(self, width=500)
+
+
+class SNA_PT_DGS_RENDER_BY_KIRI_ENGINE_708F9(bpy.types.Panel):
     bl_label = '3DGS Render by KIRI Engine'
-    bl_idname = 'SNA_PT_DGS_RENDER_BY_KIRI_ENGINE_F216E'
+    bl_idname = 'SNA_PT_DGS_RENDER_BY_KIRI_ENGINE_708F9'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_context = ''
@@ -5306,6 +5118,7 @@ class SNA_OT_Create_Omniview_Object_909Fd(bpy.types.Operator):
                                                                             print(f"Removed property '{property_name}' from object '{object_name}'")
                                                                         else:
                                                                             print(f"Property '{property_name}' not found on object '{object_name}'")
+                                                                    geonodemodreturn_0_90019 = sna_add_geo_nodes__append_group_2D522_90019(os.path.join(os.path.dirname(__file__), 'assets', '3DGS Render APPEND.blend'), 'KIRI_3DGS_Sorter_GN', bpy.context.view_layer.objects.active, 'KIRI_3DGS_Sorter_GN')
                                                                 bpy.app.timers.register(delayed_FCFF0, first_interval=0.10000000149011612)
                                                             bpy.app.timers.register(delayed_EDEBE, first_interval=0.10000000149011612)
                                                         else:
@@ -5404,6 +5217,7 @@ class SNA_OT_Create_Omniview_Object_909Fd(bpy.types.Operator):
                                                                     print(f"Removed property '{property_name}' from object '{object_name}'")
                                                                 else:
                                                                     print(f"Property '{property_name}' not found on object '{object_name}'")
+                                                            geonodemodreturn_0_9d3b3 = sna_add_geo_nodes__append_group_2D522_9D3B3(os.path.join(os.path.dirname(__file__), 'assets', '3DGS Render APPEND.blend'), 'KIRI_3DGS_Sorter_GN', bpy.context.view_layer.objects.active, 'KIRI_3DGS_Sorter_GN')
                                                     bpy.app.timers.register(delayed_FDA7B, first_interval=0.10000000149011612)
                                                 bpy.app.timers.register(delayed_096EF, first_interval=0.10000000149011612)
                                             else:
@@ -5502,6 +5316,7 @@ class SNA_OT_Create_Omniview_Object_909Fd(bpy.types.Operator):
                                                         print(f"Removed property '{property_name}' from object '{object_name}'")
                                                     else:
                                                         print(f"Property '{property_name}' not found on object '{object_name}'")
+                                                geonodemodreturn_0_e5645 = sna_add_geo_nodes__append_group_2D522_E5645(os.path.join(os.path.dirname(__file__), 'assets', '3DGS Render APPEND.blend'), 'KIRI_3DGS_Sorter_GN', bpy.context.view_layer.objects.active, 'KIRI_3DGS_Sorter_GN')
                                         bpy.app.timers.register(delayed_5E158, first_interval=0.10000000149011612)
                                     bpy.app.timers.register(delayed_0CFF3, first_interval=0.10000000149011612)
                                 else:
@@ -5600,6 +5415,7 @@ class SNA_OT_Create_Omniview_Object_909Fd(bpy.types.Operator):
                                             print(f"Removed property '{property_name}' from object '{object_name}'")
                                         else:
                                             print(f"Property '{property_name}' not found on object '{object_name}'")
+                                    geonodemodreturn_0_9d9cf = sna_add_geo_nodes__append_group_2D522_9D9CF(os.path.join(os.path.dirname(__file__), 'assets', '3DGS Render APPEND.blend'), 'KIRI_3DGS_Sorter_GN', bpy.context.view_layer.objects.active, 'KIRI_3DGS_Sorter_GN')
                             bpy.app.timers.register(delayed_FE628, first_interval=0.10000000149011612)
                         bpy.app.timers.register(delayed_CF40F, first_interval=0.10000000149011612)
                     bpy.app.timers.register(delayed_7EF56, first_interval=0.10000000149011612)
@@ -5628,79 +5444,6 @@ class SNA_OT_Create_Omniview_Object_909Fd(bpy.types.Operator):
 
     def invoke(self, context, event):
         return context.window_manager.invoke_props_dialog(self, width=400)
-
-
-class SNA_AddonPreferences_03DFE(bpy.types.AddonPreferences):
-    bl_idname = 'dgs_render_by_kiri_engine'
-    sna_hq_sorter_directory: bpy.props.StringProperty(name='HQ Sorter Directory', description='', default='SELECT SORT FILE', subtype='FILE_PATH', maxlen=0)
-    sna_auto_rotate_for_blender_axes_z_up: bpy.props.BoolProperty(name='Auto Rotate For Blender Axes (Z Up)', description='', default=True)
-
-    def sna_default_face_alignment_edit_mode_enum_items(self, context):
-        return [("No Items", "No Items", "No generate enum items node found to create items!", "ERROR", 0)]
-    sna_default_face_alignment_edit_mode: bpy.props.EnumProperty(name='Default Face Alignment (Edit Mode)', description='', items=[('To Y Axis', 'To Y Axis', '', 0, 0), ('To X Axis', 'To X Axis', '', 0, 1), ('To Z Axis', 'To Z Axis', '', 0, 2)])
-
-    def draw(self, context):
-        if not (False):
-            layout = self.layout 
-            box_2B885 = layout.box()
-            box_2B885.alert = False
-            box_2B885.enabled = True
-            box_2B885.active = True
-            box_2B885.use_property_split = False
-            box_2B885.use_property_decorate = False
-            box_2B885.alignment = 'Expand'.upper()
-            box_2B885.scale_x = 1.0
-            box_2B885.scale_y = 1.0
-            if not True: box_2B885.operator_context = "EXEC_DEFAULT"
-            box_2B885.label(text='Import PLY As Splats Settings', icon_value=load_preview_icon(os.path.join(os.path.dirname(__file__), 'assets', 'bullet-point-4084289 - light blue.png')))
-            box_5B686 = box_2B885.box()
-            box_5B686.alert = False
-            box_5B686.enabled = True
-            box_5B686.active = True
-            box_5B686.use_property_split = False
-            box_5B686.use_property_decorate = False
-            box_5B686.alignment = 'Expand'.upper()
-            box_5B686.scale_x = 1.0
-            box_5B686.scale_y = 1.0
-            if not True: box_5B686.operator_context = "EXEC_DEFAULT"
-            box_5B686.prop(bpy.context.preferences.addons['dgs_render_by_kiri_engine'].preferences, 'sna_auto_rotate_for_blender_axes_z_up', text='Auto Rotate For Blender Axes (Z Up)', icon_value=0, emboss=True)
-            box_9B36B = box_2B885.box()
-            box_9B36B.alert = False
-            box_9B36B.enabled = True
-            box_9B36B.active = True
-            box_9B36B.use_property_split = False
-            box_9B36B.use_property_decorate = False
-            box_9B36B.alignment = 'Expand'.upper()
-            box_9B36B.scale_x = 1.0
-            box_9B36B.scale_y = 1.0
-            if not True: box_9B36B.operator_context = "EXEC_DEFAULT"
-            box_9B36B.label(text='Default Face Alignment (Edit Mode)', icon_value=0)
-            box_9B36B.prop(bpy.context.preferences.addons['dgs_render_by_kiri_engine'].preferences, 'sna_default_face_alignment_edit_mode', text='', icon_value=0, emboss=True)
-            box_1404F = layout.box()
-            box_1404F.alert = False
-            box_1404F.enabled = True
-            box_1404F.active = True
-            box_1404F.use_property_split = False
-            box_1404F.use_property_decorate = False
-            box_1404F.alignment = 'Expand'.upper()
-            box_1404F.scale_x = 1.0
-            box_1404F.scale_y = 1.0
-            if not True: box_1404F.operator_context = "EXEC_DEFAULT"
-            box_1404F.label(text='HQ Render', icon_value=load_preview_icon(os.path.join(os.path.dirname(__file__), 'assets', 'bullet-point-4084289 - light blue.png')))
-            box_BC98F = box_1404F.box()
-            box_BC98F.alert = False
-            box_BC98F.enabled = True
-            box_BC98F.active = True
-            box_BC98F.use_property_split = False
-            box_BC98F.use_property_decorate = False
-            box_BC98F.alignment = 'Expand'.upper()
-            box_BC98F.scale_x = 1.0
-            box_BC98F.scale_y = 1.0
-            if not True: box_BC98F.operator_context = "EXEC_DEFAULT"
-            box_BC98F.label(text='HQ Rendering is available for Mac and Windows operating systems.', icon_value=load_preview_icon(os.path.join(os.path.dirname(__file__), 'assets', 'info-3016385-white.png')))
-            box_BC98F.label(text='         Please assign the correct file type for your system', icon_value=0)
-            box_BC98F.label(text='         Check the documentation for further assitance', icon_value=0)
-            box_1404F.prop(bpy.context.preferences.addons['dgs_render_by_kiri_engine'].preferences, 'sna_hq_sorter_directory', text='', icon_value=0, emboss=True)
 
 
 def sna_render_function_interface_C67EB(layout_function, ):
@@ -5844,7 +5587,7 @@ class SNA_OT_Dgs_Render_Offline_Aea04(bpy.types.Operator):
             sna_dgs__update_camera_single_time_function_execute_9C695()
 
             def delayed_B5B65():
-                bpy.context.view_layer.objects.active.update_tag(refresh={'OBJECT'}, )
+                bpy.data.objects[i_2F11D].update_tag(refresh={'OBJECT'}, )
                 if bpy.context and bpy.context.screen:
                     for a in bpy.context.screen.areas:
                         a.tag_redraw()
@@ -6168,15 +5911,15 @@ def sna_active_object_shading_function_interface_3A6A5(layout_function, ):
         box_18DD9.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Set_Material_GN'], attr_787E3, text='Create Extra Attributes', icon_value=0, emboss=True, toggle=True)
 
 
-class SNA_PT_DGS_RENDER__ABOUT__LINKS_PANEL_CC2AC(bpy.types.Panel):
+class SNA_PT_DGS_RENDER__ABOUT__LINKS_PANEL_E2B98(bpy.types.Panel):
     bl_label = '3DGS Render - About / Links Panel'
-    bl_idname = 'SNA_PT_DGS_RENDER__ABOUT__LINKS_PANEL_CC2AC'
+    bl_idname = 'SNA_PT_DGS_RENDER__ABOUT__LINKS_PANEL_E2B98'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_context = ''
     bl_order = 3
     bl_options = {'HIDE_HEADER'}
-    bl_parent_id = 'SNA_PT_DGS_RENDER_BY_KIRI_ENGINE_F216E'
+    bl_parent_id = 'SNA_PT_DGS_RENDER_BY_KIRI_ENGINE_708F9'
     bl_ui_units_x=0
 
     @classmethod
@@ -6221,15 +5964,15 @@ class SNA_PT_DGS_RENDER__ABOUT__LINKS_PANEL_CC2AC(bpy.types.Panel):
         op = layout.operator('sna.launch_kiri_site_d26bf', text='Learn More About KIRI Engine', icon_value=0, emboss=True, depress=False)
 
 
-class SNA_PT_DGS_RENDER__DOCUMENTATION_PANEL_21E93(bpy.types.Panel):
+class SNA_PT_DGS_RENDER__DOCUMENTATION_PANEL_22F80(bpy.types.Panel):
     bl_label = '3DGS Render - Documentation Panel'
-    bl_idname = 'SNA_PT_DGS_RENDER__DOCUMENTATION_PANEL_21E93'
+    bl_idname = 'SNA_PT_DGS_RENDER__DOCUMENTATION_PANEL_22F80'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_context = ''
     bl_order = 2
     bl_options = {'HIDE_HEADER'}
-    bl_parent_id = 'SNA_PT_DGS_RENDER_BY_KIRI_ENGINE_F216E'
+    bl_parent_id = 'SNA_PT_DGS_RENDER_BY_KIRI_ENGINE_708F9'
     bl_ui_units_x=0
 
     @classmethod
@@ -6255,15 +5998,15 @@ class SNA_PT_DGS_RENDER__DOCUMENTATION_PANEL_21E93(bpy.types.Panel):
         op = box_BDECD.operator('sna.open_blender_splat_render_tutorial_video_a4fe6', text='Tutorial Video', icon_value=0, emboss=True, depress=False)
 
 
-class SNA_PT_DGS_RENDER__MAIN_FUNCTION_PANEL_2675E(bpy.types.Panel):
+class SNA_PT_DGS_RENDER__MAIN_FUNCTION_PANEL_72ED3(bpy.types.Panel):
     bl_label = '3DGS Render - Main Function Panel'
-    bl_idname = 'SNA_PT_DGS_RENDER__MAIN_FUNCTION_PANEL_2675E'
+    bl_idname = 'SNA_PT_DGS_RENDER__MAIN_FUNCTION_PANEL_72ED3'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_context = ''
     bl_order = 1
     bl_options = {'HIDE_HEADER'}
-    bl_parent_id = 'SNA_PT_DGS_RENDER_BY_KIRI_ENGINE_F216E'
+    bl_parent_id = 'SNA_PT_DGS_RENDER_BY_KIRI_ENGINE_708F9'
     bl_ui_units_x=0
 
     @classmethod
@@ -6463,7 +6206,7 @@ class SNA_PT_DGS_RENDER__MAIN_FUNCTION_PANEL_2675E(bpy.types.Panel):
                 if not True: box_F9B36.operator_context = "EXEC_DEFAULT"
                 layout_function = box_F9B36
                 sna_render_function_interface_C67EB(layout_function, )
-            if (bpy.context.scene.sna_kiri3dgs_interface_active_mode == 'HQ Render'):
+            if (bpy.context.scene.sna_kiri3dgs_interface_active_mode == 'HQ Mode'):
                 box_4FE9F = col_657C5.box()
                 box_4FE9F.alert = False
                 box_4FE9F.enabled = True
@@ -6475,7 +6218,7 @@ class SNA_PT_DGS_RENDER__MAIN_FUNCTION_PANEL_2675E(bpy.types.Panel):
                 box_4FE9F.scale_y = 1.0
                 if not True: box_4FE9F.operator_context = "EXEC_DEFAULT"
                 layout_function = box_4FE9F
-                sna_hq_render_function_interface_17C41(layout_function, )
+                sna_hq_mode_function_interface_17C41(layout_function, )
             if (bpy.context.scene.sna_kiri3dgs_interface_active_mode == 'Omniview Object (Experimental)'):
                 box_00D6C = col_657C5.box()
                 box_00D6C.alert = False
@@ -6497,7 +6240,7 @@ class SNA_PT_DGS_RENDER__MAIN_FUNCTION_PANEL_2675E(bpy.types.Panel):
 def register():
     global _icons
     _icons = bpy.utils.previews.new()
-    bpy.types.Scene.sna_kiri3dgs_interface_active_mode = bpy.props.EnumProperty(name='KIRI3DGS Interface Active Mode', description='', items=[('Import 3DGS', 'Import 3DGS', '', 0, 0), ('Import/Edit Point Cloud', 'Import/Edit Point Cloud', '', 0, 1), ('Modify - Edit', 'Modify - Edit', '', 0, 2), ('Shading', 'Shading', '', 0, 3), ('Modify - Animate', 'Modify - Animate', '', 0, 4), ('Render', 'Render', '', 0, 5), ('HQ Render', 'HQ Render', '', 0, 6), ('Omniview Object (Experimental)', 'Omniview Object (Experimental)', '', 0, 7)])
+    bpy.types.Scene.sna_kiri3dgs_interface_active_mode = bpy.props.EnumProperty(name='KIRI3DGS Interface Active Mode', description='', items=[('Import 3DGS', 'Import 3DGS', '', 0, 0), ('Import/Edit Point Cloud', 'Import/Edit Point Cloud', '', 0, 1), ('Modify - Edit', 'Modify - Edit', '', 0, 2), ('Shading', 'Shading', '', 0, 3), ('Modify - Animate', 'Modify - Animate', '', 0, 4), ('HQ Mode', 'HQ Mode', '', 0, 5), ('Render', 'Render', '', 0, 6), ('Omniview Object (Experimental)', 'Omniview Object (Experimental)', '', 0, 7)])
     bpy.types.Scene.sna_kiri3dgs_scene_camera_refresh_mode = bpy.props.EnumProperty(name='KIRI3DGS Scene Camera Refresh Mode', description='', items=[('Continuous', 'Continuous', '', 0, 0), ('Frame Change', 'Frame Change', '', 0, 1)])
     bpy.types.Object.sna_kiri3dgs_active_object_update_mode = bpy.props.EnumProperty(name='KIRI3DGS Active Object Update Mode', description='', items=[('Enable Camera Updates', 'Enable Camera Updates', '', 0, 0), ('Disable Camera Updates', 'Disable Camera Updates', '', 0, 1), ('Show As Point Cloud', 'Show As Point Cloud', '', 0, 2)], update=sna_update_sna_kiri3dgs_active_object_update_mode_868D4)
     bpy.types.Object.sna_kiri3dgs_active_object_enable_active_camera = bpy.props.BoolProperty(name='KIRI3DGS Active Object Enable Active Camera', description='', default=False, update=sna_update_sna_kiri3dgs_active_object_enable_active_camera_DE26E)
@@ -6511,6 +6254,10 @@ def register():
     bpy.types.Object.sna_kiri3dgs_modifier_enable_remove_stray = bpy.props.BoolProperty(name='KIRI3DGS Modifier Enable Remove Stray', description='', default=False, update=sna_update_sna_kiri3dgs_modifier_enable_remove_stray_488C9)
     bpy.types.Object.sna_kiri3dgs_modifier_enable_animate = bpy.props.BoolProperty(name='KIRI3DGS Modifier Enable Animate', description='', default=False, update=sna_update_sna_kiri3dgs_modifier_enable_animate_1F5D0)
     bpy.types.Scene.sna_kiri3dgs_omnisplat_axes_count = bpy.props.EnumProperty(name='KIRI3DGS Omnisplat Axes Count', description='', items=[('3 Axes', '3 Axes', '', 0, 0), ('5 Axes', '5 Axes', '', 0, 1), ('7 Axes', '7 Axes', '', 0, 2), ('9 Axes', '9 Axes', '', 0, 3)])
+    bpy.types.Scene.sna_kiri3dgs_hq_objects_overlap = bpy.props.BoolProperty(name='KIRI3DGS HQ Objects Overlap', description='', default=False, update=sna_update_sna_kiri3dgs_hq_objects_overlap_DDF15)
+    bpy.types.Scene.sna_kiri3dgs_lq_mode__hq_mode = bpy.props.EnumProperty(name='KIRI3DGS LQ Mode / HQ Mode', description='', items=[('LQ Mode (Dithered Alpha)', 'LQ Mode (Dithered Alpha)', '', 0, 0), ('HQ Mode (Blended Alpha)', 'HQ Mode (Blended Alpha)', '', 0, 1)], update=sna_update_sna_kiri3dgs_lq_mode__hq_mode_0B3A9)
+    bpy.types.Scene.sna_kiri3dgs_import_face_alignment = bpy.props.EnumProperty(name='KIRI3DGS Import Face Alignment', description='', items=[('To Y Axis', 'To Y Axis', '', 0, 0), ('To X Axis', 'To X Axis', '', 0, 1), ('To Z Axis', 'To Z Axis', '', 0, 2)])
+    bpy.types.Scene.sna_kiri3dgs_import_auto_rotate = bpy.props.BoolProperty(name='KIRI3DGS Import Auto Rotate', description='', default=True)
     bpy.utils.register_class(SNA_OT_Launch_Kiri_Site_D26Bf)
     bpy.utils.register_class(SNA_OT_Launch_Blender_Market_77F72)
     bpy.utils.register_class(SNA_OT_Apply_3Dgs_Modifiers_E67A2)
@@ -6530,9 +6277,11 @@ def register():
     bpy.utils.register_class(SNA_OT_Append_Point_Edit_Modifier_A0188)
     bpy.utils.register_class(SNA_OT_Export_Points_For_3Dgs_63Cd8)
     bpy.utils.register_class(SNA_OT_Apply_Point_Edit_Modifier_D6B08)
-    bpy.utils.register_class(SNA_OT_Hq_Render_B89Bf)
+    bpy.utils.register_class(SNA_OT_Generate_Hq_Object_55455)
+    bpy.utils.register_class(SNA_OT_Disable_Hq_Overlap_34678)
     bpy.utils.register_class(SNA_OT_Import_Ply_As_Splats_8458E)
-    bpy.utils.register_class(SNA_PT_DGS_RENDER_BY_KIRI_ENGINE_F216E)
+    bpy.utils.register_class(SNA_OT_Dgs_Import_Settings_Bf139)
+    bpy.utils.register_class(SNA_PT_DGS_RENDER_BY_KIRI_ENGINE_708F9)
     bpy.utils.register_class(SNA_OT_Set_Render_Engine_To_Eevee_D73Ee)
     bpy.utils.register_class(SNA_OT_Remove_Animate_Modifier_5B34D)
     bpy.utils.register_class(SNA_OT_Apply_Animate_Modifier_3938E)
@@ -6550,11 +6299,10 @@ def register():
     bpy.utils.register_class(SNA_OT_Apply_Colour_Edit_Modifier_88410)
     bpy.utils.register_class(SNA_OT_Apply_Remove_Stray_Modifier_3Fdf1)
     bpy.utils.register_class(SNA_OT_Create_Omniview_Object_909Fd)
-    bpy.utils.register_class(SNA_AddonPreferences_03DFE)
     bpy.utils.register_class(SNA_OT_Dgs_Render_Offline_Aea04)
-    bpy.utils.register_class(SNA_PT_DGS_RENDER__ABOUT__LINKS_PANEL_CC2AC)
-    bpy.utils.register_class(SNA_PT_DGS_RENDER__DOCUMENTATION_PANEL_21E93)
-    bpy.utils.register_class(SNA_PT_DGS_RENDER__MAIN_FUNCTION_PANEL_2675E)
+    bpy.utils.register_class(SNA_PT_DGS_RENDER__ABOUT__LINKS_PANEL_E2B98)
+    bpy.utils.register_class(SNA_PT_DGS_RENDER__DOCUMENTATION_PANEL_22F80)
+    bpy.utils.register_class(SNA_PT_DGS_RENDER__MAIN_FUNCTION_PANEL_72ED3)
 
 
 def unregister():
@@ -6565,6 +6313,10 @@ def unregister():
     for km, kmi in addon_keymaps.values():
         km.keymap_items.remove(kmi)
     addon_keymaps.clear()
+    del bpy.types.Scene.sna_kiri3dgs_import_auto_rotate
+    del bpy.types.Scene.sna_kiri3dgs_import_face_alignment
+    del bpy.types.Scene.sna_kiri3dgs_lq_mode__hq_mode
+    del bpy.types.Scene.sna_kiri3dgs_hq_objects_overlap
     del bpy.types.Scene.sna_kiri3dgs_omnisplat_axes_count
     del bpy.types.Object.sna_kiri3dgs_modifier_enable_animate
     del bpy.types.Object.sna_kiri3dgs_modifier_enable_remove_stray
@@ -6598,9 +6350,11 @@ def unregister():
     bpy.utils.unregister_class(SNA_OT_Append_Point_Edit_Modifier_A0188)
     bpy.utils.unregister_class(SNA_OT_Export_Points_For_3Dgs_63Cd8)
     bpy.utils.unregister_class(SNA_OT_Apply_Point_Edit_Modifier_D6B08)
-    bpy.utils.unregister_class(SNA_OT_Hq_Render_B89Bf)
+    bpy.utils.unregister_class(SNA_OT_Generate_Hq_Object_55455)
+    bpy.utils.unregister_class(SNA_OT_Disable_Hq_Overlap_34678)
     bpy.utils.unregister_class(SNA_OT_Import_Ply_As_Splats_8458E)
-    bpy.utils.unregister_class(SNA_PT_DGS_RENDER_BY_KIRI_ENGINE_F216E)
+    bpy.utils.unregister_class(SNA_OT_Dgs_Import_Settings_Bf139)
+    bpy.utils.unregister_class(SNA_PT_DGS_RENDER_BY_KIRI_ENGINE_708F9)
     bpy.utils.unregister_class(SNA_OT_Set_Render_Engine_To_Eevee_D73Ee)
     bpy.utils.unregister_class(SNA_OT_Remove_Animate_Modifier_5B34D)
     bpy.utils.unregister_class(SNA_OT_Apply_Animate_Modifier_3938E)
@@ -6618,8 +6372,7 @@ def unregister():
     bpy.utils.unregister_class(SNA_OT_Apply_Colour_Edit_Modifier_88410)
     bpy.utils.unregister_class(SNA_OT_Apply_Remove_Stray_Modifier_3Fdf1)
     bpy.utils.unregister_class(SNA_OT_Create_Omniview_Object_909Fd)
-    bpy.utils.unregister_class(SNA_AddonPreferences_03DFE)
     bpy.utils.unregister_class(SNA_OT_Dgs_Render_Offline_Aea04)
-    bpy.utils.unregister_class(SNA_PT_DGS_RENDER__ABOUT__LINKS_PANEL_CC2AC)
-    bpy.utils.unregister_class(SNA_PT_DGS_RENDER__DOCUMENTATION_PANEL_21E93)
-    bpy.utils.unregister_class(SNA_PT_DGS_RENDER__MAIN_FUNCTION_PANEL_2675E)
+    bpy.utils.unregister_class(SNA_PT_DGS_RENDER__ABOUT__LINKS_PANEL_E2B98)
+    bpy.utils.unregister_class(SNA_PT_DGS_RENDER__DOCUMENTATION_PANEL_22F80)
+    bpy.utils.unregister_class(SNA_PT_DGS_RENDER__MAIN_FUNCTION_PANEL_72ED3)
