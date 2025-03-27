@@ -1,0 +1,12 @@
+schema_version = "1.0.0"
+id = "dgs_render_by_kiri_engine"
+version = "3.0.0"
+name = "3DGS Render by KIRI Engine"
+tagline = "3DGS creation and editing suite"
+maintainer = "KIRI ENGINE TEAM"
+type = "add-on"
+tags = ["3D View"]
+blender_version_min = "4.2.0"
+license = [
+"SPDX:GPL-2.0-or-later",
+]
