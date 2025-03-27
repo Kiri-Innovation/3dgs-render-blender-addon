@@ -11,6 +11,8 @@ While Gaussian Splatting is powerful, integrating it into professional workflows
 
 ## Installation:
 ❗❗Please note❗❗ The addon was made for the most current version of Blender at the time of writing. The addon should be capable of 4.2 and later, and will NOT work with previous versions of Blender. 
+The addon works with 3DGS .PLY files. You will get errors an loss of functionality with non-3DGS .PLY files.
+The Mesh-2-3DGS features work on Windows only and require a specific file/folder structure.
 
 Please follow the installation guide in the [doc](https://www.kiriengine.app/blender-addon/3dgs-render).
 
