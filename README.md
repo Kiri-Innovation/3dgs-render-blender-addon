@@ -10,16 +10,23 @@ While Gaussian Splatting is powerful, integrating it into professional workflows
 4. Objects react to lighting and cast shadows
 
 ## Installation:
-❗❗Please note❗❗ The addon was made for the most current version of Blender at the time of writing. The addon should be capable of 4.2 and later, and will NOT work with previous versions of Blender. 
+❗❗Please note❗❗ 
+The addon was made for the most current version of Blender at the time of writing. The addon should be capable of 4.2 and later, and will NOT work with previous versions of Blender. 
 The addon works with 3DGS .PLY files. You will get errors an loss of functionality with non-3DGS .PLY files.
 The Mesh-2-3DGS features work on Windows only and require a specific file/folder structure.
+
+DO NOT try to build the addon from the individual files or repo-.ZIP.
+Some files were too large to upload and so some files are missing.
+This will cause errors regarding a missing .Blend file.
+
+Instead download the addon .ZIP from 'releases'
 
 Please follow the installation guide in the [doc](https://www.kiriengine.app/blender-addon/3dgs-render).
 
 
 ## Tutorial:
 The instructions can be found in [doc](https://www.kiriengine.app/blender-addon/3dgs-render).
-The tutorial video can be found [here](https://www.youtube.com/watch?v=ubeD3Vp_7hU).
+The tutorial video can be found here https://www.youtube.com/watch?v=WUL73wQDtcE&t=634s
 
 ## Questions:
 If you run into any issues or questions, feel free to ask on our [Discord thread](https://discord.com/channels/952917583659667517/1289563910390812723)
