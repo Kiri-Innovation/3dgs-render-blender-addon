@@ -15,9 +15,9 @@ The addon was made for the most current version of Blender at the time of writin
 The addon works with 3DGS .PLY files. You will get errors an loss of functionality with non-3DGS .PLY files.
 The Mesh-2-3DGS features work on Windows only and require a specific file/folder structure.
 
-DO NOT try to build the addon from the individual files or repo-.ZIP.
-Some files were too large to upload and so some files are missing.
-This will cause errors regarding a missing .Blend file.
+**DO NOT try to download the addon from 'Code...Download ZIP' button.**
+Some files were too large to upload and so some files are missing. This will cause errors regarding a missing .Blend file.
+**Download from the 'Releases' section.**
 
 <img width="1010" height="836" alt="image" src="https://github.com/user-attachments/assets/3fbf19ec-7084-4641-bd7e-0add2ff89b81" />
 
