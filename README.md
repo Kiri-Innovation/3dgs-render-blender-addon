@@ -19,6 +19,8 @@ DO NOT try to build the addon from the individual files or repo-.ZIP.
 Some files were too large to upload and so some files are missing.
 This will cause errors regarding a missing .Blend file.
 
+<img width="1010" height="836" alt="image" src="https://github.com/user-attachments/assets/3fbf19ec-7084-4641-bd7e-0add2ff89b81" />
+
 Instead download the addon .ZIP from 'releases'
 
 Please follow the installation guide in the [doc](https://www.kiriengine.app/blender-addon/3dgs-render).
