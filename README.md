@@ -8,6 +8,11 @@ While Gaussian Splatting is powerful, integrating it into professional workflows
 2. Edit and optimize point clouds before 3DGS conversion
 3. Create animations and motion graphics
 4. Objects react to lighting and cast shadows
+About version 4.0:
+Version 4.0 of the add-on features a whole new real-time rendering mode
+A lot of our existing functions, such as modifiers or colour editing, are exactly the same as previous versions (3.0 and below).
+The additional core functions of version 4.0 are currently covered as part of our Youtube tutorial videos.
+This written documentation will be updated with 4.0 features at a later date.
 
 ## Installation:
 ❗❗Please note❗❗ 
