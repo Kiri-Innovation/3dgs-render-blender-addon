@@ -21,7 +21,7 @@ This written documentation will be updated with 4.0 features at a later date.
 
 ## Installation:
 ❗❗Please note❗❗ 
-The addon was made for the most current version of Blender at the time of writing. The addon should be capable of 4.2 and later, and will NOT work with previous versions of Blender. 
+The addon was made for the most current version of Blender at the time of writing. The addon should be capable of 4.3 and later, and will NOT work with previous versions of Blender. 
 The addon works with 3DGS .PLY files. You will get errors an loss of functionality with non-3DGS .PLY files.
 The Mesh-2-3DGS features work on Windows only and require a specific file/folder structure.
 
