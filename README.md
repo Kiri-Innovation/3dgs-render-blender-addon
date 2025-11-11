@@ -33,12 +33,10 @@ Some files were too large to upload and so some files are missing. This will cau
 
 Instead download the addon .ZIP from 'releases'
 
-Please follow the installation guide in the [doc](https://www.kiriengine.app/blender-addon/3dgs-render).
-
 
 ## Tutorial:
-The instructions can be found in [doc](https://www.kiriengine.app/blender-addon/3dgs-render).
-The tutorial video can be found here https://www.youtube.com/watch?v=WUL73wQDtcE&t=634s
+The instructions can be found at  [KIRI Blnder addon docs]([https://discord.com/channels/952917583659667517/1289563910390812723](https://www.kiriengine.app/blender-addon))
+The tutorial playlist can be found here [https://www.youtube.com/watch?v=WUL73wQDtcE&t=634s](https://youtu.be/v3Ii0Yg655U?si=M7ioTE5GAS_PHXUf)
 
 ## Questions:
 If you run into any issues or questions, feel free to ask on our [Discord thread](https://discord.com/channels/952917583659667517/1289563910390812723)
