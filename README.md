@@ -35,7 +35,7 @@ Instead download the addon .ZIP from 'releases'
 
 
 ## Tutorial:
-The instructions can be found at  [KIRI Blnder addon docs]([https://discord.com/channels/952917583659667517/1289563910390812723](https://www.kiriengine.app/blender-addon))
+The instructions can be found at  [KIRI Blender addon docs](https://www.kiriengine.app/blender-addon))
 The tutorial playlist can be found here [https://www.youtube.com/watch?v=WUL73wQDtcE&t=634s](https://youtu.be/v3Ii0Yg655U?si=M7ioTE5GAS_PHXUf)
 
 ## Questions:
