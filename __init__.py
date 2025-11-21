@@ -5106,6 +5106,8 @@ def sna_render_temp_scene_913CD(TEMP_RENDER_PATH, RENDER_ANIMATION, FRAME_STEP):
     def resolve_blender_path(blender_path):
         """Convert Blender relative path to absolute path"""
         import os
+        if os.name == 'posix':
+            return blender_path
         # Check if it's a VALID absolute path (has drive letter on Windows)
         if os.path.isabs(blender_path) and (len(blender_path) < 2 or blender_path[1] == ':'):
             return blender_path
