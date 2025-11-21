@@ -1,12 +1,37 @@
 schema_version = "1.0.0"
 id = "dgs_render_by_kiri_engine"
-version = "3.0.0"
+version = "4.1.3"
 name = "3DGS Render by KIRI Engine"
-tagline = "3DGS creation and editing suite"
-maintainer = "KIRI ENGINE TEAM"
+tagline = "3DGS creation, render and editing suite"
+maintainer = "KIRI ENGINE"
 type = "add-on"
 tags = ["3D View"]
-blender_version_min = "4.2.0"
+blender_version_min = "4.3.0"
 license = [
 "SPDX:GPL-2.0-or-later",
+]
+wheels = [
+    "./wheels/any/blinker-1.9.0-py3-none-any.whl",
+    "./wheels/any/click-8.3.0-py3-none-any.whl",
+    "./wheels/any/dash-3.2.0-py3-none-any.whl",
+    "./wheels/any/flask-3.1.2-py3-none-any.whl",
+    "./wheels/any/importlib_metadata-8.7.0-py3-none-any.whl",
+    "./wheels/any/itsdangerous-2.2.0-py3-none-any.whl",
+    "./wheels/any/jinja2-3.1.6-py3-none-any.whl",
+    "./wheels/any/narwhals-2.9.0-py3-none-any.whl",
+    "./wheels/any/plotly-6.3.1-py3-none-any.whl",
+    "./wheels/any/typing_extensions-4.15.0-py3-none-any.whl",
+    "./wheels/any/werkzeug-3.1.3-py3-none-any.whl",
+
+    "./wheels/windows/markupsafe-3.0.3-cp311-cp311-win_amd64.whl",
+    "./wheels/windows/open3d-0.19.0-cp311-cp311-win_amd64.whl",
+    "./wheels/windows/scipy-1.16.2-cp311-cp311-win_amd64.whl",
+
+    "./wheels/macos/markupsafe-3.0.3-cp311-cp311-macosx_10_9_x86_64.whl",
+    "./wheels/macos/open3d-0.19.0-cp311-cp311-macosx_10_15_universal2.whl",
+    "./wheels/macos/scipy-1.16.2-cp311-cp311-macosx_10_14_x86_64.whl",
+
+    "./wheels/linux/markupsafe-3.0.3-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+    "./wheels/linux/open3d-0.19.0-cp311-cp311-manylinux_2_31_x86_64.whl",
+    "./wheels/linux/scipy-1.16.2-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
 ]
