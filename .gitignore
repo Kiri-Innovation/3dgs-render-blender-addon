@@ -1,9 +1,9 @@
-# Ignore the wheels
-wheels/
-# Ignore the .blend file
-*.blend
-# Ignore .exe file
-*.exe
+# # Ignore the wheels
+# wheels/
+# # Ignore the .blend file
+# *.blend
+# # Ignore .exe file
+# *.exe
 # Ignore the python cache
 __pycache__/
 *.py[cod]
