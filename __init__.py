@@ -45,7 +45,19 @@ import uuid
 from math import pi
 from mathutils import Matrix
 from typing import Optional
+import debugpy
 
+DEBUG_MODE = False
+if DEBUG_MODE and not debugpy.is_client_connected():
+    print("[DEBUGPY PATH] Current working directory:", os.getcwd())
+    print("[DEBUGPY PATH] __file__ of this module:", __file__)
+    print("[DEBUGPY PATH] sys.path[0]:", os.path.abspath(sys.path[0]) if sys.path else "N/A")
+    print("[DEBUGPY PATH] Full source path example:", os.path.abspath("your_project/__init__.py"))
+    # Optional: make it super obvious in the console
+    debugpy.listen(5678)
+    debugpy.wait_for_client()
+    debugpy.trace_this_thread(True)
+    debugpy.debug_this_thread()
 
 addon_keymaps = {}
 _icons = None
@@ -5106,6 +5118,8 @@ def sna_render_temp_scene_913CD(TEMP_RENDER_PATH, RENDER_ANIMATION, FRAME_STEP):
     def resolve_blender_path(blender_path):
         """Convert Blender relative path to absolute path"""
         import os
+        if os.name == 'posix':
+            return blender_path
         # Check if it's a VALID absolute path (has drive letter on Windows)
         if os.path.isabs(blender_path) and (len(blender_path) < 2 or blender_path[1] == ':'):
             return blender_path
