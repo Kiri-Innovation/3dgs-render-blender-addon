@@ -1,3 +1,1 @@
-Some required files were too large to upload with the other separate files.
-If you try to compile / zip the addon with the separate files you will get an error regarding missing .Blend files.
-To avoid this download the .ZIP release containing all required files.
+For the majority of users - downloading from Releases instead of .Main is recommended
