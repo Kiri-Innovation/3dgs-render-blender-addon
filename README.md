@@ -43,3 +43,14 @@ If you run into any issues or questions, feel free to ask on our [Discord thread
 
 ## Acknowledgement:
 Thanks to everybody who contributes to this good work from the KIRI Engine team.
+
+## BibTex:
+```
+@misc{3dgsrenderer,
+  author = {{Kiri Innovation}},
+  title = {{3DGS Render Blender}},
+  year = {2024},
+  url = {https://github.com/Kiri-Innovation/3dgs-render-blender-addon},
+  note = {Licensed under Apache License 2.0, http://www.apache.org/licenses/LICENSE-2.0}
+}
+```
