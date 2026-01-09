@@ -15,12 +15,15 @@ Version 4.0 of the add-on features a whole new real-time rendering mode
 
 A lot of our existing functions, such as modifiers or colour editing, are exactly the same as previous versions (3.0 and below).
 
-The additional core functions of version 4.0 are currently covered as part of our Youtube tutorial videos.
+Full use is covered in the written documentation.
 
-This written documentation will be updated with 4.0 features at a later date.
+The additional core functions and use of version 4.0 are covered as part of a short Youtube update video.
 
-## Tutorial:
-The instructions can be found at  [KIRI Blender addon docs](https://www.kiriengine.app/blender-addon))
+Be mindful that watching older Youtube videos may show deprecated features or UI elements.
+
+
+## Documentation and Tutorials:
+The written documentation can be found at  [KIRI Blender addon docs](https://www.kiriengine.app/blender-addon))
 The tutorial playlist can be found here [https://www.youtube.com/watch?v=WUL73wQDtcE&t=634s](https://youtu.be/v3Ii0Yg655U?si=M7ioTE5GAS_PHXUf)
 
 ## Questions:
