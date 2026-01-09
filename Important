@@ -1,0 +1,2 @@
+Only 3DGS .PLY files are accepted
+If you expeience errors noting 'f_dc_0' being missing - you are likely using a standard mesh or point cloud .PLY, not a 3DGS .PLY
