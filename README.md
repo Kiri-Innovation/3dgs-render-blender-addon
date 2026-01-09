@@ -19,21 +19,6 @@ The additional core functions of version 4.0 are currently covered as part of ou
 
 This written documentation will be updated with 4.0 features at a later date.
 
-## Installation:
-❗❗Please note❗❗ 
-The addon was made for the most current version of Blender at the time of writing. The addon should be working in Blender 4.3 and later, and will NOT work with previous versions of Blender. 
-The addon works with 3DGS .PLY files. You will get errors an loss of functionality with non-3DGS .PLY files.
-The Mesh-2-3DGS features work on Windows only and require a specific file/folder structure.
-
-**DO NOT try to download the addon from 'Code...Download ZIP' button.**
-Some files were too large to upload and so some files are missing. This will cause errors regarding a missing .Blend file.
-**Download from the 'Releases' section.**
-
-<img width="1010" height="836" alt="image" src="https://github.com/user-attachments/assets/3fbf19ec-7084-4641-bd7e-0add2ff89b81" />
-
-Instead download the addon .ZIP from 'releases'
-
-
 ## Tutorial:
 The instructions can be found at  [KIRI Blender addon docs](https://www.kiriengine.app/blender-addon))
 The tutorial playlist can be found here [https://www.youtube.com/watch?v=WUL73wQDtcE&t=634s](https://youtu.be/v3Ii0Yg655U?si=M7ioTE5GAS_PHXUf)
