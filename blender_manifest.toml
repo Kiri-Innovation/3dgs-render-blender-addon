@@ -1,10 +1,11 @@
 schema_version = "1.0.0"
 id = "dgs_render_by_kiri_engine"
-version = "4.1.3"
+version = "4.1.5"
 name = "3DGS Render by KIRI Engine"
 tagline = "3DGS creation, render and editing suite"
 maintainer = "KIRI ENGINE"
 type = "add-on"
+website = "https://www.kiriengine.app/blender-addon/3dgs-render"
 tags = ["3D View"]
 blender_version_min = "4.3.0"
 license = [
@@ -35,9 +36,3 @@ wheels = [
     "./wheels/linux/open3d-0.19.0-cp311-cp311-manylinux_2_31_x86_64.whl",
     "./wheels/linux/scipy-1.16.2-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
 ]
-
-
-
-
-
-
