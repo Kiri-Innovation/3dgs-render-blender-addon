@@ -468,24 +468,24 @@ class SNA_OT_Dgs_Render_Align_Active_To_X_Axis_6Ae0E(bpy.types.Operator):
     def invoke(self, context, event):
         return self.execute(context)
 
-class SNA_OT_Dgs_Render_Align_Active_To_Z_Axis_1E184(bpy.types.Operator):
-    bl_idname = "sna.dgs_render_align_active_to_z_axis_1e184"
-    bl_label = "3DGS Render: Align Active To Z Axis"
-    bl_description = "Updates the 3DGS_Render modifier once to the Z axis for the active object."
-    bl_options = {"REGISTER", "UNDO"}
-
-    @classmethod
-    def poll(cls, context):
-        if bpy.app.version >= (3, 0, 0) and True:
-            cls.poll_message_set('')
-        return not False
-
-    def execute(self, context):
-        sna_align_active_values_to_z_7B9ED()
-        return {"FINISHED"}
-
-    def invoke(self, context, event):
-        return self.execute(context)
+# class SNA_OT_Dgs_Render_Align_Active_To_Z_Axis_1E184(bpy.types.Operator):
+#     bl_idname = "sna.dgs_render_align_active_to_z_axis_1e184"
+#     bl_label = "3DGS Render: Align Active To Z Axis"
+#     bl_description = "Updates the 3DGS_Render modifier once to the Z axis for the active object."
+#     bl_options = {"REGISTER", "UNDO"}
+#
+#     @classmethod
+#     def poll(cls, context):
+#         if bpy.app.version >= (3, 0, 0) and True:
+#             cls.poll_message_set('')
+#         return not False
+#
+#     def execute(self, context):
+#         sna_align_active_values_to_z_7B9ED()
+#         return {"FINISHED"}
+#
+#     def invoke(self, context, event):
+#         return self.execute(context)
 
 
 def sna_animate_function_interface_57F9E(layout_function, ):
@@ -812,300 +812,300 @@ def sna_add_to_view3d_mt_object_apply_F9005(self, context):
         op = layout.operator('sna.dgs_render_apply_3dgs_tranforms_5b665', text='Apply 3DGS Transforms and Colour', icon_value=load_preview_icon(os.path.join(os.path.dirname(__file__), 'assets', 'kiriengine icon.svg')), emboss=True, depress=False)
 
 
-class SNA_OT_Dgs_Render_Apply_3Dgs_Tranforms_5B665(bpy.types.Operator):
-    bl_idname = "sna.dgs_render_apply_3dgs_tranforms_5b665"
-    bl_label = "3DGS Render: Apply 3DGS Tranforms"
-    bl_description = "Applies the 3DGS Render modifier if present, makes colour edits permanent and updates 3DGS rotation and scale values"
-    bl_options = {"REGISTER", "UNDO"}
-
-    @classmethod
-    def poll(cls, context):
-        if bpy.app.version >= (3, 0, 0) and True:
-            cls.poll_message_set('')
-        return not False
-
-    def execute(self, context):
-        if (property_exists("bpy.context.view_layer.objects.active.modifiers", globals(), locals()) and 'KIRI_3DGS_Render_GN' in bpy.context.view_layer.objects.active.modifiers):
-            modifier_name = 'KIRI_3DGS_Render_GN'
-            object_name = bpy.context.view_layer.objects.active.name
-            obj = bpy.data.objects.get(object_name)
-            if obj:
-                modifier = obj.modifiers.get(modifier_name)
-                if modifier:
-                    if not modifier.show_viewport:
-                        # Simply remove the modifier if it's hidden
-                        obj.modifiers.remove(modifier)
-                        print(f"Removed hidden modifier '{modifier_name}' from object '{object_name}'.")
-                    else:
-                        # Apply normally if visible
-                        bpy.ops.object.modifier_apply(modifier=modifier_name)
-                        print(f"Applied visible modifier '{modifier_name}' to object '{object_name}'.")
-                else:
-                    print(f"Modifier '{modifier_name}' not found on object '{object_name}'.")
-            else:
-                print(f"Object '{object_name}' not found.")
-        if (property_exists("bpy.context.view_layer.objects.active.modifiers", globals(), locals()) and 'KIRI_3DGS_Adjust_Colour_And_Material' in bpy.context.view_layer.objects.active.modifiers):
-            modifier_name = 'KIRI_3DGS_Adjust_Colour_And_Material'
-            object_name = bpy.context.view_layer.objects.active.name
-            obj = bpy.data.objects.get(object_name)
-            if obj:
-                modifier = obj.modifiers.get(modifier_name)
-                if modifier:
-                    if not modifier.show_viewport:
-                        # Simply remove the modifier if it's hidden
-                        obj.modifiers.remove(modifier)
-                        print(f"Removed hidden modifier '{modifier_name}' from object '{object_name}'.")
-                    else:
-                        # Apply normally if visible
-                        bpy.ops.object.modifier_apply(modifier=modifier_name)
-                        print(f"Applied visible modifier '{modifier_name}' to object '{object_name}'.")
-                else:
-                    print(f"Modifier '{modifier_name}' not found on object '{object_name}'.")
-            else:
-                print(f"Object '{object_name}' not found.")
-        APPLY_SCALE = True
-        APPLY_ROTATION = True
-        TRANSFORM_ORDER = 'ROTATION_FIRST'
-        import numpy as np
-        from mathutils import Quaternion, Matrix, Euler
-        #------ INPUT VARIABLES (modify these) ------#
-        # The attributes to update
-        SCALE_ATTRIBUTES = ["scale_0", "scale_1", "scale_2"]
-        ROTATION_ATTRIBUTES = ["rot_0", "rot_1", "rot_2", "rot_3"]
-        # Whether to apply transformations after updating attributes
-        #APPLY_SCALE = True
-        #APPLY_ROTATION = True
-        # The order of operations: either "SCALE_FIRST" or "ROTATION_FIRST"
-        # 3DGS typically uses SCALE_FIRST (scale, then rotate)
-        #TRANSFORM_ORDER = "SCALE_FIRST"
-        # Whether to print debug information
-        VERBOSE = True
-        # Whether to normalize quaternions after transformation (PostShot does this)
-        NORMALIZE_QUATERNIONS = True
-        #------------------------------------------#
-
-        def quaternion_multiply(q1, q2):
-            """
-            Multiply two quaternions (compose rotations)
-            q1 and q2 are in form [w, x, y, z]
-            """
-            w1, x1, y1, z1 = q1
-            w2, x2, y2, z2 = q2
-            w = w1 * w2 - x1 * x2 - y1 * y2 - z1 * z2
-            x = w1 * x2 + x1 * w2 + y1 * z2 - z1 * y2
-            y = w1 * y2 - x1 * z2 + y1 * w2 + z1 * x2
-            z = w1 * z2 + x1 * y2 - y1 * x2 + z1 * w2
-            return [w, x, y, z]
-
-        def normalize_quaternion(q):
-            """
-            Normalize a quaternion to unit length
-            q is in form [w, x, y, z]
-            """
-            magnitude = math.sqrt(q[0]**2 + q[1]**2 + q[2]**2 + q[3]**2)
-            if magnitude > 0.00001:  # Avoid division by near-zero
-                return [q[0]/magnitude, q[1]/magnitude, q[2]/magnitude, q[3]/magnitude]
-            else:
-                return [1.0, 0.0, 0.0, 0.0]  # Default to identity quaternion
-
-        def update_scale_attributes(obj, scale_attributes, log_scale_factors, verbose=False):
-            """
-            Update the scale attributes with logarithmic scale factors
-            """
-            success = True
-            for attr_idx, attr_name in enumerate(scale_attributes):
-                if attr_name not in obj.data.attributes:
-                    print(f"Attribute '{attr_name}' not found on object.")
-                    success = False
-                    continue
-                attr = obj.data.attributes[attr_name]
-                if verbose:
-                    print(f"\nUpdating attribute: {attr_name}")
-                    print(f"Data type: {attr.data_type}")
-                    print(f"Domain: {attr.domain}")
-                    print(f"Length: {len(attr.data)}")
-                # Determine which scale factor to use based on attribute name
-                if attr_name == "scale_0":
-                    log_scale = log_scale_factors[0]
-                elif attr_name == "scale_1":
-                    log_scale = log_scale_factors[1]
-                elif attr_name == "scale_2":
-                    log_scale = log_scale_factors[2]
-                else:
-                    # For custom-named attributes, use the index in the scale_attributes list
-                    log_scale = log_scale_factors[min(attr_idx, 2)]
-                if verbose:
-                    print(f"Using log scale factor: {log_scale}")
-                # Update the attribute values
-                if attr.data_type == 'FLOAT':
-                    # Sample a few values before and after for verification
-                    sample_size = min(5, len(attr.data))
-                    before_values = []
-                    for i in range(sample_size):
-                        before_values.append(attr.data[i].value)
-                    # Update all values
-                    for i in range(len(attr.data)):
-                        # In 3DGS, adding the log of the scale factor to the log-space scale value
-                        attr.data[i].value += log_scale
-                    # Print sample values after update
-                    if verbose:
-                        print("Sample values before and after update:")
-                        for i in range(sample_size):
-                            print(f"  [{i}]: {before_values[i]} -> {attr.data[i].value}")
-                else:
-                    print(f"Attribute '{attr_name}' is not of type FLOAT (found {attr.data_type}). Skipping.")
-                    success = False
-            return success
-
-        def update_rotation_attributes(obj, rotation_attributes, blender_quat, verbose=False, normalize=True):
-            """
-            Update the rotation attributes with the object's rotation quaternion
-            """
-            # First, gather all data to avoid processing incomplete sets
-            attribute_data = {}
-            valid_attributes = True
-            for attr_name in rotation_attributes:
-                if attr_name not in obj.data.attributes:
-                    print(f"Attribute '{attr_name}' not found on object.")
-                    valid_attributes = False
-                    break
-                attr = obj.data.attributes[attr_name]
-                if attr.data_type != 'FLOAT':
-                    print(f"Attribute '{attr_name}' is not of type FLOAT (found {attr.data_type}). Skipping.")
-                    valid_attributes = False
-                    break
-                # Store the attribute for processing
-                attribute_data[attr_name] = attr
-            if not valid_attributes:
-                print("Unable to process rotation due to missing or invalid attributes.")
-                return False
-            # Sample a few values before the update for verification
-            sample_size = min(5, len(attribute_data[rotation_attributes[0]].data))
-            before_values = {attr_name: [] for attr_name in rotation_attributes}
-            for attr_name in rotation_attributes:
-                for i in range(sample_size):
-                    before_values[attr_name].append(attribute_data[attr_name].data[i].value)
-            # Process all points
-            num_points = len(attribute_data[rotation_attributes[0]].data)
-            print(f"Processing {num_points} points...")
-            for i in range(num_points):
-                # Get current quaternion values [w, x, y, z]
-                point_quat = [
-                    attribute_data[rotation_attributes[0]].data[i].value,  # w
-                    attribute_data[rotation_attributes[1]].data[i].value,  # x
-                    attribute_data[rotation_attributes[2]].data[i].value,  # y
-                    attribute_data[rotation_attributes[3]].data[i].value   # z
-                ]
-                # Apply rotation by multiplying quaternions
-                # The order matters: PostShot appears to use the object_rotation * point_quat
-                # format (rotating the local frame)
-                new_quat = quaternion_multiply(blender_quat, point_quat)
-                # Normalize the quaternion if requested (PostShot does this)
-                if normalize:
-                    new_quat = normalize_quaternion(new_quat)
-                # Enforce positive w component to match PostShot's convention
-                # Since q and -q represent the same rotation, we can flip all signs if w is negative
-                if new_quat[0] < 0:
-                    new_quat = [-q for q in new_quat]
-                # Update attribute values
-                attribute_data[rotation_attributes[0]].data[i].value = new_quat[0]  # w
-                attribute_data[rotation_attributes[1]].data[i].value = new_quat[1]  # x
-                attribute_data[rotation_attributes[2]].data[i].value = new_quat[2]  # y
-                attribute_data[rotation_attributes[3]].data[i].value = new_quat[3]  # z
-            # Print sample values after update for verification
-            if verbose:
-                print("\nSample values before and after update:")
-                for i in range(sample_size):
-                    print(f"Point [{i}]:")
-                    for j, attr_name in enumerate(rotation_attributes):
-                        print(f"  {attr_name}: {before_values[attr_name][i]} -> {attribute_data[attr_name].data[i].value}")
-            return True
-
-        def apply_transformations(obj, apply_rotation=False, apply_scale=False):
-            """
-            Apply the transformations to the object
-            """
-            if not (apply_rotation or apply_scale):
-                return
-            # Store current context
-            original_mode = obj.mode
-            # Switch to object mode if needed
-            if original_mode != 'OBJECT':
-                bpy.ops.object.mode_set(mode='OBJECT')
-            # Apply transformations
-            bpy.ops.object.transform_apply(
-                location=False, 
-                rotation=apply_rotation, 
-                scale=apply_scale
-            )
-            # Restore original mode
-            if original_mode != 'OBJECT':
-                bpy.ops.object.mode_set(mode=original_mode)
-            transformations = []
-            if apply_rotation:
-                transformations.append("rotation")
-            if apply_scale:
-                transformations.append("scale")
-            print(f"Object {', '.join(transformations)} applied.")
-        # MAIN SCRIPT EXECUTION
-        # Get the active object
-        obj = bpy.context.active_object
-        if not obj:
-            print("No active object found.")
-        else:
-            print(f"Processing 3DGS transformations for object: {obj.name}")
-            # Get current object rotation (ensuring quaternion is updated)
-            original_rotation_mode = obj.rotation_mode
-            # If not already in quaternion mode, ensure the quaternion gets updated
-            if original_rotation_mode != 'QUATERNION':
-                # Switch to quaternion mode to ensure quaternion is updated
-                obj.rotation_mode = 'QUATERNION'
-                # Switch back to original mode
-                obj.rotation_mode = original_rotation_mode
-            # Get the quaternion values
-            obj_rotation_quat = obj.rotation_quaternion.copy()
-            # Convert to w, x, y, z format (from Blender's x, y, z, w)
-            blender_quat = [obj_rotation_quat.w, obj_rotation_quat.x, 
-                          obj_rotation_quat.y, obj_rotation_quat.z]
-            if VERBOSE:
-                print(f"Current object rotation quaternion [w,x,y,z]: {blender_quat}")
-            # Get current object scale
-            scale_x, scale_y, scale_z = obj.scale
-            if VERBOSE:
-                print(f"Current object scale: X={scale_x}, Y={scale_y}, Z={scale_z}")
-            # Calculate the logarithm of scale factors
-            log_scale_x = math.log(scale_x) if scale_x > 0 else 0
-            log_scale_y = math.log(scale_y) if scale_y > 0 else 0
-            log_scale_z = math.log(scale_z) if scale_z > 0 else 0
-            log_scale_factors = [log_scale_x, log_scale_y, log_scale_z]
-            if VERBOSE:
-                print(f"Log scale factors: X={log_scale_x}, Y={log_scale_y}, Z={log_scale_z}")
-            # Check if the object has attribute data
-            if not hasattr(obj.data, "attributes"):
-                print("Object does not have attribute data.")
-            else:
-                # Perform transformations in the specified order
-                if TRANSFORM_ORDER == "SCALE_FIRST":
-                    # First update scale attributes
-                    scale_success = update_scale_attributes(obj, SCALE_ATTRIBUTES, log_scale_factors, VERBOSE)
-                    print("Scale attributes update", "succeeded" if scale_success else "failed")
-                    # Then update rotation attributes
-                    rotation_success = update_rotation_attributes(obj, ROTATION_ATTRIBUTES, blender_quat, VERBOSE, NORMALIZE_QUATERNIONS)
-                    print("Rotation attributes update", "succeeded" if rotation_success else "failed")
-                else:  # ROTATION_FIRST
-                    # First update rotation attributes
-                    rotation_success = update_rotation_attributes(obj, ROTATION_ATTRIBUTES, blender_quat, VERBOSE, NORMALIZE_QUATERNIONS)
-                    print("Rotation attributes update", "succeeded" if rotation_success else "failed")
-                    # Then update scale attributes
-                    scale_success = update_scale_attributes(obj, SCALE_ATTRIBUTES, log_scale_factors, VERBOSE)
-                    print("Scale attributes update", "succeeded" if scale_success else "failed")
-                # Apply transformations to reset object transforms
-                apply_transformations(obj, APPLY_ROTATION, APPLY_SCALE)
-                print("\nTransformation operations completed.")
-        return {"FINISHED"}
-
-    def invoke(self, context, event):
-        return self.execute(context)
+# class SNA_OT_Dgs_Render_Apply_3Dgs_Tranforms_5B665(bpy.types.Operator):
+#     bl_idname = "sna.dgs_render_apply_3dgs_tranforms_5b665"
+#     bl_label = "3DGS Render: Apply 3DGS Tranforms"
+#     bl_description = "Applies the 3DGS Render modifier if present, makes colour edits permanent and updates 3DGS rotation and scale values"
+#     bl_options = {"REGISTER", "UNDO"}
+#
+#     @classmethod
+#     def poll(cls, context):
+#         if bpy.app.version >= (3, 0, 0) and True:
+#             cls.poll_message_set('')
+#         return not False
+#
+#     def execute(self, context):
+#         if (property_exists("bpy.context.view_layer.objects.active.modifiers", globals(), locals()) and 'KIRI_3DGS_Render_GN' in bpy.context.view_layer.objects.active.modifiers):
+#             modifier_name = 'KIRI_3DGS_Render_GN'
+#             object_name = bpy.context.view_layer.objects.active.name
+#             obj = bpy.data.objects.get(object_name)
+#             if obj:
+#                 modifier = obj.modifiers.get(modifier_name)
+#                 if modifier:
+#                     if not modifier.show_viewport:
+#                         # Simply remove the modifier if it's hidden
+#                         obj.modifiers.remove(modifier)
+#                         print(f"Removed hidden modifier '{modifier_name}' from object '{object_name}'.")
+#                     else:
+#                         # Apply normally if visible
+#                         bpy.ops.object.modifier_apply(modifier=modifier_name)
+#                         print(f"Applied visible modifier '{modifier_name}' to object '{object_name}'.")
+#                 else:
+#                     print(f"Modifier '{modifier_name}' not found on object '{object_name}'.")
+#             else:
+#                 print(f"Object '{object_name}' not found.")
+#         if (property_exists("bpy.context.view_layer.objects.active.modifiers", globals(), locals()) and 'KIRI_3DGS_Adjust_Colour_And_Material' in bpy.context.view_layer.objects.active.modifiers):
+#             modifier_name = 'KIRI_3DGS_Adjust_Colour_And_Material'
+#             object_name = bpy.context.view_layer.objects.active.name
+#             obj = bpy.data.objects.get(object_name)
+#             if obj:
+#                 modifier = obj.modifiers.get(modifier_name)
+#                 if modifier:
+#                     if not modifier.show_viewport:
+#                         # Simply remove the modifier if it's hidden
+#                         obj.modifiers.remove(modifier)
+#                         print(f"Removed hidden modifier '{modifier_name}' from object '{object_name}'.")
+#                     else:
+#                         # Apply normally if visible
+#                         bpy.ops.object.modifier_apply(modifier=modifier_name)
+#                         print(f"Applied visible modifier '{modifier_name}' to object '{object_name}'.")
+#                 else:
+#                     print(f"Modifier '{modifier_name}' not found on object '{object_name}'.")
+#             else:
+#                 print(f"Object '{object_name}' not found.")
+#         APPLY_SCALE = True
+#         APPLY_ROTATION = True
+#         TRANSFORM_ORDER = 'ROTATION_FIRST'
+#         import numpy as np
+#         from mathutils import Quaternion, Matrix, Euler
+#         #------ INPUT VARIABLES (modify these) ------#
+#         # The attributes to update
+#         SCALE_ATTRIBUTES = ["scale_0", "scale_1", "scale_2"]
+#         ROTATION_ATTRIBUTES = ["rot_0", "rot_1", "rot_2", "rot_3"]
+#         # Whether to apply transformations after updating attributes
+#         #APPLY_SCALE = True
+#         #APPLY_ROTATION = True
+#         # The order of operations: either "SCALE_FIRST" or "ROTATION_FIRST"
+#         # 3DGS typically uses SCALE_FIRST (scale, then rotate)
+#         #TRANSFORM_ORDER = "SCALE_FIRST"
+#         # Whether to print debug information
+#         VERBOSE = True
+#         # Whether to normalize quaternions after transformation (PostShot does this)
+#         NORMALIZE_QUATERNIONS = True
+#         #------------------------------------------#
+#
+#         def quaternion_multiply(q1, q2):
+#             """
+#             Multiply two quaternions (compose rotations)
+#             q1 and q2 are in form [w, x, y, z]
+#             """
+#             w1, x1, y1, z1 = q1
+#             w2, x2, y2, z2 = q2
+#             w = w1 * w2 - x1 * x2 - y1 * y2 - z1 * z2
+#             x = w1 * x2 + x1 * w2 + y1 * z2 - z1 * y2
+#             y = w1 * y2 - x1 * z2 + y1 * w2 + z1 * x2
+#             z = w1 * z2 + x1 * y2 - y1 * x2 + z1 * w2
+#             return [w, x, y, z]
+#
+#         def normalize_quaternion(q):
+#             """
+#             Normalize a quaternion to unit length
+#             q is in form [w, x, y, z]
+#             """
+#             magnitude = math.sqrt(q[0]**2 + q[1]**2 + q[2]**2 + q[3]**2)
+#             if magnitude > 0.00001:  # Avoid division by near-zero
+#                 return [q[0]/magnitude, q[1]/magnitude, q[2]/magnitude, q[3]/magnitude]
+#             else:
+#                 return [1.0, 0.0, 0.0, 0.0]  # Default to identity quaternion
+#
+#         def update_scale_attributes(obj, scale_attributes, log_scale_factors, verbose=False):
+#             """
+#             Update the scale attributes with logarithmic scale factors
+#             """
+#             success = True
+#             for attr_idx, attr_name in enumerate(scale_attributes):
+#                 if attr_name not in obj.data.attributes:
+#                     print(f"Attribute '{attr_name}' not found on object.")
+#                     success = False
+#                     continue
+#                 attr = obj.data.attributes[attr_name]
+#                 if verbose:
+#                     print(f"\nUpdating attribute: {attr_name}")
+#                     print(f"Data type: {attr.data_type}")
+#                     print(f"Domain: {attr.domain}")
+#                     print(f"Length: {len(attr.data)}")
+#                 # Determine which scale factor to use based on attribute name
+#                 if attr_name == "scale_0":
+#                     log_scale = log_scale_factors[0]
+#                 elif attr_name == "scale_1":
+#                     log_scale = log_scale_factors[1]
+#                 elif attr_name == "scale_2":
+#                     log_scale = log_scale_factors[2]
+#                 else:
+#                     # For custom-named attributes, use the index in the scale_attributes list
+#                     log_scale = log_scale_factors[min(attr_idx, 2)]
+#                 if verbose:
+#                     print(f"Using log scale factor: {log_scale}")
+#                 # Update the attribute values
+#                 if attr.data_type == 'FLOAT':
+#                     # Sample a few values before and after for verification
+#                     sample_size = min(5, len(attr.data))
+#                     before_values = []
+#                     for i in range(sample_size):
+#                         before_values.append(attr.data[i].value)
+#                     # Update all values
+#                     for i in range(len(attr.data)):
+#                         # In 3DGS, adding the log of the scale factor to the log-space scale value
+#                         attr.data[i].value += log_scale
+#                     # Print sample values after update
+#                     if verbose:
+#                         print("Sample values before and after update:")
+#                         for i in range(sample_size):
+#                             print(f"  [{i}]: {before_values[i]} -> {attr.data[i].value}")
+#                 else:
+#                     print(f"Attribute '{attr_name}' is not of type FLOAT (found {attr.data_type}). Skipping.")
+#                     success = False
+#             return success
+#
+#         def update_rotation_attributes(obj, rotation_attributes, blender_quat, verbose=False, normalize=True):
+#             """
+#             Update the rotation attributes with the object's rotation quaternion
+#             """
+#             # First, gather all data to avoid processing incomplete sets
+#             attribute_data = {}
+#             valid_attributes = True
+#             for attr_name in rotation_attributes:
+#                 if attr_name not in obj.data.attributes:
+#                     print(f"Attribute '{attr_name}' not found on object.")
+#                     valid_attributes = False
+#                     break
+#                 attr = obj.data.attributes[attr_name]
+#                 if attr.data_type != 'FLOAT':
+#                     print(f"Attribute '{attr_name}' is not of type FLOAT (found {attr.data_type}). Skipping.")
+#                     valid_attributes = False
+#                     break
+#                 # Store the attribute for processing
+#                 attribute_data[attr_name] = attr
+#             if not valid_attributes:
+#                 print("Unable to process rotation due to missing or invalid attributes.")
+#                 return False
+#             # Sample a few values before the update for verification
+#             sample_size = min(5, len(attribute_data[rotation_attributes[0]].data))
+#             before_values = {attr_name: [] for attr_name in rotation_attributes}
+#             for attr_name in rotation_attributes:
+#                 for i in range(sample_size):
+#                     before_values[attr_name].append(attribute_data[attr_name].data[i].value)
+#             # Process all points
+#             num_points = len(attribute_data[rotation_attributes[0]].data)
+#             print(f"Processing {num_points} points...")
+#             for i in range(num_points):
+#                 # Get current quaternion values [w, x, y, z]
+#                 point_quat = [
+#                     attribute_data[rotation_attributes[0]].data[i].value,  # w
+#                     attribute_data[rotation_attributes[1]].data[i].value,  # x
+#                     attribute_data[rotation_attributes[2]].data[i].value,  # y
+#                     attribute_data[rotation_attributes[3]].data[i].value   # z
+#                 ]
+#                 # Apply rotation by multiplying quaternions
+#                 # The order matters: PostShot appears to use the object_rotation * point_quat
+#                 # format (rotating the local frame)
+#                 new_quat = quaternion_multiply(blender_quat, point_quat)
+#                 # Normalize the quaternion if requested (PostShot does this)
+#                 if normalize:
+#                     new_quat = normalize_quaternion(new_quat)
+#                 # Enforce positive w component to match PostShot's convention
+#                 # Since q and -q represent the same rotation, we can flip all signs if w is negative
+#                 if new_quat[0] < 0:
+#                     new_quat = [-q for q in new_quat]
+#                 # Update attribute values
+#                 attribute_data[rotation_attributes[0]].data[i].value = new_quat[0]  # w
+#                 attribute_data[rotation_attributes[1]].data[i].value = new_quat[1]  # x
+#                 attribute_data[rotation_attributes[2]].data[i].value = new_quat[2]  # y
+#                 attribute_data[rotation_attributes[3]].data[i].value = new_quat[3]  # z
+#             # Print sample values after update for verification
+#             if verbose:
+#                 print("\nSample values before and after update:")
+#                 for i in range(sample_size):
+#                     print(f"Point [{i}]:")
+#                     for j, attr_name in enumerate(rotation_attributes):
+#                         print(f"  {attr_name}: {before_values[attr_name][i]} -> {attribute_data[attr_name].data[i].value}")
+#             return True
+#
+#         def apply_transformations(obj, apply_rotation=False, apply_scale=False):
+#             """
+#             Apply the transformations to the object
+#             """
+#             if not (apply_rotation or apply_scale):
+#                 return
+#             # Store current context
+#             original_mode = obj.mode
+#             # Switch to object mode if needed
+#             if original_mode != 'OBJECT':
+#                 bpy.ops.object.mode_set(mode='OBJECT')
+#             # Apply transformations
+#             bpy.ops.object.transform_apply(
+#                 location=False, 
+#                 rotation=apply_rotation, 
+#                 scale=apply_scale
+#             )
+#             # Restore original mode
+#             if original_mode != 'OBJECT':
+#                 bpy.ops.object.mode_set(mode=original_mode)
+#             transformations = []
+#             if apply_rotation:
+#                 transformations.append("rotation")
+#             if apply_scale:
+#                 transformations.append("scale")
+#             print(f"Object {', '.join(transformations)} applied.")
+#         # MAIN SCRIPT EXECUTION
+#         # Get the active object
+#         obj = bpy.context.active_object
+#         if not obj:
+#             print("No active object found.")
+#         else:
+#             print(f"Processing 3DGS transformations for object: {obj.name}")
+#             # Get current object rotation (ensuring quaternion is updated)
+#             original_rotation_mode = obj.rotation_mode
+#             # If not already in quaternion mode, ensure the quaternion gets updated
+#             if original_rotation_mode != 'QUATERNION':
+#                 # Switch to quaternion mode to ensure quaternion is updated
+#                 obj.rotation_mode = 'QUATERNION'
+#                 # Switch back to original mode
+#                 obj.rotation_mode = original_rotation_mode
+#             # Get the quaternion values
+#             obj_rotation_quat = obj.rotation_quaternion.copy()
+#             # Convert to w, x, y, z format (from Blender's x, y, z, w)
+#             blender_quat = [obj_rotation_quat.w, obj_rotation_quat.x, 
+#                           obj_rotation_quat.y, obj_rotation_quat.z]
+#             if VERBOSE:
+#                 print(f"Current object rotation quaternion [w,x,y,z]: {blender_quat}")
+#             # Get current object scale
+#             scale_x, scale_y, scale_z = obj.scale
+#             if VERBOSE:
+#                 print(f"Current object scale: X={scale_x}, Y={scale_y}, Z={scale_z}")
+#             # Calculate the logarithm of scale factors
+#             log_scale_x = math.log(scale_x) if scale_x > 0 else 0
+#             log_scale_y = math.log(scale_y) if scale_y > 0 else 0
+#             log_scale_z = math.log(scale_z) if scale_z > 0 else 0
+#             log_scale_factors = [log_scale_x, log_scale_y, log_scale_z]
+#             if VERBOSE:
+#                 print(f"Log scale factors: X={log_scale_x}, Y={log_scale_y}, Z={log_scale_z}")
+#             # Check if the object has attribute data
+#             if not hasattr(obj.data, "attributes"):
+#                 print("Object does not have attribute data.")
+#             else:
+#                 # Perform transformations in the specified order
+#                 if TRANSFORM_ORDER == "SCALE_FIRST":
+#                     # First update scale attributes
+#                     scale_success = update_scale_attributes(obj, SCALE_ATTRIBUTES, log_scale_factors, VERBOSE)
+#                     print("Scale attributes update", "succeeded" if scale_success else "failed")
+#                     # Then update rotation attributes
+#                     rotation_success = update_rotation_attributes(obj, ROTATION_ATTRIBUTES, blender_quat, VERBOSE, NORMALIZE_QUATERNIONS)
+#                     print("Rotation attributes update", "succeeded" if rotation_success else "failed")
+#                 else:  # ROTATION_FIRST
+#                     # First update rotation attributes
+#                     rotation_success = update_rotation_attributes(obj, ROTATION_ATTRIBUTES, blender_quat, VERBOSE, NORMALIZE_QUATERNIONS)
+#                     print("Rotation attributes update", "succeeded" if rotation_success else "failed")
+#                     # Then update scale attributes
+#                     scale_success = update_scale_attributes(obj, SCALE_ATTRIBUTES, log_scale_factors, VERBOSE)
+#                     print("Scale attributes update", "succeeded" if scale_success else "failed")
+#                 # Apply transformations to reset object transforms
+#                 apply_transformations(obj, APPLY_ROTATION, APPLY_SCALE)
+#                 print("\nTransformation operations completed.")
+#         return {"FINISHED"}
+#
+#     def invoke(self, context, event):
+#         return self.execute(context)
 
 
 def sna_move_object_to_collection_create_if_missingfunction_execute_AB682(Object_to_move, Target_Collection, Collection_Color_Tag):
@@ -3009,882 +3009,882 @@ def sna_clean_up_scene_5F1F1(REMOVE_ALL_GAUSSIAN_OBJECTS):
         print("All caches cleared successfully")
 
 
-def sna_viewport_render_A3941():
-    # ========== VARIABLES (EDIT THESE) ==========
-    ENABLE_RENDERING = True
-    RENDER_MODE = 0  # 0=Gaussian, 1=Depth, 2=Surfel
-    SH_DEGREE = 3    # 0, 1, 2, or 3
-    SORT_THRESHOLD = 0.05  # Camera movement threshold for re-sorting
-    # ============================================
-    #import bpy
-    #import gpu
-    import mathutils
+# def sna_viewport_render_A3941():
+#     # ========== VARIABLES (EDIT THESE) ==========
+#     ENABLE_RENDERING = True
+#     RENDER_MODE = 0  # 0=Gaussian, 1=Depth, 2=Surfel
+#     SH_DEGREE = 3    # 0, 1, 2, or 3
+#     SORT_THRESHOLD = 0.05  # Camera movement threshold for re-sorting
+#     # ============================================
+#     #import bpy
+#     #import gpu
+#     import mathutils
+#
+#     def auto_reconstruct_cache():
+#         """Auto-detect and rebuild cache from existing scene objects"""
+#         try:
+#             # Find all gaussian objects in the scene
+#             gaussian_objects = []
+#             for obj in bpy.data.objects:
+#                 if obj.get("is_gaussian_splat", False):
+#                     gaussian_objects.append(obj)
+#             if not gaussian_objects:
+#                 return False
+#             print(f"Auto-reconstructing cache from {len(gaussian_objects)} scene objects...")
+#             # Initialize fresh cache
+#             bpy.gaussian_object_cache = {}
+#             total_gaussians = 0
+#             for obj in gaussian_objects:
+#                 try:
+#                     # Extract data from object properties
+#                     data_bytes = obj.get("gaussian_data")
+#                     gaussian_count = obj.get("gaussian_count", 0)
+#                     sh_degree = obj.get("sh_degree", 48)
+#                     ply_filepath = obj.get("ply_filepath", "Unknown")
+#                     if not data_bytes or gaussian_count == 0:
+#                         continue
+#                     # Reconstruct numpy array from bytes
+#                     gaussian_data = np.frombuffer(data_bytes, dtype=np.float32).reshape(gaussian_count, 59)
+#                     # Add to cache
+#                     bpy.gaussian_object_cache[obj.name] = {
+#                         'gaussian_data': gaussian_data,
+#                         'gaussian_count': gaussian_count,
+#                         'sh_degree': sh_degree,
+#                         'object': obj,
+#                         'ply_filepath': ply_filepath
+#                     }
+#                     total_gaussians += gaussian_count
+#                 except Exception as e:
+#                     print(f"Failed to reconstruct {obj.name}: {e}")
+#                     continue
+#             if bpy.gaussian_object_cache:
+#                 # Mark that global textures need rebuilding
+#                 bpy.gaussian_global_needs_update = True
+#                 print(f"Cache auto-reconstructed: {len(bpy.gaussian_object_cache)} objects, {total_gaussians:,} gaussians")
+#                 return True
+#             else:
+#                 return False
+#         except Exception as e:
+#             print(f"Auto-reconstruction failed: {e}")
+#             return False
+#
+#     def create_viewport_framebuffer(width, height):
+#         try:
+#             if width <= 0 or height <= 0:
+#                 return None
+#             color_texture = gpu.types.GPUTexture((width, height), format='RGBA8')
+#             depth_texture = gpu.types.GPUTexture((width, height), format='DEPTH_COMPONENT24')
+#             framebuffer = gpu.types.GPUFrameBuffer(
+#                 color_slots=[color_texture],
+#                 depth_slot=depth_texture
+#             )
+#             return color_texture, depth_texture, framebuffer
+#         except Exception as e:
+#             print(f"Failed to create viewport framebuffer: {e}")
+#             return None
+#
+#     def read_blender_depth_buffer():
+#         try:
+#             fb = gpu.state.active_framebuffer_get()
+#             viewport = gpu.state.viewport_get()
+#             width = viewport[2] - viewport[0]
+#             height = viewport[3] - viewport[1]
+#             if width <= 0 or height <= 0:
+#                 return None, 0, 0
+#             depth_buffer = fb.read_depth(0, 0, width, height)
+#             depth_buffer.dimensions = width * height
+#             depth_texture = gpu.types.GPUTexture(
+#                 (width, height),
+#                 format='R32F',
+#                 data=depth_buffer
+#             )
+#             return depth_texture, width, height
+#         except Exception as e:
+#             return None, 0, 0
+#
+#     def cleanup_deleted_objects():
+#         """Remove deleted objects from cache"""
+#         if not hasattr(bpy, 'gaussian_object_cache'):
+#             return False
+#         objects_to_remove = []
+#         for obj_name in bpy.gaussian_object_cache.keys():
+#             if obj_name not in bpy.data.objects:
+#                 objects_to_remove.append(obj_name)
+#         if objects_to_remove:
+#             for obj_name in objects_to_remove:
+#                 del bpy.gaussian_object_cache[obj_name]
+#                 print(f"Cleaned up deleted object: {obj_name}")
+#             bpy.gaussian_global_needs_update = True
+#             return True
+#         return False
+#
+#     def check_any_transforms_changed():
+#         """Check if ANY object has moved - multi-object version"""
+#         try:
+#             if not hasattr(bpy, 'gaussian_object_metadata'):
+#                 return False
+#             if not hasattr(bpy, 'gaussian_last_transforms'):
+#                 bpy.gaussian_last_transforms = {}
+#             any_changed = False
+#             for obj_meta in bpy.gaussian_object_metadata:
+#                 obj_name = obj_meta['name']
+#                 obj = obj_meta['object']
+#                 if obj_name not in bpy.data.objects:
+#                     continue
+#                 current_transform = obj.matrix_world.copy()
+#                 # Check if we've stored this object's transform before
+#                 if obj_name not in bpy.gaussian_last_transforms:
+#                     bpy.gaussian_last_transforms[obj_name] = current_transform.copy()
+#                     any_changed = True
+#                     continue
+#                 last_transform = bpy.gaussian_last_transforms[obj_name]
+#                 # Check for changes
+#                 translation_diff = (current_transform.translation - last_transform.translation).length
+#                 if translation_diff > 0.0001:
+#                     bpy.gaussian_last_transforms[obj_name] = current_transform.copy()
+#                     any_changed = True
+#                     continue
+#                 rotation_diff = current_transform.to_quaternion().rotation_difference(last_transform.to_quaternion()).angle
+#                 if rotation_diff > 0.001:
+#                     bpy.gaussian_last_transforms[obj_name] = current_transform.copy()
+#                     any_changed = True
+#                     continue
+#                 scale_diff = (current_transform.to_scale() - last_transform.to_scale()).length
+#                 if scale_diff > 0.0001:
+#                     bpy.gaussian_last_transforms[obj_name] = current_transform.copy()
+#                     any_changed = True
+#             return any_changed
+#         except Exception as e:
+#             print(f"Transform check error: {e}")
+#             return False
+#
+#     def update_metadata_texture():
+#         """Recreate metadata texture with current transforms for all objects"""
+#         try:
+#             if not hasattr(bpy, 'gaussian_object_metadata'):
+#                 return False
+#             num_objects = len(bpy.gaussian_object_metadata)
+#             floats_per_object = 15
+#             total_metadata_floats = num_objects * floats_per_object
+#             max_texture_dim = 16384
+#             metadata_width = min(max_texture_dim, total_metadata_floats)
+#             metadata_height = (total_metadata_floats + metadata_width - 1) // metadata_width
+#             expected_size = metadata_width * metadata_height
+#             metadata_data = np.zeros(expected_size, dtype=np.float32)
+#             # Fill metadata with CURRENT transforms for all objects
+#             for obj_idx, obj_meta in enumerate(bpy.gaussian_object_metadata):
+#                 base_idx = obj_idx * floats_per_object
+#                 obj = obj_meta['object']
+#                 # Start index as uint32 bitcast to float32
+#                 uint32_start_idx = np.uint32(obj_meta['start_idx'])
+#                 metadata_data[base_idx + 0] = uint32_start_idx.view(np.float32)
+#                 metadata_data[base_idx + 1] = float(obj_meta['gaussian_count'])
+#                 metadata_data[base_idx + 2] = 1.0  # Visible
+#                 # CURRENT object transform matrix
+#                 current_transform = obj.matrix_world
+#                 matrix_idx = 0
+#                 for col in range(4):
+#                     for row in range(3):
+#                         metadata_data[base_idx + 3 + matrix_idx] = current_transform[row][col]
+#                         matrix_idx += 1
+#             # Create new metadata texture
+#             metadata_buffer = gpu.types.Buffer('FLOAT', len(metadata_data), metadata_data.tolist())
+#             bpy.gaussian_metadata_texture = gpu.types.GPUTexture(
+#                 (metadata_width, metadata_height), 
+#                 format='R32F', 
+#                 data=metadata_buffer
+#             )
+#             return True
+#         except Exception as e:
+#             print(f"Metadata update error: {e}")
+#             return False
+#
+#     def update_depth_sorting():
+#         """Global depth sorting for all objects combined"""
+#         try:
+#             if not hasattr(bpy, 'gaussian_object_metadata'):
+#                 return False
+#             view_matrix = gpu.matrix.get_model_view_matrix()
+#             # NEW: Check if forced depth sort is requested by script_3
+#             force_sort = getattr(bpy, 'gaussian_needs_depth_sort', False)
+#             # Check if camera moved enough to require re-sorting
+#             update_needed = force_sort  # Start with force flag
+#             if not force_sort and hasattr(bpy, 'gaussian_last_camera_pos'):
+#                 last_pos = bpy.gaussian_last_camera_pos
+#                 current_pos = [view_matrix[0][3], view_matrix[1][3], view_matrix[2][3]]
+#                 movement = sum((a-b)**2 for a,b in zip(last_pos, current_pos))**0.5
+#                 update_needed = movement > SORT_THRESHOLD
+#             elif not force_sort:
+#                 update_needed = True  # First time, no stored camera position
+#             if update_needed:
+#                 # Clear the force sort flag if it was set
+#                 if force_sort:
+#                     bpy.gaussian_needs_depth_sort = False
+#                     print("Forced depth sort triggered by script_3")
+#                 # Collect all positions from all objects
+#                 all_camera_positions = []
+#                 view_matrix_np = np.array(view_matrix, dtype=np.float32)
+#                 for obj_meta in bpy.gaussian_object_metadata:
+#                     obj = obj_meta['object']
+#                     obj_name = obj_meta['name']
+#                     if obj_name not in bpy.gaussian_object_cache:
+#                         continue
+#                     # Get gaussian data for this object
+#                     gaussian_data = bpy.gaussian_object_cache[obj_name]['gaussian_data']
+#                     positions = gaussian_data[:, 0:3]
+#                     # Transform to camera space using current object transform
+#                     object_transform_np = np.array(obj.matrix_world, dtype=np.float32)
+#                     combined_transform = view_matrix_np @ object_transform_np
+#                     positions_homogeneous = np.ones((len(positions), 4), dtype=np.float32)
+#                     positions_homogeneous[:, 0:3] = positions
+#                     camera_positions = positions_homogeneous @ combined_transform.T
+#                     all_camera_positions.append(camera_positions[:, 0:3])
+#                 if not all_camera_positions:
+#                     return False
+#                 # Merge all camera positions
+#                 merged_camera_positions = np.concatenate(all_camera_positions, axis=0)
+#                 depths = merged_camera_positions[:, 2]
+#                 # Sort depths
+#                 depths_min = np.min(depths)
+#                 depths_max = np.max(depths)
+#                 depth_range = depths_max - depths_min
+#                 if depth_range > 0:
+#                     depths_normalized = (depths - depths_min) / depth_range
+#                     scale_factor = np.float64(np.iinfo(np.uint32).max) - 1.0
+#                     depths_scaled = depths_normalized * scale_factor
+#                     depths_uint32 = depths_scaled.astype(np.uint32)
+#                 else:
+#                     depths_uint32 = np.zeros_like(depths, dtype=np.uint32)
+#                 sorted_indices = np.argsort(depths_uint32, kind='stable').astype(np.float32)
+#                 # Update indices texture
+#                 if hasattr(bpy, 'gaussian_indices_texture'):
+#                     indices_width = bpy.gaussian_indices_width
+#                     indices_height = bpy.gaussian_indices_height
+#                     expected_size = indices_width * indices_height
+#                     if len(sorted_indices) < expected_size:
+#                         padded_indices = np.zeros(expected_size, dtype=np.float32)
+#                         padded_indices[:len(sorted_indices)] = sorted_indices
+#                         indices_data = padded_indices
+#                     else:
+#                         indices_data = sorted_indices
+#                     indices_buffer = gpu.types.Buffer('FLOAT', len(indices_data), indices_data.tolist())
+#                     bpy.gaussian_indices_texture = gpu.types.GPUTexture(
+#                         (indices_width, indices_height),
+#                         format='R32F',
+#                         data=indices_buffer
+#                     )
+#                 bpy.gaussian_last_camera_pos = [view_matrix[0][3], view_matrix[1][3], view_matrix[2][3]]
+#                 return True
+#             return False
+#         except Exception as e:
+#             print(f"Global depth sorting error: {e}")
+#             return False
+#
+#     def draw_gaussians():
+#         """Multi-object rendering with automatic cache reconstruction"""
+#         try:
+#             # ========== AUTO-RECONSTRUCTION CHECK ==========
+#             cache_needs_rebuild = False
+#             # Check if cache exists and has objects
+#             if not hasattr(bpy, 'gaussian_object_cache') or not bpy.gaussian_object_cache:
+#                 cache_needs_rebuild = auto_reconstruct_cache()
+#                 if not cache_needs_rebuild:
+#                     return  # No gaussian objects found
+#             else:
+#                 # Clean up any deleted objects
+#                 cleanup_deleted_objects()
+#             # Check if global textures need rebuilding (after file load or new objects)
+#             if not hasattr(bpy, 'gaussian_texture') or getattr(bpy, 'gaussian_global_needs_update', False):
+#                 print("Global textures missing - run script_3 first")
+#                 return
+#             # ========== STANDARD RENDERING CHECKS ==========
+#             required_attrs = [
+#                 'gaussian_quad_shader', 'gaussian_quad_batch', 'gaussian_composite_shader', 
+#                 'gaussian_composite_batch', 'gaussian_texture', 'gaussian_indices_texture', 'gaussian_count'
+#             ]
+#             for attr in required_attrs:
+#                 if not hasattr(bpy, attr):
+#                     print(f"Missing {attr} - run scripts 2 and 3 first")
+#                     return
+#             # Check if any object transforms changed
+#             transforms_changed = check_any_transforms_changed()
+#             # Update metadata texture if any object moved
+#             if transforms_changed:
+#                 update_metadata_texture()
+#             # Update global depth sorting
+#             sorting_updated = update_depth_sorting()
+#             viewport = gpu.state.viewport_get()
+#             viewport_width = viewport[2] - viewport[0]
+#             viewport_height = viewport[3] - viewport[1]
+#             if viewport_width <= 0 or viewport_height <= 0:
+#                 return
+#             # Create/update framebuffer
+#             fb_needs_update = (
+#                 not hasattr(bpy, 'gaussian_persistent_fb') or 
+#                 not hasattr(bpy, 'gaussian_fb_width') or 
+#                 bpy.gaussian_fb_width != viewport_width or 
+#                 bpy.gaussian_fb_height != viewport_height
+#             )
+#             if fb_needs_update:
+#                 if hasattr(bpy, 'gaussian_persistent_fb'):
+#                     try:
+#                         color_tex, depth_tex, fb = bpy.gaussian_persistent_fb
+#                         del fb, depth_tex, color_tex
+#                     except:
+#                         pass
+#                 fb_result = create_viewport_framebuffer(viewport_width, viewport_height)
+#                 if not fb_result:
+#                     return
+#                 bpy.gaussian_persistent_fb = fb_result
+#                 bpy.gaussian_fb_width = viewport_width
+#                 bpy.gaussian_fb_height = viewport_height
+#             color_texture, depth_texture, framebuffer = bpy.gaussian_persistent_fb
+#             blender_depth_texture, depth_width, depth_height = read_blender_depth_buffer()
+#             if not blender_depth_texture:
+#                 return
+#             # ========== STAGE 1: RENDER ALL GAUSSIANS ==========
+#             with framebuffer.bind():
+#                 fb = gpu.state.active_framebuffer_get()
+#                 fb.clear(color=(0.0, 0.0, 0.0, 0.0), depth=1.0)
+#                 view_matrix = gpu.matrix.get_model_view_matrix()
+#                 proj_matrix = gpu.matrix.get_projection_matrix()
+#                 fy = proj_matrix[1][1]
+#                 fov_y = 2 * math.atan(1.0 / fy)
+#                 tan_half_fovy = math.tan(fov_y * 0.5)
+#                 aspect_ratio = viewport_width / viewport_height
+#                 tan_half_fovx = tan_half_fovy * aspect_ratio
+#                 focal = viewport_height / (2.0 * tan_half_fovy)
+#                 camera_pos = mathutils.Vector((view_matrix[0][3], view_matrix[1][3], view_matrix[2][3]))
+#                 gpu.state.depth_test_set('NONE')
+#                 gpu.state.depth_mask_set(False) 
+#                 gpu.state.blend_set('ALPHA')
+#                 gpu.state.program_point_size_set(False)
+#                 bpy.gaussian_quad_shader.bind()
+#                 bpy.gaussian_quad_shader.uniform_float("ViewMatrix", view_matrix)
+#                 bpy.gaussian_quad_shader.uniform_float("ProjectionMatrix", proj_matrix)
+#                 bpy.gaussian_quad_shader.uniform_float("focal_parameters", (tan_half_fovx, tan_half_fovy, focal))
+#                 bpy.gaussian_quad_shader.uniform_float("camera_position", camera_pos)
+#                 bpy.gaussian_quad_shader.uniform_int("render_mode", RENDER_MODE)
+#                 bpy.gaussian_quad_shader.uniform_int("sh_degree", SH_DEGREE)
+#                 if hasattr(bpy, 'gaussian_texture_width'):
+#                     bpy.gaussian_quad_shader.uniform_float("texture_dimensions", 
+#                                                           (bpy.gaussian_texture_width, bpy.gaussian_texture_height))
+#                 if hasattr(bpy, 'gaussian_indices_width'):
+#                     bpy.gaussian_quad_shader.uniform_float("indices_dimensions", 
+#                                                           (bpy.gaussian_indices_width, bpy.gaussian_indices_height))
+#                 if depth_width > 0 and depth_height > 0:
+#                     bpy.gaussian_quad_shader.uniform_float("depth_texture_size", (depth_width, depth_height))
+#                 # Bind textures (metadata now contains all object transforms)
+#                 bpy.gaussian_quad_shader.uniform_sampler("gaussian_data", bpy.gaussian_texture)
+#                 bpy.gaussian_quad_shader.uniform_sampler("sorted_indices", bpy.gaussian_indices_texture)
+#                 bpy.gaussian_quad_shader.uniform_sampler("blender_depth", blender_depth_texture)
+#                 bpy.gaussian_quad_shader.uniform_sampler("object_metadata", bpy.gaussian_metadata_texture)
+#                 # Draw all gaussians from all objects
+#                 bpy.gaussian_quad_batch.draw_instanced(bpy.gaussian_quad_shader, instance_count=bpy.gaussian_count)
+#             # ========== STAGE 2: COMPOSITE TO VIEWPORT ==========
+#             gpu.state.blend_set('ALPHA')
+#             gpu.state.depth_test_set('NONE') 
+#             gpu.state.depth_mask_set(False)
+#             bpy.gaussian_composite_shader.bind()
+#             bpy.gaussian_composite_shader.uniform_sampler("image", color_texture)
+#             bpy.gaussian_composite_batch.draw(bpy.gaussian_composite_shader)
+#             gpu.state.blend_set('NONE')
+#             gpu.state.program_point_size_set(False)
+#         except Exception as e:
+#             print(f"Multi-object render error: {e}")
+#             import traceback
+#             traceback.print_exc()
+#     # Remove existing handler
+#     if hasattr(bpy, 'gaussian_draw_handle'):
+#         try:
+#             bpy.types.SpaceView3D.draw_handler_remove(bpy.gaussian_draw_handle, 'WINDOW')
+#             delattr(bpy, 'gaussian_draw_handle')
+#         except:
+#             pass
+#     if ENABLE_RENDERING:
+#         handle = bpy.types.SpaceView3D.draw_handler_add(draw_gaussians, (), 'WINDOW', 'POST_VIEW')
+#         bpy.gaussian_draw_handle = handle
+#         print("Auto-reconstructing multi-object gaussian pipeline enabled")
+#         for area in bpy.context.screen.areas:
+#             if area.type == 'VIEW_3D':
+#                 area.tag_redraw()
+#     else:
+#         print("Multi-object renderer disabled")
 
-    def auto_reconstruct_cache():
-        """Auto-detect and rebuild cache from existing scene objects"""
-        try:
-            # Find all gaussian objects in the scene
-            gaussian_objects = []
-            for obj in bpy.data.objects:
-                if obj.get("is_gaussian_splat", False):
-                    gaussian_objects.append(obj)
-            if not gaussian_objects:
-                return False
-            print(f"Auto-reconstructing cache from {len(gaussian_objects)} scene objects...")
-            # Initialize fresh cache
-            bpy.gaussian_object_cache = {}
-            total_gaussians = 0
-            for obj in gaussian_objects:
-                try:
-                    # Extract data from object properties
-                    data_bytes = obj.get("gaussian_data")
-                    gaussian_count = obj.get("gaussian_count", 0)
-                    sh_degree = obj.get("sh_degree", 48)
-                    ply_filepath = obj.get("ply_filepath", "Unknown")
-                    if not data_bytes or gaussian_count == 0:
-                        continue
-                    # Reconstruct numpy array from bytes
-                    gaussian_data = np.frombuffer(data_bytes, dtype=np.float32).reshape(gaussian_count, 59)
-                    # Add to cache
-                    bpy.gaussian_object_cache[obj.name] = {
-                        'gaussian_data': gaussian_data,
-                        'gaussian_count': gaussian_count,
-                        'sh_degree': sh_degree,
-                        'object': obj,
-                        'ply_filepath': ply_filepath
-                    }
-                    total_gaussians += gaussian_count
-                except Exception as e:
-                    print(f"Failed to reconstruct {obj.name}: {e}")
-                    continue
-            if bpy.gaussian_object_cache:
-                # Mark that global textures need rebuilding
-                bpy.gaussian_global_needs_update = True
-                print(f"Cache auto-reconstructed: {len(bpy.gaussian_object_cache)} objects, {total_gaussians:,} gaussians")
-                return True
-            else:
-                return False
-        except Exception as e:
-            print(f"Auto-reconstruction failed: {e}")
-            return False
 
-    def create_viewport_framebuffer(width, height):
-        try:
-            if width <= 0 or height <= 0:
-                return None
-            color_texture = gpu.types.GPUTexture((width, height), format='RGBA8')
-            depth_texture = gpu.types.GPUTexture((width, height), format='DEPTH_COMPONENT24')
-            framebuffer = gpu.types.GPUFrameBuffer(
-                color_slots=[color_texture],
-                depth_slot=depth_texture
-            )
-            return color_texture, depth_texture, framebuffer
-        except Exception as e:
-            print(f"Failed to create viewport framebuffer: {e}")
-            return None
-
-    def read_blender_depth_buffer():
-        try:
-            fb = gpu.state.active_framebuffer_get()
-            viewport = gpu.state.viewport_get()
-            width = viewport[2] - viewport[0]
-            height = viewport[3] - viewport[1]
-            if width <= 0 or height <= 0:
-                return None, 0, 0
-            depth_buffer = fb.read_depth(0, 0, width, height)
-            depth_buffer.dimensions = width * height
-            depth_texture = gpu.types.GPUTexture(
-                (width, height), 
-                format='R32F',
-                data=depth_buffer
-            )
-            return depth_texture, width, height
-        except Exception as e:
-            return None, 0, 0
-
-    def cleanup_deleted_objects():
-        """Remove deleted objects from cache"""
-        if not hasattr(bpy, 'gaussian_object_cache'):
-            return False
-        objects_to_remove = []
-        for obj_name in bpy.gaussian_object_cache.keys():
-            if obj_name not in bpy.data.objects:
-                objects_to_remove.append(obj_name)
-        if objects_to_remove:
-            for obj_name in objects_to_remove:
-                del bpy.gaussian_object_cache[obj_name]
-                print(f"Cleaned up deleted object: {obj_name}")
-            bpy.gaussian_global_needs_update = True
-            return True
-        return False
-
-    def check_any_transforms_changed():
-        """Check if ANY object has moved - multi-object version"""
-        try:
-            if not hasattr(bpy, 'gaussian_object_metadata'):
-                return False
-            if not hasattr(bpy, 'gaussian_last_transforms'):
-                bpy.gaussian_last_transforms = {}
-            any_changed = False
-            for obj_meta in bpy.gaussian_object_metadata:
-                obj_name = obj_meta['name']
-                obj = obj_meta['object']
-                if obj_name not in bpy.data.objects:
-                    continue
-                current_transform = obj.matrix_world.copy()
-                # Check if we've stored this object's transform before
-                if obj_name not in bpy.gaussian_last_transforms:
-                    bpy.gaussian_last_transforms[obj_name] = current_transform.copy()
-                    any_changed = True
-                    continue
-                last_transform = bpy.gaussian_last_transforms[obj_name]
-                # Check for changes
-                translation_diff = (current_transform.translation - last_transform.translation).length
-                if translation_diff > 0.0001:
-                    bpy.gaussian_last_transforms[obj_name] = current_transform.copy()
-                    any_changed = True
-                    continue
-                rotation_diff = current_transform.to_quaternion().rotation_difference(last_transform.to_quaternion()).angle
-                if rotation_diff > 0.001:
-                    bpy.gaussian_last_transforms[obj_name] = current_transform.copy()
-                    any_changed = True
-                    continue
-                scale_diff = (current_transform.to_scale() - last_transform.to_scale()).length
-                if scale_diff > 0.0001:
-                    bpy.gaussian_last_transforms[obj_name] = current_transform.copy()
-                    any_changed = True
-            return any_changed
-        except Exception as e:
-            print(f"Transform check error: {e}")
-            return False
-
-    def update_metadata_texture():
-        """Recreate metadata texture with current transforms for all objects"""
-        try:
-            if not hasattr(bpy, 'gaussian_object_metadata'):
-                return False
-            num_objects = len(bpy.gaussian_object_metadata)
-            floats_per_object = 15
-            total_metadata_floats = num_objects * floats_per_object
-            max_texture_dim = 16384
-            metadata_width = min(max_texture_dim, total_metadata_floats)
-            metadata_height = (total_metadata_floats + metadata_width - 1) // metadata_width
-            expected_size = metadata_width * metadata_height
-            metadata_data = np.zeros(expected_size, dtype=np.float32)
-            # Fill metadata with CURRENT transforms for all objects
-            for obj_idx, obj_meta in enumerate(bpy.gaussian_object_metadata):
-                base_idx = obj_idx * floats_per_object
-                obj = obj_meta['object']
-                # Start index as uint32 bitcast to float32
-                uint32_start_idx = np.uint32(obj_meta['start_idx'])
-                metadata_data[base_idx + 0] = uint32_start_idx.view(np.float32)
-                metadata_data[base_idx + 1] = float(obj_meta['gaussian_count'])
-                metadata_data[base_idx + 2] = 1.0  # Visible
-                # CURRENT object transform matrix
-                current_transform = obj.matrix_world
-                matrix_idx = 0
-                for col in range(4):
-                    for row in range(3):
-                        metadata_data[base_idx + 3 + matrix_idx] = current_transform[row][col]
-                        matrix_idx += 1
-            # Create new metadata texture
-            metadata_buffer = gpu.types.Buffer('FLOAT', len(metadata_data), metadata_data.tolist())
-            bpy.gaussian_metadata_texture = gpu.types.GPUTexture(
-                (metadata_width, metadata_height), 
-                format='R32F', 
-                data=metadata_buffer
-            )
-            return True
-        except Exception as e:
-            print(f"Metadata update error: {e}")
-            return False
-
-    def update_depth_sorting():
-        """Global depth sorting for all objects combined"""
-        try:
-            if not hasattr(bpy, 'gaussian_object_metadata'):
-                return False
-            view_matrix = gpu.matrix.get_model_view_matrix()
-            # NEW: Check if forced depth sort is requested by script_3
-            force_sort = getattr(bpy, 'gaussian_needs_depth_sort', False)
-            # Check if camera moved enough to require re-sorting
-            update_needed = force_sort  # Start with force flag
-            if not force_sort and hasattr(bpy, 'gaussian_last_camera_pos'):
-                last_pos = bpy.gaussian_last_camera_pos
-                current_pos = [view_matrix[0][3], view_matrix[1][3], view_matrix[2][3]]
-                movement = sum((a-b)**2 for a,b in zip(last_pos, current_pos))**0.5
-                update_needed = movement > SORT_THRESHOLD
-            elif not force_sort:
-                update_needed = True  # First time, no stored camera position
-            if update_needed:
-                # Clear the force sort flag if it was set
-                if force_sort:
-                    bpy.gaussian_needs_depth_sort = False
-                    print("Forced depth sort triggered by script_3")
-                # Collect all positions from all objects
-                all_camera_positions = []
-                view_matrix_np = np.array(view_matrix, dtype=np.float32)
-                for obj_meta in bpy.gaussian_object_metadata:
-                    obj = obj_meta['object']
-                    obj_name = obj_meta['name']
-                    if obj_name not in bpy.gaussian_object_cache:
-                        continue
-                    # Get gaussian data for this object
-                    gaussian_data = bpy.gaussian_object_cache[obj_name]['gaussian_data']
-                    positions = gaussian_data[:, 0:3]
-                    # Transform to camera space using current object transform
-                    object_transform_np = np.array(obj.matrix_world, dtype=np.float32)
-                    combined_transform = view_matrix_np @ object_transform_np
-                    positions_homogeneous = np.ones((len(positions), 4), dtype=np.float32)
-                    positions_homogeneous[:, 0:3] = positions
-                    camera_positions = positions_homogeneous @ combined_transform.T
-                    all_camera_positions.append(camera_positions[:, 0:3])
-                if not all_camera_positions:
-                    return False
-                # Merge all camera positions
-                merged_camera_positions = np.concatenate(all_camera_positions, axis=0)
-                depths = merged_camera_positions[:, 2]
-                # Sort depths
-                depths_min = np.min(depths)
-                depths_max = np.max(depths)
-                depth_range = depths_max - depths_min
-                if depth_range > 0:
-                    depths_normalized = (depths - depths_min) / depth_range
-                    scale_factor = np.float64(np.iinfo(np.uint32).max) - 1.0
-                    depths_scaled = depths_normalized * scale_factor
-                    depths_uint32 = depths_scaled.astype(np.uint32)
-                else:
-                    depths_uint32 = np.zeros_like(depths, dtype=np.uint32)
-                sorted_indices = np.argsort(depths_uint32, kind='stable').astype(np.float32)
-                # Update indices texture
-                if hasattr(bpy, 'gaussian_indices_texture'):
-                    indices_width = bpy.gaussian_indices_width
-                    indices_height = bpy.gaussian_indices_height
-                    expected_size = indices_width * indices_height
-                    if len(sorted_indices) < expected_size:
-                        padded_indices = np.zeros(expected_size, dtype=np.float32)
-                        padded_indices[:len(sorted_indices)] = sorted_indices
-                        indices_data = padded_indices
-                    else:
-                        indices_data = sorted_indices
-                    indices_buffer = gpu.types.Buffer('FLOAT', len(indices_data), indices_data.tolist())
-                    bpy.gaussian_indices_texture = gpu.types.GPUTexture(
-                        (indices_width, indices_height),
-                        format='R32F',
-                        data=indices_buffer
-                    )
-                bpy.gaussian_last_camera_pos = [view_matrix[0][3], view_matrix[1][3], view_matrix[2][3]]
-                return True
-            return False
-        except Exception as e:
-            print(f"Global depth sorting error: {e}")
-            return False
-
-    def draw_gaussians():
-        """Multi-object rendering with automatic cache reconstruction"""
-        try:
-            # ========== AUTO-RECONSTRUCTION CHECK ==========
-            cache_needs_rebuild = False
-            # Check if cache exists and has objects
-            if not hasattr(bpy, 'gaussian_object_cache') or not bpy.gaussian_object_cache:
-                cache_needs_rebuild = auto_reconstruct_cache()
-                if not cache_needs_rebuild:
-                    return  # No gaussian objects found
-            else:
-                # Clean up any deleted objects
-                cleanup_deleted_objects()
-            # Check if global textures need rebuilding (after file load or new objects)
-            if not hasattr(bpy, 'gaussian_texture') or getattr(bpy, 'gaussian_global_needs_update', False):
-                print("Global textures missing - run script_3 first")
-                return
-            # ========== STANDARD RENDERING CHECKS ==========
-            required_attrs = [
-                'gaussian_quad_shader', 'gaussian_quad_batch', 'gaussian_composite_shader', 
-                'gaussian_composite_batch', 'gaussian_texture', 'gaussian_indices_texture', 'gaussian_count'
-            ]
-            for attr in required_attrs:
-                if not hasattr(bpy, attr):
-                    print(f"Missing {attr} - run scripts 2 and 3 first")
-                    return
-            # Check if any object transforms changed
-            transforms_changed = check_any_transforms_changed()
-            # Update metadata texture if any object moved
-            if transforms_changed:
-                update_metadata_texture()
-            # Update global depth sorting
-            sorting_updated = update_depth_sorting()
-            viewport = gpu.state.viewport_get()
-            viewport_width = viewport[2] - viewport[0]
-            viewport_height = viewport[3] - viewport[1]
-            if viewport_width <= 0 or viewport_height <= 0:
-                return
-            # Create/update framebuffer
-            fb_needs_update = (
-                not hasattr(bpy, 'gaussian_persistent_fb') or 
-                not hasattr(bpy, 'gaussian_fb_width') or 
-                bpy.gaussian_fb_width != viewport_width or 
-                bpy.gaussian_fb_height != viewport_height
-            )
-            if fb_needs_update:
-                if hasattr(bpy, 'gaussian_persistent_fb'):
-                    try:
-                        color_tex, depth_tex, fb = bpy.gaussian_persistent_fb
-                        del fb, depth_tex, color_tex
-                    except:
-                        pass
-                fb_result = create_viewport_framebuffer(viewport_width, viewport_height)
-                if not fb_result:
-                    return
-                bpy.gaussian_persistent_fb = fb_result
-                bpy.gaussian_fb_width = viewport_width
-                bpy.gaussian_fb_height = viewport_height
-            color_texture, depth_texture, framebuffer = bpy.gaussian_persistent_fb
-            blender_depth_texture, depth_width, depth_height = read_blender_depth_buffer()
-            if not blender_depth_texture:
-                return
-            # ========== STAGE 1: RENDER ALL GAUSSIANS ==========
-            with framebuffer.bind():
-                fb = gpu.state.active_framebuffer_get()
-                fb.clear(color=(0.0, 0.0, 0.0, 0.0), depth=1.0)
-                view_matrix = gpu.matrix.get_model_view_matrix()
-                proj_matrix = gpu.matrix.get_projection_matrix()
-                fy = proj_matrix[1][1]
-                fov_y = 2 * math.atan(1.0 / fy)
-                tan_half_fovy = math.tan(fov_y * 0.5)
-                aspect_ratio = viewport_width / viewport_height
-                tan_half_fovx = tan_half_fovy * aspect_ratio
-                focal = viewport_height / (2.0 * tan_half_fovy)
-                camera_pos = mathutils.Vector((view_matrix[0][3], view_matrix[1][3], view_matrix[2][3]))
-                gpu.state.depth_test_set('NONE')
-                gpu.state.depth_mask_set(False) 
-                gpu.state.blend_set('ALPHA')
-                gpu.state.program_point_size_set(False)
-                bpy.gaussian_quad_shader.bind()
-                bpy.gaussian_quad_shader.uniform_float("ViewMatrix", view_matrix)
-                bpy.gaussian_quad_shader.uniform_float("ProjectionMatrix", proj_matrix)
-                bpy.gaussian_quad_shader.uniform_float("focal_parameters", (tan_half_fovx, tan_half_fovy, focal))
-                bpy.gaussian_quad_shader.uniform_float("camera_position", camera_pos)
-                bpy.gaussian_quad_shader.uniform_int("render_mode", RENDER_MODE)
-                bpy.gaussian_quad_shader.uniform_int("sh_degree", SH_DEGREE)
-                if hasattr(bpy, 'gaussian_texture_width'):
-                    bpy.gaussian_quad_shader.uniform_float("texture_dimensions", 
-                                                          (bpy.gaussian_texture_width, bpy.gaussian_texture_height))
-                if hasattr(bpy, 'gaussian_indices_width'):
-                    bpy.gaussian_quad_shader.uniform_float("indices_dimensions", 
-                                                          (bpy.gaussian_indices_width, bpy.gaussian_indices_height))
-                if depth_width > 0 and depth_height > 0:
-                    bpy.gaussian_quad_shader.uniform_float("depth_texture_size", (depth_width, depth_height))
-                # Bind textures (metadata now contains all object transforms)
-                bpy.gaussian_quad_shader.uniform_sampler("gaussian_data", bpy.gaussian_texture)
-                bpy.gaussian_quad_shader.uniform_sampler("sorted_indices", bpy.gaussian_indices_texture)
-                bpy.gaussian_quad_shader.uniform_sampler("blender_depth", blender_depth_texture)
-                bpy.gaussian_quad_shader.uniform_sampler("object_metadata", bpy.gaussian_metadata_texture)
-                # Draw all gaussians from all objects
-                bpy.gaussian_quad_batch.draw_instanced(bpy.gaussian_quad_shader, instance_count=bpy.gaussian_count)
-            # ========== STAGE 2: COMPOSITE TO VIEWPORT ==========
-            gpu.state.blend_set('ALPHA')
-            gpu.state.depth_test_set('NONE') 
-            gpu.state.depth_mask_set(False)
-            bpy.gaussian_composite_shader.bind()
-            bpy.gaussian_composite_shader.uniform_sampler("image", color_texture)
-            bpy.gaussian_composite_batch.draw(bpy.gaussian_composite_shader)
-            gpu.state.blend_set('NONE')
-            gpu.state.program_point_size_set(False)
-        except Exception as e:
-            print(f"Multi-object render error: {e}")
-            import traceback
-            traceback.print_exc()
-    # Remove existing handler
-    if hasattr(bpy, 'gaussian_draw_handle'):
-        try:
-            bpy.types.SpaceView3D.draw_handler_remove(bpy.gaussian_draw_handle, 'WINDOW')
-            delattr(bpy, 'gaussian_draw_handle')
-        except:
-            pass
-    if ENABLE_RENDERING:
-        handle = bpy.types.SpaceView3D.draw_handler_add(draw_gaussians, (), 'WINDOW', 'POST_VIEW')
-        bpy.gaussian_draw_handle = handle
-        print("Auto-reconstructing multi-object gaussian pipeline enabled")
-        for area in bpy.context.screen.areas:
-            if area.type == 'VIEW_3D':
-                area.tag_redraw()
-    else:
-        print("Multi-object renderer disabled")
-
-
-def sna_texture_creation_FD1B2():
-    # ========== VARIABLES (EDIT THESE) ==========
-    # No variables needed - builds from all cached objects
-    # ============================================
-    #import bpy
-    #import gpu
-    #import os
-    # ========== FALLBACK FUNCTIONS FOR CORRUPTED DATA ==========
-
-    def extract_attribute_data(mesh_data, attr_name):
-        """Extract data from mesh attribute by name - optimized version"""
-        if attr_name not in [attr.name for attr in mesh_data.attributes]:
-            return None
-        attr = mesh_data.attributes[attr_name]
-        # Use foreach_get for much faster extraction
-        data_array = np.zeros(len(attr.data), dtype=np.float32)
-        attr.data.foreach_get("value", data_array)
-        return data_array
-
-    def extract_gaussian_data_from_evaluated_mesh(mesh_obj):
-        """Extract and process gaussian data from EVALUATED mesh object attributes"""
-        # Get evaluated mesh data
-        depsgraph = bpy.context.evaluated_depsgraph_get()
-        evaluated_object = mesh_obj.evaluated_get(depsgraph)
-        evaluated_mesh = evaluated_object.data
-        # Extract positions from evaluated vertices - optimized version
-        num_points = len(evaluated_mesh.vertices)
-        if num_points == 0:
-            raise ValueError("Evaluated mesh has no vertices")
-        # Use foreach_get for fast vertex coordinate extraction
-        positions = np.zeros(num_points * 3, dtype=np.float32)
-        evaluated_mesh.vertices.foreach_get("co", positions)
-        positions = positions.reshape(-1, 3)
-        # Get available attributes from evaluated mesh
-        available_attrs = [attr.name for attr in evaluated_mesh.attributes]
-        # Extract spherical harmonics from evaluated mesh
-        if all(attr in available_attrs for attr in ['f_dc_0', 'f_dc_1', 'f_dc_2']):
-            dc_0 = extract_attribute_data(evaluated_mesh, 'f_dc_0')
-            dc_1 = extract_attribute_data(evaluated_mesh, 'f_dc_1')
-            dc_2 = extract_attribute_data(evaluated_mesh, 'f_dc_2')
-            features_dc = np.column_stack([dc_0, dc_1, dc_2])
-            # Find f_rest fields
-            f_rest_fields = [attr for attr in available_attrs if attr.startswith('f_rest_')]
-            f_rest_fields = sorted(f_rest_fields, key=lambda x: int(x.split('_')[-1]))
-            if f_rest_fields:
-                features_extra_list = []
-                for field in f_rest_fields:
-                    data = extract_attribute_data(evaluated_mesh, field)
-                    if data is not None:
-                        features_extra_list.append(data)
-                if features_extra_list:
-                    features_extra = np.column_stack(features_extra_list)
-                    num_f_rest = len(f_rest_fields)
-                    # Determine degree and coefficients to use
-                    if num_f_rest >= 45:
-                        actual_degree = 3
-                        coeffs_to_use = 45
-                    elif num_f_rest >= 24:
-                        actual_degree = 2  
-                        coeffs_to_use = 24
-                    elif num_f_rest >= 9:
-                        actual_degree = 1
-                        coeffs_to_use = 9
-                    else:
-                        actual_degree = 0
-                        coeffs_to_use = 0
-                    if coeffs_to_use > 0:
-                        features_extra_used = features_extra[:, :coeffs_to_use]
-                        coeffs_per_degree = (actual_degree + 1) ** 2 - 1
-                        features_extra_reshaped = features_extra_used.reshape((num_points, 3, coeffs_per_degree))
-                        features_extra_reshaped = np.transpose(features_extra_reshaped, [0, 2, 1])
-                        features_dc_reshaped = features_dc.reshape(-1, 1, 3)
-                        all_features = np.concatenate([features_dc_reshaped, features_extra_reshaped], axis=1)
-                        sh_coeffs = all_features.reshape(num_points, -1)
-                    else:
-                        sh_coeffs = features_dc
-                else:
-                    sh_coeffs = features_dc
-            else:
-                sh_coeffs = features_dc
-        else:
-            # Default SH coeffs if not found
-            print(f"Warning: f_dc attributes not found on evaluated mesh, using defaults")
-            sh_coeffs = np.ones((num_points, 3)) * 0.28209479177387814
-        # Extract scales from evaluated mesh
-        if all(attr in available_attrs for attr in ['scale_0', 'scale_1', 'scale_2']):
-            scale_0 = extract_attribute_data(evaluated_mesh, 'scale_0')
-            scale_1 = extract_attribute_data(evaluated_mesh, 'scale_1')
-            scale_2 = extract_attribute_data(evaluated_mesh, 'scale_2')
-            scales = np.column_stack([scale_0, scale_1, scale_2])
-            scales = np.exp(scales)  # Apply exponential
-        else:
-            print(f"Warning: scale attributes not found on evaluated mesh, using defaults")
-            scales = np.ones((num_points, 3)) * 0.01
-        # Extract rotations from evaluated mesh
-        if all(attr in available_attrs for attr in ['rot_0', 'rot_1', 'rot_2', 'rot_3']):
-            rot_0 = extract_attribute_data(evaluated_mesh, 'rot_0')
-            rot_1 = extract_attribute_data(evaluated_mesh, 'rot_1')
-            rot_2 = extract_attribute_data(evaluated_mesh, 'rot_2')
-            rot_3 = extract_attribute_data(evaluated_mesh, 'rot_3')
-            rotations = np.column_stack([rot_0, rot_1, rot_2, rot_3])
-            # Normalize quaternions
-            norms = np.linalg.norm(rotations, axis=1, keepdims=True)
-            rotations = rotations / norms
-        else:
-            print(f"Warning: rotation attributes not found on evaluated mesh, using defaults")
-            rotations = np.zeros((num_points, 4))
-            rotations[:, 0] = 1.0  # Identity quaternion
-        # Extract opacity from evaluated mesh
-        if 'opacity' in available_attrs:
-            opacity_raw = extract_attribute_data(evaluated_mesh, 'opacity')
-            opacity = 1.0 / (1.0 + np.exp(-opacity_raw))  # Apply sigmoid
-        else:
-            print(f"Warning: opacity attribute not found on evaluated mesh, using defaults")
-            opacity = np.ones(num_points)
-        return {
-            'num_points': num_points,
-            'positions': positions,
-            'scales': scales,
-            'rotations': rotations,
-            'opacities': opacity,
-            'sh_coeffs': sh_coeffs,
-            'sh_dim': sh_coeffs.shape[1]
-        }
-
-    def find_source_object_by_uuid(source_uuid):
-        """Find Blender object by gaussian_source_uuid"""
-        for obj in bpy.data.objects:
-            if obj.get("gaussian_source_uuid") == source_uuid:
-                return obj
-        return None
-
-    def check_mesh_has_gaussian_attributes(mesh_obj):
-        """Check if mesh object has basic gaussian attributes"""
-        if not mesh_obj or not mesh_obj.data:
-            return False
-        # Check for basic gaussian attributes
-        required_attrs = ['f_dc_0', 'f_dc_1', 'f_dc_2']
-        available_attrs = [attr.name for attr in mesh_obj.data.attributes]
-        return all(attr in available_attrs for attr in required_attrs)
-
-    def refresh_object_from_blender_source(obj):
-        """Refresh gaussian data from Blender mesh source - fallback function"""
-        try:
-            source_uuid = obj.get("source_mesh_uuid")
-            if not source_uuid:
-                return False, "No source UUID found"
-            # Find source object by UUID
-            source_obj = find_source_object_by_uuid(source_uuid)
-            if not source_obj:
-                return False, f"Source object with UUID {source_uuid} not found"
-            # Validate that source object has gaussian attributes
-            if not check_mesh_has_gaussian_attributes(source_obj):
-                return False, f"Source object '{source_obj.name}' missing gaussian attributes"
-            print(f"  🔄 Fallback: Refreshing {obj.name} from source mesh {source_obj.name}")
-            # Extract fresh data from evaluated mesh
-            gaussian_data_info = extract_gaussian_data_from_evaluated_mesh(source_obj)
-            # Create gaussian data array (59 floats per gaussian)
-            num_gaussians = gaussian_data_info['num_points']
-            sh_dim = 48
-            total_dim = 3 + 4 + 3 + 1 + sh_dim
-            gaussian_data = np.zeros((num_gaussians, total_dim), dtype=np.float32)
-            # Pack data in original order
-            gaussian_data[:, 0:3] = gaussian_data_info['positions']
-            gaussian_data[:, 3:7] = gaussian_data_info['rotations']
-            gaussian_data[:, 7:10] = gaussian_data_info['scales']
-            gaussian_data[:, 10] = gaussian_data_info['opacities'].flatten()
-            # Handle SH coefficients
-            source_sh_coeffs = gaussian_data_info['sh_coeffs']
-            if source_sh_coeffs.shape[1] >= sh_dim:
-                gaussian_data[:, 11:11+sh_dim] = source_sh_coeffs[:, :sh_dim]
-            else:
-                gaussian_data[:, 11:11+source_sh_coeffs.shape[1]] = source_sh_coeffs
-            # Update object properties with fresh data
-            obj["gaussian_data"] = gaussian_data.tobytes()
-            obj["gaussian_count"] = num_gaussians
-            obj["sh_degree"] = gaussian_data_info['sh_dim']
-            obj["last_load_time"] = time.time()
-            return True, (gaussian_data, num_gaussians, gaussian_data_info['sh_dim'])
-        except Exception as e:
-            return False, f"Fallback refresh failed: {e}"
-
-    def refresh_object_from_ply_source(obj):
-        """Refresh gaussian data from PLY file - fallback function"""
-        try:
-            ply_filepath = obj.get("ply_filepath")
-            if not ply_filepath or not os.path.exists(ply_filepath):
-                return False, "PLY file not found or missing path"
-            print(f"  🔄 Fallback: Refreshing {obj.name} from PLY {os.path.basename(ply_filepath)}")
-            # Simple PLY loading (minimal implementation for fallback)
-            from plyfile import PlyData
-            plydata = PlyData.read(ply_filepath)
-            vertex_element = plydata.elements[0]
-            vertex_data = vertex_element.data
-            available_fields = list(vertex_data.dtype.names)
-            # Extract positions
-            if 'x' in available_fields and 'y' in available_fields and 'z' in available_fields:
-                positions = np.column_stack([vertex_data['x'], vertex_data['y'], vertex_data['z']])
-                positions = np.ascontiguousarray(positions).astype(np.float32)
-            else:
-                return False, "PLY missing position coordinates"
-            num_points = len(positions)
-            # Extract SH coefficients (simplified)
-            if all(attr in available_fields for attr in ['f_dc_0', 'f_dc_1', 'f_dc_2']):
-                dc_0 = vertex_data['f_dc_0']
-                dc_1 = vertex_data['f_dc_1'] 
-                dc_2 = vertex_data['f_dc_2']
-                sh_coeffs = np.column_stack([dc_0, dc_1, dc_2]).astype(np.float32)
-            else:
-                sh_coeffs = np.ones((num_points, 3), dtype=np.float32) * 0.28209479177387814
-            # Extract scales
-            if all(attr in available_fields for attr in ['scale_0', 'scale_1', 'scale_2']):
-                scale_0 = vertex_data['scale_0']
-                scale_1 = vertex_data['scale_1']
-                scale_2 = vertex_data['scale_2']
-                scales = np.column_stack([scale_0, scale_1, scale_2])
-                scales = np.exp(scales).astype(np.float32)
-            else:
-                scales = np.ones((num_points, 3), dtype=np.float32) * 0.01
-            # Extract rotations
-            if all(attr in available_fields for attr in ['rot_0', 'rot_1', 'rot_2', 'rot_3']):
-                rot_0 = vertex_data['rot_0']
-                rot_1 = vertex_data['rot_1']
-                rot_2 = vertex_data['rot_2']
-                rot_3 = vertex_data['rot_3']
-                rotations = np.column_stack([rot_0, rot_1, rot_2, rot_3])
-                norms = np.linalg.norm(rotations, axis=1, keepdims=True)
-                rotations = (rotations / norms).astype(np.float32)
-            else:
-                rotations = np.zeros((num_points, 4), dtype=np.float32)
-                rotations[:, 0] = 1.0
-            # Extract opacity
-            if 'opacity' in available_fields:
-                opacity = vertex_data['opacity']
-                opacity = (1.0 / (1.0 + np.exp(-opacity))).astype(np.float32)
-            else:
-                opacity = np.ones(num_points, dtype=np.float32)
-            # Create gaussian data array
-            sh_dim = 48
-            total_dim = 3 + 4 + 3 + 1 + sh_dim
-            gaussian_data = np.zeros((num_points, total_dim), dtype=np.float32)
-            # Pack data
-            gaussian_data[:, 0:3] = positions
-            gaussian_data[:, 3:7] = rotations
-            gaussian_data[:, 7:10] = scales
-            gaussian_data[:, 10] = opacity.flatten()
-            if sh_coeffs.shape[1] >= sh_dim:
-                gaussian_data[:, 11:11+sh_dim] = sh_coeffs[:, :sh_dim]
-            else:
-                gaussian_data[:, 11:11+sh_coeffs.shape[1]] = sh_coeffs
-            # Update object properties
-            obj["gaussian_data"] = gaussian_data.tobytes()
-            obj["gaussian_count"] = num_points
-            obj["sh_degree"] = sh_coeffs.shape[1]
-            obj["last_load_time"] = time.time()
-            return True, (gaussian_data, num_points, sh_coeffs.shape[1])
-        except Exception as e:
-            return False, f"PLY fallback failed: {e}"
-
-    def auto_reconstruct_cache_for_script3():
-        """Auto-reconstruct cache from scene objects with fallback for corrupted data"""
-        try:
-            # Find all gaussian objects in the scene
-            gaussian_objects = []
-            for obj in bpy.data.objects:
-                if obj.get("is_gaussian_splat", False):
-                    gaussian_objects.append(obj)
-            if not gaussian_objects:
-                return False
-            print(f"Auto-reconstructing cache from {len(gaussian_objects)} scene objects...")
-            # Initialize fresh cache
-            bpy.gaussian_object_cache = {}
-            total_gaussians = 0
-            fallback_count = 0
-            for obj in gaussian_objects:
-                try:
-                    # Extract data from object properties
-                    data_bytes = obj.get("gaussian_data")
-                    gaussian_count = obj.get("gaussian_count", 0)
-                    sh_degree = obj.get("sh_degree", 48)
-                    ply_filepath = obj.get("ply_filepath", "")
-                    if not data_bytes or gaussian_count == 0:
-                        print(f"  ⚠️  {obj.name}: Missing data or zero count, skipping")
-                        continue
-                    # Try to reconstruct numpy array from bytes
-                    try:
-                        gaussian_data = np.frombuffer(data_bytes, dtype=np.float32).reshape(gaussian_count, 59)
-                        # Validate data integrity
-                        if gaussian_data.shape != (gaussian_count, 59):
-                            raise ValueError("Data shape validation failed")
-                        # Check for reasonable values (basic sanity check)
-                        if np.any(np.isnan(gaussian_data)) or np.any(np.isinf(gaussian_data)):
-                            raise ValueError("Data contains NaN or infinity values")
-                        print(f"  ✅ {obj.name}: Successfully reconstructed from cache")
-                    except (ValueError, TypeError) as e:
-                        print(f"  ❌ {obj.name}: Cache data corrupted ({e})")
-                        print(f"     Attempting fallback refresh...")
-                        # Determine source type and attempt fallback
-                        is_blender_source = obj.get("source_mesh_uuid") is not None
-                        is_ply_source = ply_filepath and ply_filepath.strip()
-                        fallback_success = False
-                        if is_blender_source:
-                            success, result = refresh_object_from_blender_source(obj)
-                            if success:
-                                gaussian_data, gaussian_count, sh_degree = result
-                                fallback_success = True
-                                fallback_count += 1
-                            else:
-                                print(f"     Blender source fallback failed: {result}")
-                        elif is_ply_source:
-                            success, result = refresh_object_from_ply_source(obj)
-                            if success:
-                                gaussian_data, gaussian_count, sh_degree = result
-                                fallback_success = True
-                                fallback_count += 1
-                            else:
-                                print(f"     PLY source fallback failed: {result}")
-                        if not fallback_success:
-                            print(f"     All fallback methods failed for {obj.name}, skipping")
-                            continue
-                    # Add to cache
-                    source_info = ""
-                    if obj.get("source_mesh_uuid"):
-                        source_info = f"Mesh:{obj.get('source_mesh_name', 'Unknown')}"
-                    elif ply_filepath:
-                        source_info = f"PLY:{os.path.basename(ply_filepath)}"
-                    bpy.gaussian_object_cache[obj.name] = {
-                        'gaussian_data': gaussian_data,
-                        'gaussian_count': gaussian_count,
-                        'sh_degree': sh_degree,
-                        'object': obj,
-                        'ply_filepath': ply_filepath,
-                        'source_info': source_info
-                    }
-                    total_gaussians += gaussian_count
-                except Exception as e:
-                    print(f"  ❌ {obj.name}: Reconstruction failed completely: {e}")
-                    continue
-            if bpy.gaussian_object_cache:
-                cache_status = f"Cache reconstructed: {len(bpy.gaussian_object_cache)} objects, {total_gaussians:,} gaussians"
-                if fallback_count > 0:
-                    cache_status += f" ({fallback_count} restored from source)"
-                print(cache_status)
-                return True
-            else:
-                return False
-        except Exception as e:
-            print(f"Auto-reconstruction failed: {e}")
-            return False
-    # ========== MAIN SCRIPT ==========
-    try:
-        # ========== AUTO-RECONSTRUCTION CHECK ==========
-        # Check if we have cached objects, if not try to reconstruct
-        if not hasattr(bpy, 'gaussian_object_cache') or not bpy.gaussian_object_cache:
-            reconstruction_success = auto_reconstruct_cache_for_script3()
-            if not reconstruction_success:
-                raise ValueError("No gaussian objects found in scene - run script_1 first")
-        print(f"Building global textures from {len(bpy.gaussian_object_cache)} objects:")
-        # ========== MERGE DATA FROM ALL OBJECTS ==========
-        all_gaussian_data = []
-        all_object_metadata = []
-        current_start_idx = 0
-        for obj_name, obj_data in bpy.gaussian_object_cache.items():
-            gaussian_data = obj_data['gaussian_data']
-            gaussian_count = obj_data['gaussian_count']
-            obj = obj_data['object']
-            source_info = obj_data.get('source_info', 'Unknown')
-            print(f"  - {obj_name}: {gaussian_count:,} gaussians ({source_info})")
-            # Add to merged data
-            all_gaussian_data.append(gaussian_data)
-            # Store metadata for this object
-            all_object_metadata.append({
-                'name': obj_name,
-                'start_idx': current_start_idx,
-                'gaussian_count': gaussian_count,
-                'object': obj
-            })
-            current_start_idx += gaussian_count
-        # Merge all gaussian data into single array
-        merged_gaussian_data = np.concatenate(all_gaussian_data, axis=0)
-        total_gaussians = len(merged_gaussian_data)
-        print(f"Total merged gaussians: {total_gaussians:,}")
-        # ========== CREATE GLOBAL 3D GAUSSIAN TEXTURE ==========
-        total_floats = merged_gaussian_data.size
-        max_texture_dim = 16384
-        # Calculate 3D texture dimensions using original method
-        cube_root = int(np.ceil(np.power(total_floats, 1/3)))
-        texture_depth = min(max_texture_dim, cube_root)
-        texture_area = (total_floats + texture_depth - 1) // texture_depth
-        texture_width = min(max_texture_dim, int(np.ceil(np.sqrt(texture_area))))
-        texture_height = (texture_area + texture_width - 1) // texture_width
-        # Pad data if needed
-        flat_data = merged_gaussian_data.flatten()
-        expected_size = texture_width * texture_height * texture_depth
-        if len(flat_data) < expected_size:
-            padded_data = np.zeros(expected_size, dtype=np.float32)
-            padded_data[:len(flat_data)] = flat_data
-            flat_data = padded_data
-        # Create 3D texture
-        buffer = gpu.types.Buffer('FLOAT', len(flat_data), flat_data.tolist())
-        gaussian_texture = gpu.types.GPUTexture(
-            (texture_width, texture_height, texture_depth), 
-            format='R32F',
-            data=buffer
-        )
-        # ========== CREATE GLOBAL INDICES TEXTURE ==========
-        sorted_indices = np.arange(total_gaussians, dtype=np.float32)
-        indices_width = min(max_texture_dim, len(sorted_indices))
-        indices_height = (len(sorted_indices) + indices_width - 1) // indices_width
-        expected_indices_size = indices_width * indices_height
-        if len(sorted_indices) < expected_indices_size:
-            padded_indices = np.zeros(expected_indices_size, dtype=np.float32)
-            padded_indices[:len(sorted_indices)] = sorted_indices
-            indices_data = padded_indices
-        else:
-            indices_data = sorted_indices
-        indices_buffer = gpu.types.Buffer('FLOAT', len(indices_data), indices_data.tolist())
-        indices_texture = gpu.types.GPUTexture(
-            (indices_width, indices_height),
-            format='R32F',
-            data=indices_buffer
-        )
-        # ========== CREATE MULTI-OBJECT METADATA TEXTURE ==========
-        num_objects = len(all_object_metadata)
-        floats_per_object = 15
-        total_metadata_floats = num_objects * floats_per_object
-        metadata_width = min(max_texture_dim, total_metadata_floats)
-        metadata_height = (total_metadata_floats + metadata_width - 1) // metadata_width
-        expected_size = metadata_width * metadata_height
-        metadata_data = np.zeros(expected_size, dtype=np.float32)
-        # Fill metadata for each object
-        for obj_idx, obj_meta in enumerate(all_object_metadata):
-            base_idx = obj_idx * floats_per_object
-            # Start index (uint32 bitcast to float32)
-            uint32_start_idx = np.uint32(obj_meta['start_idx'])
-            metadata_data[base_idx + 0] = uint32_start_idx.view(np.float32)
-            metadata_data[base_idx + 1] = float(obj_meta['gaussian_count'])
-            metadata_data[base_idx + 2] = 1.0  # Visible
-            # Object transform matrix (3x4 = 12 floats)
-            transform = obj_meta['object'].matrix_world
-            matrix_idx = 0
-            for col in range(4):
-                for row in range(3):
-                    metadata_data[base_idx + 3 + matrix_idx] = transform[row][col]
-                    matrix_idx += 1
-        metadata_buffer = gpu.types.Buffer('FLOAT', len(metadata_data), metadata_data.tolist())
-        metadata_texture = gpu.types.GPUTexture(
-            (metadata_width, metadata_height), 
-            format='R32F', 
-            data=metadata_buffer
-        )
-        # ========== STORE GLOBALLY ==========
-        bpy.gaussian_texture = gaussian_texture
-        bpy.gaussian_texture_width = texture_width
-        bpy.gaussian_texture_height = texture_height
-        bpy.gaussian_texture_depth = texture_depth
-        bpy.gaussian_indices_texture = indices_texture
-        bpy.gaussian_indices_width = indices_width
-        bpy.gaussian_indices_height = indices_height
-        bpy.gaussian_metadata_texture = metadata_texture
-        bpy.gaussian_count = total_gaussians
-        bpy.gaussian_object_metadata = all_object_metadata  # For transform tracking
-        bpy.gaussian_global_needs_update = False  # Mark as updated
-        bpy.gaussian_needs_depth_sort = True  # NEW: Signal viewport renderer to force depth sort
-        print(f"Global textures created:")
-        print(f"  Gaussian: {texture_width}x{texture_height}x{texture_depth}")
-        print(f"  Indices: {indices_width}x{indices_height}")
-        print(f"  Metadata: {metadata_width}x{metadata_height} for {num_objects} objects")
-        print(f"  Depth sort flagged for next viewport render")
-    except Exception as e:
-        print(f"Error creating global textures: {e}")
-        import traceback
-        traceback.print_exc()
+# def sna_texture_creation_FD1B2():
+#     # ========== VARIABLES (EDIT THESE) ==========
+#     # No variables needed - builds from all cached objects
+#     # ============================================
+#     #import bpy
+#     #import gpu
+#     #import os
+#     # ========== FALLBACK FUNCTIONS FOR CORRUPTED DATA ==========
+#
+#     def extract_attribute_data(mesh_data, attr_name):
+#         """Extract data from mesh attribute by name - optimized version"""
+#         if attr_name not in [attr.name for attr in mesh_data.attributes]:
+#             return None
+#         attr = mesh_data.attributes[attr_name]
+#         # Use foreach_get for much faster extraction
+#         data_array = np.zeros(len(attr.data), dtype=np.float32)
+#         attr.data.foreach_get("value", data_array)
+#         return data_array
+#
+#     def extract_gaussian_data_from_evaluated_mesh(mesh_obj):
+#         """Extract and process gaussian data from EVALUATED mesh object attributes"""
+#         # Get evaluated mesh data
+#         depsgraph = bpy.context.evaluated_depsgraph_get()
+#         evaluated_object = mesh_obj.evaluated_get(depsgraph)
+#         evaluated_mesh = evaluated_object.data
+#         # Extract positions from evaluated vertices - optimized version
+#         num_points = len(evaluated_mesh.vertices)
+#         if num_points == 0:
+#             raise ValueError("Evaluated mesh has no vertices")
+#         # Use foreach_get for fast vertex coordinate extraction
+#         positions = np.zeros(num_points * 3, dtype=np.float32)
+#         evaluated_mesh.vertices.foreach_get("co", positions)
+#         positions = positions.reshape(-1, 3)
+#         # Get available attributes from evaluated mesh
+#         available_attrs = [attr.name for attr in evaluated_mesh.attributes]
+#         # Extract spherical harmonics from evaluated mesh
+#         if all(attr in available_attrs for attr in ['f_dc_0', 'f_dc_1', 'f_dc_2']):
+#             dc_0 = extract_attribute_data(evaluated_mesh, 'f_dc_0')
+#             dc_1 = extract_attribute_data(evaluated_mesh, 'f_dc_1')
+#             dc_2 = extract_attribute_data(evaluated_mesh, 'f_dc_2')
+#             features_dc = np.column_stack([dc_0, dc_1, dc_2])
+#             # Find f_rest fields
+#             f_rest_fields = [attr for attr in available_attrs if attr.startswith('f_rest_')]
+#             f_rest_fields = sorted(f_rest_fields, key=lambda x: int(x.split('_')[-1]))
+#             if f_rest_fields:
+#                 features_extra_list = []
+#                 for field in f_rest_fields:
+#                     data = extract_attribute_data(evaluated_mesh, field)
+#                     if data is not None:
+#                         features_extra_list.append(data)
+#                 if features_extra_list:
+#                     features_extra = np.column_stack(features_extra_list)
+#                     num_f_rest = len(f_rest_fields)
+#                     # Determine degree and coefficients to use
+#                     if num_f_rest >= 45:
+#                         actual_degree = 3
+#                         coeffs_to_use = 45
+#                     elif num_f_rest >= 24:
+#                         actual_degree = 2  
+#                         coeffs_to_use = 24
+#                     elif num_f_rest >= 9:
+#                         actual_degree = 1
+#                         coeffs_to_use = 9
+#                     else:
+#                         actual_degree = 0
+#                         coeffs_to_use = 0
+#                     if coeffs_to_use > 0:
+#                         features_extra_used = features_extra[:, :coeffs_to_use]
+#                         coeffs_per_degree = (actual_degree + 1) ** 2 - 1
+#                         features_extra_reshaped = features_extra_used.reshape((num_points, 3, coeffs_per_degree))
+#                         features_extra_reshaped = np.transpose(features_extra_reshaped, [0, 2, 1])
+#                         features_dc_reshaped = features_dc.reshape(-1, 1, 3)
+#                         all_features = np.concatenate([features_dc_reshaped, features_extra_reshaped], axis=1)
+#                         sh_coeffs = all_features.reshape(num_points, -1)
+#                     else:
+#                         sh_coeffs = features_dc
+#                 else:
+#                     sh_coeffs = features_dc
+#             else:
+#                 sh_coeffs = features_dc
+#         else:
+#             # Default SH coeffs if not found
+#             print(f"Warning: f_dc attributes not found on evaluated mesh, using defaults")
+#             sh_coeffs = np.ones((num_points, 3)) * 0.28209479177387814
+#         # Extract scales from evaluated mesh
+#         if all(attr in available_attrs for attr in ['scale_0', 'scale_1', 'scale_2']):
+#             scale_0 = extract_attribute_data(evaluated_mesh, 'scale_0')
+#             scale_1 = extract_attribute_data(evaluated_mesh, 'scale_1')
+#             scale_2 = extract_attribute_data(evaluated_mesh, 'scale_2')
+#             scales = np.column_stack([scale_0, scale_1, scale_2])
+#             scales = np.exp(scales)  # Apply exponential
+#         else:
+#             print(f"Warning: scale attributes not found on evaluated mesh, using defaults")
+#             scales = np.ones((num_points, 3)) * 0.01
+#         # Extract rotations from evaluated mesh
+#         if all(attr in available_attrs for attr in ['rot_0', 'rot_1', 'rot_2', 'rot_3']):
+#             rot_0 = extract_attribute_data(evaluated_mesh, 'rot_0')
+#             rot_1 = extract_attribute_data(evaluated_mesh, 'rot_1')
+#             rot_2 = extract_attribute_data(evaluated_mesh, 'rot_2')
+#             rot_3 = extract_attribute_data(evaluated_mesh, 'rot_3')
+#             rotations = np.column_stack([rot_0, rot_1, rot_2, rot_3])
+#             # Normalize quaternions
+#             norms = np.linalg.norm(rotations, axis=1, keepdims=True)
+#             rotations = rotations / norms
+#         else:
+#             print(f"Warning: rotation attributes not found on evaluated mesh, using defaults")
+#             rotations = np.zeros((num_points, 4))
+#             rotations[:, 0] = 1.0  # Identity quaternion
+#         # Extract opacity from evaluated mesh
+#         if 'opacity' in available_attrs:
+#             opacity_raw = extract_attribute_data(evaluated_mesh, 'opacity')
+#             opacity = 1.0 / (1.0 + np.exp(-opacity_raw))  # Apply sigmoid
+#         else:
+#             print(f"Warning: opacity attribute not found on evaluated mesh, using defaults")
+#             opacity = np.ones(num_points)
+#         return {
+#             'num_points': num_points,
+#             'positions': positions,
+#             'scales': scales,
+#             'rotations': rotations,
+#             'opacities': opacity,
+#             'sh_coeffs': sh_coeffs,
+#             'sh_dim': sh_coeffs.shape[1]
+#         }
+#
+#     def find_source_object_by_uuid(source_uuid):
+#         """Find Blender object by gaussian_source_uuid"""
+#         for obj in bpy.data.objects:
+#             if obj.get("gaussian_source_uuid") == source_uuid:
+#                 return obj
+#         return None
+#
+#     def check_mesh_has_gaussian_attributes(mesh_obj):
+#         """Check if mesh object has basic gaussian attributes"""
+#         if not mesh_obj or not mesh_obj.data:
+#             return False
+#         # Check for basic gaussian attributes
+#         required_attrs = ['f_dc_0', 'f_dc_1', 'f_dc_2']
+#         available_attrs = [attr.name for attr in mesh_obj.data.attributes]
+#         return all(attr in available_attrs for attr in required_attrs)
+#
+#     def refresh_object_from_blender_source(obj):
+#         """Refresh gaussian data from Blender mesh source - fallback function"""
+#         try:
+#             source_uuid = obj.get("source_mesh_uuid")
+#             if not source_uuid:
+#                 return False, "No source UUID found"
+#             # Find source object by UUID
+#             source_obj = find_source_object_by_uuid(source_uuid)
+#             if not source_obj:
+#                 return False, f"Source object with UUID {source_uuid} not found"
+#             # Validate that source object has gaussian attributes
+#             if not check_mesh_has_gaussian_attributes(source_obj):
+#                 return False, f"Source object '{source_obj.name}' missing gaussian attributes"
+#             print(f"  🔄 Fallback: Refreshing {obj.name} from source mesh {source_obj.name}")
+#             # Extract fresh data from evaluated mesh
+#             gaussian_data_info = extract_gaussian_data_from_evaluated_mesh(source_obj)
+#             # Create gaussian data array (59 floats per gaussian)
+#             num_gaussians = gaussian_data_info['num_points']
+#             sh_dim = 48
+#             total_dim = 3 + 4 + 3 + 1 + sh_dim
+#             gaussian_data = np.zeros((num_gaussians, total_dim), dtype=np.float32)
+#             # Pack data in original order
+#             gaussian_data[:, 0:3] = gaussian_data_info['positions']
+#             gaussian_data[:, 3:7] = gaussian_data_info['rotations']
+#             gaussian_data[:, 7:10] = gaussian_data_info['scales']
+#             gaussian_data[:, 10] = gaussian_data_info['opacities'].flatten()
+#             # Handle SH coefficients
+#             source_sh_coeffs = gaussian_data_info['sh_coeffs']
+#             if source_sh_coeffs.shape[1] >= sh_dim:
+#                 gaussian_data[:, 11:11+sh_dim] = source_sh_coeffs[:, :sh_dim]
+#             else:
+#                 gaussian_data[:, 11:11+source_sh_coeffs.shape[1]] = source_sh_coeffs
+#             # Update object properties with fresh data
+#             obj["gaussian_data"] = gaussian_data.tobytes()
+#             obj["gaussian_count"] = num_gaussians
+#             obj["sh_degree"] = gaussian_data_info['sh_dim']
+#             obj["last_load_time"] = time.time()
+#             return True, (gaussian_data, num_gaussians, gaussian_data_info['sh_dim'])
+#         except Exception as e:
+#             return False, f"Fallback refresh failed: {e}"
+#
+#     def refresh_object_from_ply_source(obj):
+#         """Refresh gaussian data from PLY file - fallback function"""
+#         try:
+#             ply_filepath = obj.get("ply_filepath")
+#             if not ply_filepath or not os.path.exists(ply_filepath):
+#                 return False, "PLY file not found or missing path"
+#             print(f"  🔄 Fallback: Refreshing {obj.name} from PLY {os.path.basename(ply_filepath)}")
+#             # Simple PLY loading (minimal implementation for fallback)
+#             from plyfile import PlyData
+#             plydata = PlyData.read(ply_filepath)
+#             vertex_element = plydata.elements[0]
+#             vertex_data = vertex_element.data
+#             available_fields = list(vertex_data.dtype.names)
+#             # Extract positions
+#             if 'x' in available_fields and 'y' in available_fields and 'z' in available_fields:
+#                 positions = np.column_stack([vertex_data['x'], vertex_data['y'], vertex_data['z']])
+#                 positions = np.ascontiguousarray(positions).astype(np.float32)
+#             else:
+#                 return False, "PLY missing position coordinates"
+#             num_points = len(positions)
+#             # Extract SH coefficients (simplified)
+#             if all(attr in available_fields for attr in ['f_dc_0', 'f_dc_1', 'f_dc_2']):
+#                 dc_0 = vertex_data['f_dc_0']
+#                 dc_1 = vertex_data['f_dc_1'] 
+#                 dc_2 = vertex_data['f_dc_2']
+#                 sh_coeffs = np.column_stack([dc_0, dc_1, dc_2]).astype(np.float32)
+#             else:
+#                 sh_coeffs = np.ones((num_points, 3), dtype=np.float32) * 0.28209479177387814
+#             # Extract scales
+#             if all(attr in available_fields for attr in ['scale_0', 'scale_1', 'scale_2']):
+#                 scale_0 = vertex_data['scale_0']
+#                 scale_1 = vertex_data['scale_1']
+#                 scale_2 = vertex_data['scale_2']
+#                 scales = np.column_stack([scale_0, scale_1, scale_2])
+#                 scales = np.exp(scales).astype(np.float32)
+#             else:
+#                 scales = np.ones((num_points, 3), dtype=np.float32) * 0.01
+#             # Extract rotations
+#             if all(attr in available_fields for attr in ['rot_0', 'rot_1', 'rot_2', 'rot_3']):
+#                 rot_0 = vertex_data['rot_0']
+#                 rot_1 = vertex_data['rot_1']
+#                 rot_2 = vertex_data['rot_2']
+#                 rot_3 = vertex_data['rot_3']
+#                 rotations = np.column_stack([rot_0, rot_1, rot_2, rot_3])
+#                 norms = np.linalg.norm(rotations, axis=1, keepdims=True)
+#                 rotations = (rotations / norms).astype(np.float32)
+#             else:
+#                 rotations = np.zeros((num_points, 4), dtype=np.float32)
+#                 rotations[:, 0] = 1.0
+#             # Extract opacity
+#             if 'opacity' in available_fields:
+#                 opacity = vertex_data['opacity']
+#                 opacity = (1.0 / (1.0 + np.exp(-opacity))).astype(np.float32)
+#             else:
+#                 opacity = np.ones(num_points, dtype=np.float32)
+#             # Create gaussian data array
+#             sh_dim = 48
+#             total_dim = 3 + 4 + 3 + 1 + sh_dim
+#             gaussian_data = np.zeros((num_points, total_dim), dtype=np.float32)
+#             # Pack data
+#             gaussian_data[:, 0:3] = positions
+#             gaussian_data[:, 3:7] = rotations
+#             gaussian_data[:, 7:10] = scales
+#             gaussian_data[:, 10] = opacity.flatten()
+#             if sh_coeffs.shape[1] >= sh_dim:
+#                 gaussian_data[:, 11:11+sh_dim] = sh_coeffs[:, :sh_dim]
+#             else:
+#                 gaussian_data[:, 11:11+sh_coeffs.shape[1]] = sh_coeffs
+#             # Update object properties
+#             obj["gaussian_data"] = gaussian_data.tobytes()
+#             obj["gaussian_count"] = num_points
+#             obj["sh_degree"] = sh_coeffs.shape[1]
+#             obj["last_load_time"] = time.time()
+#             return True, (gaussian_data, num_points, sh_coeffs.shape[1])
+#         except Exception as e:
+#             return False, f"PLY fallback failed: {e}"
+#
+#     def auto_reconstruct_cache_for_script3():
+#         """Auto-reconstruct cache from scene objects with fallback for corrupted data"""
+#         try:
+#             # Find all gaussian objects in the scene
+#             gaussian_objects = []
+#             for obj in bpy.data.objects:
+#                 if obj.get("is_gaussian_splat", False):
+#                     gaussian_objects.append(obj)
+#             if not gaussian_objects:
+#                 return False
+#             print(f"Auto-reconstructing cache from {len(gaussian_objects)} scene objects...")
+#             # Initialize fresh cache
+#             bpy.gaussian_object_cache = {}
+#             total_gaussians = 0
+#             fallback_count = 0
+#             for obj in gaussian_objects:
+#                 try:
+#                     # Extract data from object properties
+#                     data_bytes = obj.get("gaussian_data")
+#                     gaussian_count = obj.get("gaussian_count", 0)
+#                     sh_degree = obj.get("sh_degree", 48)
+#                     ply_filepath = obj.get("ply_filepath", "")
+#                     if not data_bytes or gaussian_count == 0:
+#                         print(f"  ⚠️  {obj.name}: Missing data or zero count, skipping")
+#                         continue
+#                     # Try to reconstruct numpy array from bytes
+#                     try:
+#                         gaussian_data = np.frombuffer(data_bytes, dtype=np.float32).reshape(gaussian_count, 59)
+#                         # Validate data integrity
+#                         if gaussian_data.shape != (gaussian_count, 59):
+#                             raise ValueError("Data shape validation failed")
+#                         # Check for reasonable values (basic sanity check)
+#                         if np.any(np.isnan(gaussian_data)) or np.any(np.isinf(gaussian_data)):
+#                             raise ValueError("Data contains NaN or infinity values")
+#                         print(f"  ✅ {obj.name}: Successfully reconstructed from cache")
+#                     except (ValueError, TypeError) as e:
+#                         print(f"  ❌ {obj.name}: Cache data corrupted ({e})")
+#                         print(f"     Attempting fallback refresh...")
+#                         # Determine source type and attempt fallback
+#                         is_blender_source = obj.get("source_mesh_uuid") is not None
+#                         is_ply_source = ply_filepath and ply_filepath.strip()
+#                         fallback_success = False
+#                         if is_blender_source:
+#                             success, result = refresh_object_from_blender_source(obj)
+#                             if success:
+#                                 gaussian_data, gaussian_count, sh_degree = result
+#                                 fallback_success = True
+#                                 fallback_count += 1
+#                             else:
+#                                 print(f"     Blender source fallback failed: {result}")
+#                         elif is_ply_source:
+#                             success, result = refresh_object_from_ply_source(obj)
+#                             if success:
+#                                 gaussian_data, gaussian_count, sh_degree = result
+#                                 fallback_success = True
+#                                 fallback_count += 1
+#                             else:
+#                                 print(f"     PLY source fallback failed: {result}")
+#                         if not fallback_success:
+#                             print(f"     All fallback methods failed for {obj.name}, skipping")
+#                             continue
+#                     # Add to cache
+#                     source_info = ""
+#                     if obj.get("source_mesh_uuid"):
+#                         source_info = f"Mesh:{obj.get('source_mesh_name', 'Unknown')}"
+#                     elif ply_filepath:
+#                         source_info = f"PLY:{os.path.basename(ply_filepath)}"
+#                     bpy.gaussian_object_cache[obj.name] = {
+#                         'gaussian_data': gaussian_data,
+#                         'gaussian_count': gaussian_count,
+#                         'sh_degree': sh_degree,
+#                         'object': obj,
+#                         'ply_filepath': ply_filepath,
+#                         'source_info': source_info
+#                     }
+#                     total_gaussians += gaussian_count
+#                 except Exception as e:
+#                     print(f"  ❌ {obj.name}: Reconstruction failed completely: {e}")
+#                     continue
+#             if bpy.gaussian_object_cache:
+#                 cache_status = f"Cache reconstructed: {len(bpy.gaussian_object_cache)} objects, {total_gaussians:,} gaussians"
+#                 if fallback_count > 0:
+#                     cache_status += f" ({fallback_count} restored from source)"
+#                 print(cache_status)
+#                 return True
+#             else:
+#                 return False
+#         except Exception as e:
+#             print(f"Auto-reconstruction failed: {e}")
+#             return False
+#     # ========== MAIN SCRIPT ==========
+#     try:
+#         # ========== AUTO-RECONSTRUCTION CHECK ==========
+#         # Check if we have cached objects, if not try to reconstruct
+#         if not hasattr(bpy, 'gaussian_object_cache') or not bpy.gaussian_object_cache:
+#             reconstruction_success = auto_reconstruct_cache_for_script3()
+#             if not reconstruction_success:
+#                 raise ValueError("No gaussian objects found in scene - run script_1 first")
+#         print(f"Building global textures from {len(bpy.gaussian_object_cache)} objects:")
+#         # ========== MERGE DATA FROM ALL OBJECTS ==========
+#         all_gaussian_data = []
+#         all_object_metadata = []
+#         current_start_idx = 0
+#         for obj_name, obj_data in bpy.gaussian_object_cache.items():
+#             gaussian_data = obj_data['gaussian_data']
+#             gaussian_count = obj_data['gaussian_count']
+#             obj = obj_data['object']
+#             source_info = obj_data.get('source_info', 'Unknown')
+#             print(f"  - {obj_name}: {gaussian_count:,} gaussians ({source_info})")
+#             # Add to merged data
+#             all_gaussian_data.append(gaussian_data)
+#             # Store metadata for this object
+#             all_object_metadata.append({
+#                 'name': obj_name,
+#                 'start_idx': current_start_idx,
+#                 'gaussian_count': gaussian_count,
+#                 'object': obj
+#             })
+#             current_start_idx += gaussian_count
+#         # Merge all gaussian data into single array
+#         merged_gaussian_data = np.concatenate(all_gaussian_data, axis=0)
+#         total_gaussians = len(merged_gaussian_data)
+#         print(f"Total merged gaussians: {total_gaussians:,}")
+#         # ========== CREATE GLOBAL 3D GAUSSIAN TEXTURE ==========
+#         total_floats = merged_gaussian_data.size
+#         max_texture_dim = 16384
+#         # Calculate 3D texture dimensions using original method
+#         cube_root = int(np.ceil(np.power(total_floats, 1/3)))
+#         texture_depth = min(max_texture_dim, cube_root)
+#         texture_area = (total_floats + texture_depth - 1) // texture_depth
+#         texture_width = min(max_texture_dim, int(np.ceil(np.sqrt(texture_area))))
+#         texture_height = (texture_area + texture_width - 1) // texture_width
+#         # Pad data if needed
+#         flat_data = merged_gaussian_data.flatten()
+#         expected_size = texture_width * texture_height * texture_depth
+#         if len(flat_data) < expected_size:
+#             padded_data = np.zeros(expected_size, dtype=np.float32)
+#             padded_data[:len(flat_data)] = flat_data
+#             flat_data = padded_data
+#         # Create 3D texture
+#         buffer = gpu.types.Buffer('FLOAT', len(flat_data), flat_data.tolist())
+#         gaussian_texture = gpu.types.GPUTexture(
+#             (texture_width, texture_height, texture_depth), 
+#             format='R32F',
+#             data=buffer
+#         )
+#         # ========== CREATE GLOBAL INDICES TEXTURE ==========
+#         sorted_indices = np.arange(total_gaussians, dtype=np.float32)
+#         indices_width = min(max_texture_dim, len(sorted_indices))
+#         indices_height = (len(sorted_indices) + indices_width - 1) // indices_width
+#         expected_indices_size = indices_width * indices_height
+#         if len(sorted_indices) < expected_indices_size:
+#             padded_indices = np.zeros(expected_indices_size, dtype=np.float32)
+#             padded_indices[:len(sorted_indices)] = sorted_indices
+#             indices_data = padded_indices
+#         else:
+#             indices_data = sorted_indices
+#         indices_buffer = gpu.types.Buffer('FLOAT', len(indices_data), indices_data.tolist())
+#         indices_texture = gpu.types.GPUTexture(
+#             (indices_width, indices_height),
+#             format='R32F',
+#             data=indices_buffer
+#         )
+#         # ========== CREATE MULTI-OBJECT METADATA TEXTURE ==========
+#         num_objects = len(all_object_metadata)
+#         floats_per_object = 15
+#         total_metadata_floats = num_objects * floats_per_object
+#         metadata_width = min(max_texture_dim, total_metadata_floats)
+#         metadata_height = (total_metadata_floats + metadata_width - 1) // metadata_width
+#         expected_size = metadata_width * metadata_height
+#         metadata_data = np.zeros(expected_size, dtype=np.float32)
+#         # Fill metadata for each object
+#         for obj_idx, obj_meta in enumerate(all_object_metadata):
+#             base_idx = obj_idx * floats_per_object
+#             # Start index (uint32 bitcast to float32)
+#             uint32_start_idx = np.uint32(obj_meta['start_idx'])
+#             metadata_data[base_idx + 0] = uint32_start_idx.view(np.float32)
+#             metadata_data[base_idx + 1] = float(obj_meta['gaussian_count'])
+#             metadata_data[base_idx + 2] = 1.0  # Visible
+#             # Object transform matrix (3x4 = 12 floats)
+#             transform = obj_meta['object'].matrix_world
+#             matrix_idx = 0
+#             for col in range(4):
+#                 for row in range(3):
+#                     metadata_data[base_idx + 3 + matrix_idx] = transform[row][col]
+#                     matrix_idx += 1
+#         metadata_buffer = gpu.types.Buffer('FLOAT', len(metadata_data), metadata_data.tolist())
+#         metadata_texture = gpu.types.GPUTexture(
+#             (metadata_width, metadata_height), 
+#             format='R32F', 
+#             data=metadata_buffer
+#         )
+#         # ========== STORE GLOBALLY ==========
+#         bpy.gaussian_texture = gaussian_texture
+#         bpy.gaussian_texture_width = texture_width
+#         bpy.gaussian_texture_height = texture_height
+#         bpy.gaussian_texture_depth = texture_depth
+#         bpy.gaussian_indices_texture = indices_texture
+#         bpy.gaussian_indices_width = indices_width
+#         bpy.gaussian_indices_height = indices_height
+#         bpy.gaussian_metadata_texture = metadata_texture
+#         bpy.gaussian_count = total_gaussians
+#         bpy.gaussian_object_metadata = all_object_metadata  # For transform tracking
+#         bpy.gaussian_global_needs_update = False  # Mark as updated
+#         bpy.gaussian_needs_depth_sort = True  # NEW: Signal viewport renderer to force depth sort
+#         print(f"Global textures created:")
+#         print(f"  Gaussian: {texture_width}x{texture_height}x{texture_depth}")
+#         print(f"  Indices: {indices_width}x{indices_height}")
+#         print(f"  Metadata: {metadata_width}x{metadata_height} for {num_objects} objects")
+#         print(f"  Depth sort flagged for next viewport render")
+#     except Exception as e:
+#         print(f"Error creating global textures: {e}")
+#         import traceback
+#         traceback.print_exc()
 
 
 def sna_shader_system_A4AED():
