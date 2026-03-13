@@ -1,4 +1,5 @@
 import bpy
+from .important import *
 class SNA_OT_Dgs_Render_Apply_Remove_By_Size_Modifier_6Dbab(bpy.types.Operator):
     bl_idname = "sna.dgs_render_apply_remove_by_size_modifier_6dbab"
     bl_label = "3DGS Render: Apply Remove By Size Modifier"

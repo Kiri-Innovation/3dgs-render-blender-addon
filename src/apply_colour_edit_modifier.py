@@ -1,4 +1,5 @@
 import bpy
+from .important import *
 
 class SNA_OT_Dgs_Render_Apply_Colour_Edit_Modifier_C83C4(bpy.types.Operator):
     bl_idname = "sna.dgs_render_apply_colour_edit_modifier_c83c4"

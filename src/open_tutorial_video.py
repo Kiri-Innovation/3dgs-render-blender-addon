@@ -1,4 +1,5 @@
 from bpy_extras.io_utils import ImportHelper, ExportHelper
+from .important import *
 import bpy
 import webbrowser
 

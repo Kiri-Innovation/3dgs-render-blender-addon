@@ -1,4 +1,5 @@
 import bpy
+from .important import *
 
 class SNA_OT_Dgs_Render_Apply_Convert_To_Rough_Mesh_Modifier_9F4B2(bpy.types.Operator):
     bl_idname = "sna.dgs_render_apply_convert_to_rough_mesh_modifier_9f4b2"

@@ -1,4 +1,5 @@
 import bpy
+from .important import *
 from bpy_extras.io_utils import ImportHelper, ExportHelper
 
 class SNA_OT_Dgs_Render_Import_Image_Overlay_4A457(bpy.types.Operator, ImportHelper):

@@ -1,4 +1,5 @@
 import bpy
+from .important import *
 
 class SNA_OT_Dgs_Render_Apply_Animate_Modifier_3938E(bpy.types.Operator):
     bl_idname = "sna.dgs_render_apply_animate_modifier_3938e"

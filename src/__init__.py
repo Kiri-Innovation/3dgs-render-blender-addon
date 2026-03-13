@@ -1,4 +1,6 @@
 # src/__init__.py
+from .important import *
+
 from .remove_higher_sh_attributes import *
 from .align_active_to_view import *
 from .rotate_for_blender_axes import *
@@ -13,7 +15,9 @@ from .apply_camera_cull_modifier import *
 from .apply_colour_edit_modifier import *
 from .apply_convert_to_rough_mesh_modifier import *
 from .apply_crop_box_modifier import *
+from .remove_crop_box_modifier import *
 from .apply_decimate_modifier import *
+from .remove_decimate_modifier import *
 from .apply_remove_by_size_modifier import *
 # append_rough_mesh_modifier
 # refresh_scene
@@ -49,3 +53,19 @@ from .launch_kiri_blender_addons_page import *
 from .auto_set_up_camera_cull_properties import *
 from .launch_kiri_site import *
 from .append_geometry_node_modifier import *
+
+
+
+
+
+
+from .sna_render_comp import *
+from .sna_render_temp_scene import *
+from .sna_c2_refresh_all import *
+
+
+from .advanced_render import *
+from .remove_remove_by_size_modifier import *
+
+from .sna_align_active_values_to_y import *
+

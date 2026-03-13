@@ -1,4 +1,5 @@
 import bpy
+from .important import *
 
 class SNA_OT_Dgs_Render_Remove_Higher_Sh_Attributes_Cb703(bpy.types.Operator):
     bl_idname = "sna.dgs_render_remove_higher_sh_attributes_cb703"

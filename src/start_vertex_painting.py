@@ -1,4 +1,5 @@
 import bpy
+from .important import *
 
 class SNA_OT_Dgs_Render_Start_Vertex_Painting_A36E0(bpy.types.Operator):
     bl_idname = "sna.dgs_render_start_vertex_painting_a36e0"

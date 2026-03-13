@@ -1,4 +1,5 @@
 import bpy
+from .important import *
 
 class SNA_OT_Dgs_Render_Apply_Crop_Box_Modifier_Bfdca(bpy.types.Operator):
     bl_idname = "sna.dgs_render_apply_crop_box_modifier_bfdca"

@@ -1,4 +1,5 @@
 import bpy
+from .important import *
 from bpy_extras.io_utils import ImportHelper, ExportHelper
 
 class SNA_OT_Dgs_Render_Apply_Adjust_Attribute_Modifier_B24A5(bpy.types.Operator):
