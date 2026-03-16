@@ -77,3 +77,4 @@ from .sna_viewport_render import *
 from .sna_shader_system import *
 from .export_mesh_object_as_3dgs_ply import *
 
+from .sna_dgs_render_main_function_menu import *
