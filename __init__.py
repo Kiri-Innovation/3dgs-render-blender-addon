@@ -2049,313 +2049,313 @@ def sna_move_object_to_collection_create_if_missingfunction_execute_AB682(Object
 #     op = box_E30D3.operator('sna.dgs_render_export_mesh_object_as_3dgs_ply_ce2f7', text='Export 3DGS', icon_value=load_preview_icon(os.path.join(os.path.dirname(__file__), 'assets', 'export.svg')), emboss=True, depress=False)
 #
 
-class SNA_OT_Dgs_Render_Export_Mesh_Object_As_3Dgs_Ply_Ce2F7(bpy.types.Operator):
-    bl_idname = "sna.dgs_render_export_mesh_object_as_3dgs_ply_ce2f7"
-    bl_label = "3DGS Render: Export Mesh Object As 3DGS PLY"
-    bl_description = "Resets scale and rotation transforms, applies the Point Edit modifier and exports the active object for as a 3DGS .ply"
-    bl_options = {"REGISTER", "UNDO"}
-
-    @classmethod
-    def poll(cls, context):
-        if bpy.app.version >= (3, 0, 0) and True:
-            cls.poll_message_set('')
-        return not False
-
-    def execute(self, context):
-        if (bpy.context.view_layer.objects.active == None):
-            self.report({'ERROR'}, message='No active object')
-        else:
-            if (len(bpy.context.view_layer.objects.selected) > 1):
-                self.report({'ERROR'}, message='Only select 1 object please.')
-            else:
-                if (property_exists("bpy.context.view_layer.objects.active.modifiers", globals(), locals()) and 'KIRI_3DGS_Write F_DC_And_Merge' in bpy.context.view_layer.objects.active.modifiers):
-                    bpy.context.view_layer.objects.active.select_set(state=True, view_layer=bpy.context.view_layer, )
-                    bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Write F_DC_And_Merge'].show_viewport = True
-                    bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Write F_DC_And_Merge'].show_render = True
-                    bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Write F_DC_And_Merge']['Socket_2'] = True
-                    object_name = bpy.context.view_layer.objects.active.name
-                    # Replace this with your object's name
-                    #object_name = "YourObjectName"
-                    # Get the object
-                    obj = bpy.data.objects.get(object_name)
-                    if obj:
-                        # Make sure the object is selected and active
-                        bpy.context.view_layer.objects.active = obj
-                        obj.select_set(True)
-                        # Apply all modifiers
-                        for modifier in obj.modifiers[:]:  # [:] creates a copy of the list to avoid modification issues
-                            try:
-                                bpy.ops.object.modifier_apply(modifier=modifier.name)
-                                print(f"Applied modifier: {modifier.name}")
-                            except Exception as e:
-                                print(f"Failed to apply modifier {modifier.name}: {str(e)}")
-                    else:
-                        print(f"Object '{object_name}' not found")
-                    if False:
-                        bpy.context.view_layer.objects.active.location = (0.0, 0.0, 0.0)
-                    APPLY_SCALE = True
-                    APPLY_ROTATION = True
-                    TRANSFORM_ORDER = 'ROTATION_FIRST'
-                    import numpy as np
-                    from mathutils import Quaternion, Matrix, Euler
-                    #------ INPUT VARIABLES (modify these) ------#
-                    # The attributes to update
-                    SCALE_ATTRIBUTES = ["scale_0", "scale_1", "scale_2"]
-                    ROTATION_ATTRIBUTES = ["rot_0", "rot_1", "rot_2", "rot_3"]
-                    # Whether to apply transformations after updating attributes
-                    #APPLY_SCALE = True
-                    #APPLY_ROTATION = True
-                    # The order of operations: either "SCALE_FIRST" or "ROTATION_FIRST"
-                    # 3DGS typically uses SCALE_FIRST (scale, then rotate)
-                    #TRANSFORM_ORDER = "SCALE_FIRST"
-                    # Whether to print debug information
-                    VERBOSE = True
-                    # Whether to normalize quaternions after transformation (PostShot does this)
-                    NORMALIZE_QUATERNIONS = True
-                    #------------------------------------------#
-
-                    def quaternion_multiply(q1, q2):
-                        """
-                        Multiply two quaternions (compose rotations)
-                        q1 and q2 are in form [w, x, y, z]
-                        """
-                        w1, x1, y1, z1 = q1
-                        w2, x2, y2, z2 = q2
-                        w = w1 * w2 - x1 * x2 - y1 * y2 - z1 * z2
-                        x = w1 * x2 + x1 * w2 + y1 * z2 - z1 * y2
-                        y = w1 * y2 - x1 * z2 + y1 * w2 + z1 * x2
-                        z = w1 * z2 + x1 * y2 - y1 * x2 + z1 * w2
-                        return [w, x, y, z]
-
-                    def normalize_quaternion(q):
-                        """
-                        Normalize a quaternion to unit length
-                        q is in form [w, x, y, z]
-                        """
-                        magnitude = math.sqrt(q[0]**2 + q[1]**2 + q[2]**2 + q[3]**2)
-                        if magnitude > 0.00001:  # Avoid division by near-zero
-                            return [q[0]/magnitude, q[1]/magnitude, q[2]/magnitude, q[3]/magnitude]
-                        else:
-                            return [1.0, 0.0, 0.0, 0.0]  # Default to identity quaternion
-
-                    def update_scale_attributes(obj, scale_attributes, log_scale_factors, verbose=False):
-                        """
-                        Update the scale attributes with logarithmic scale factors
-                        """
-                        success = True
-                        for attr_idx, attr_name in enumerate(scale_attributes):
-                            if attr_name not in obj.data.attributes:
-                                print(f"Attribute '{attr_name}' not found on object.")
-                                success = False
-                                continue
-                            attr = obj.data.attributes[attr_name]
-                            if verbose:
-                                print(f"\nUpdating attribute: {attr_name}")
-                                print(f"Data type: {attr.data_type}")
-                                print(f"Domain: {attr.domain}")
-                                print(f"Length: {len(attr.data)}")
-                            # Determine which scale factor to use based on attribute name
-                            if attr_name == "scale_0":
-                                log_scale = log_scale_factors[0]
-                            elif attr_name == "scale_1":
-                                log_scale = log_scale_factors[1]
-                            elif attr_name == "scale_2":
-                                log_scale = log_scale_factors[2]
-                            else:
-                                # For custom-named attributes, use the index in the scale_attributes list
-                                log_scale = log_scale_factors[min(attr_idx, 2)]
-                            if verbose:
-                                print(f"Using log scale factor: {log_scale}")
-                            # Update the attribute values
-                            if attr.data_type == 'FLOAT':
-                                # Sample a few values before and after for verification
-                                sample_size = min(5, len(attr.data))
-                                before_values = []
-                                for i in range(sample_size):
-                                    before_values.append(attr.data[i].value)
-                                # Update all values
-                                for i in range(len(attr.data)):
-                                    # In 3DGS, adding the log of the scale factor to the log-space scale value
-                                    attr.data[i].value += log_scale
-                                # Print sample values after update
-                                if verbose:
-                                    print("Sample values before and after update:")
-                                    for i in range(sample_size):
-                                        print(f"  [{i}]: {before_values[i]} -> {attr.data[i].value}")
-                            else:
-                                print(f"Attribute '{attr_name}' is not of type FLOAT (found {attr.data_type}). Skipping.")
-                                success = False
-                        return success
-
-                    def update_rotation_attributes(obj, rotation_attributes, blender_quat, verbose=False, normalize=True):
-                        """
-                        Update the rotation attributes with the object's rotation quaternion
-                        """
-                        # First, gather all data to avoid processing incomplete sets
-                        attribute_data = {}
-                        valid_attributes = True
-                        for attr_name in rotation_attributes:
-                            if attr_name not in obj.data.attributes:
-                                print(f"Attribute '{attr_name}' not found on object.")
-                                valid_attributes = False
-                                break
-                            attr = obj.data.attributes[attr_name]
-                            if attr.data_type != 'FLOAT':
-                                print(f"Attribute '{attr_name}' is not of type FLOAT (found {attr.data_type}). Skipping.")
-                                valid_attributes = False
-                                break
-                            # Store the attribute for processing
-                            attribute_data[attr_name] = attr
-                        if not valid_attributes:
-                            print("Unable to process rotation due to missing or invalid attributes.")
-                            return False
-                        # Sample a few values before the update for verification
-                        sample_size = min(5, len(attribute_data[rotation_attributes[0]].data))
-                        before_values = {attr_name: [] for attr_name in rotation_attributes}
-                        for attr_name in rotation_attributes:
-                            for i in range(sample_size):
-                                before_values[attr_name].append(attribute_data[attr_name].data[i].value)
-                        # Process all points
-                        num_points = len(attribute_data[rotation_attributes[0]].data)
-                        print(f"Processing {num_points} points...")
-                        for i in range(num_points):
-                            # Get current quaternion values [w, x, y, z]
-                            point_quat = [
-                                attribute_data[rotation_attributes[0]].data[i].value,  # w
-                                attribute_data[rotation_attributes[1]].data[i].value,  # x
-                                attribute_data[rotation_attributes[2]].data[i].value,  # y
-                                attribute_data[rotation_attributes[3]].data[i].value   # z
-                            ]
-                            # Apply rotation by multiplying quaternions
-                            # The order matters: PostShot appears to use the object_rotation * point_quat
-                            # format (rotating the local frame)
-                            new_quat = quaternion_multiply(blender_quat, point_quat)
-                            # Normalize the quaternion if requested (PostShot does this)
-                            if normalize:
-                                new_quat = normalize_quaternion(new_quat)
-                            # Enforce positive w component to match PostShot's convention
-                            # Since q and -q represent the same rotation, we can flip all signs if w is negative
-                            if new_quat[0] < 0:
-                                new_quat = [-q for q in new_quat]
-                            # Update attribute values
-                            attribute_data[rotation_attributes[0]].data[i].value = new_quat[0]  # w
-                            attribute_data[rotation_attributes[1]].data[i].value = new_quat[1]  # x
-                            attribute_data[rotation_attributes[2]].data[i].value = new_quat[2]  # y
-                            attribute_data[rotation_attributes[3]].data[i].value = new_quat[3]  # z
-                        # Print sample values after update for verification
-                        if verbose:
-                            print("\nSample values before and after update:")
-                            for i in range(sample_size):
-                                print(f"Point [{i}]:")
-                                for j, attr_name in enumerate(rotation_attributes):
-                                    print(f"  {attr_name}: {before_values[attr_name][i]} -> {attribute_data[attr_name].data[i].value}")
-                        return True
-
-                    def apply_transformations(obj, apply_rotation=False, apply_scale=False):
-                        """
-                        Apply the transformations to the object
-                        """
-                        if not (apply_rotation or apply_scale):
-                            return
-                        # Store current context
-                        original_mode = obj.mode
-                        # Switch to object mode if needed
-                        if original_mode != 'OBJECT':
-                            bpy.ops.object.mode_set(mode='OBJECT')
-                        # Apply transformations
-                        bpy.ops.object.transform_apply(
-                            location=False, 
-                            rotation=apply_rotation, 
-                            scale=apply_scale
-                        )
-                        # Restore original mode
-                        if original_mode != 'OBJECT':
-                            bpy.ops.object.mode_set(mode=original_mode)
-                        transformations = []
-                        if apply_rotation:
-                            transformations.append("rotation")
-                        if apply_scale:
-                            transformations.append("scale")
-                        print(f"Object {', '.join(transformations)} applied.")
-                    # MAIN SCRIPT EXECUTION
-                    # Get the active object
-                    obj = bpy.context.active_object
-                    if not obj:
-                        print("No active object found.")
-                    else:
-                        print(f"Processing 3DGS transformations for object: {obj.name}")
-                        # Get current object rotation (ensuring quaternion is updated)
-                        original_rotation_mode = obj.rotation_mode
-                        # If not already in quaternion mode, ensure the quaternion gets updated
-                        if original_rotation_mode != 'QUATERNION':
-                            # Switch to quaternion mode to ensure quaternion is updated
-                            obj.rotation_mode = 'QUATERNION'
-                            # Switch back to original mode
-                            obj.rotation_mode = original_rotation_mode
-                        # Get the quaternion values
-                        obj_rotation_quat = obj.rotation_quaternion.copy()
-                        # Convert to w, x, y, z format (from Blender's x, y, z, w)
-                        blender_quat = [obj_rotation_quat.w, obj_rotation_quat.x, 
-                                      obj_rotation_quat.y, obj_rotation_quat.z]
-                        if VERBOSE:
-                            print(f"Current object rotation quaternion [w,x,y,z]: {blender_quat}")
-                        # Get current object scale
-                        scale_x, scale_y, scale_z = obj.scale
-                        if VERBOSE:
-                            print(f"Current object scale: X={scale_x}, Y={scale_y}, Z={scale_z}")
-                        # Calculate the logarithm of scale factors
-                        log_scale_x = math.log(scale_x) if scale_x > 0 else 0
-                        log_scale_y = math.log(scale_y) if scale_y > 0 else 0
-                        log_scale_z = math.log(scale_z) if scale_z > 0 else 0
-                        log_scale_factors = [log_scale_x, log_scale_y, log_scale_z]
-                        if VERBOSE:
-                            print(f"Log scale factors: X={log_scale_x}, Y={log_scale_y}, Z={log_scale_z}")
-                        # Check if the object has attribute data
-                        if not hasattr(obj.data, "attributes"):
-                            print("Object does not have attribute data.")
-                        else:
-                            # Perform transformations in the specified order
-                            if TRANSFORM_ORDER == "SCALE_FIRST":
-                                # First update scale attributes
-                                scale_success = update_scale_attributes(obj, SCALE_ATTRIBUTES, log_scale_factors, VERBOSE)
-                                print("Scale attributes update", "succeeded" if scale_success else "failed")
-                                # Then update rotation attributes
-                                rotation_success = update_rotation_attributes(obj, ROTATION_ATTRIBUTES, blender_quat, VERBOSE, NORMALIZE_QUATERNIONS)
-                                print("Rotation attributes update", "succeeded" if rotation_success else "failed")
-                            else:  # ROTATION_FIRST
-                                # First update rotation attributes
-                                rotation_success = update_rotation_attributes(obj, ROTATION_ATTRIBUTES, blender_quat, VERBOSE, NORMALIZE_QUATERNIONS)
-                                print("Rotation attributes update", "succeeded" if rotation_success else "failed")
-                                # Then update scale attributes
-                                scale_success = update_scale_attributes(obj, SCALE_ATTRIBUTES, log_scale_factors, VERBOSE)
-                                print("Scale attributes update", "succeeded" if scale_success else "failed")
-                            # Apply transformations to reset object transforms
-                            apply_transformations(obj, APPLY_ROTATION, APPLY_SCALE)
-                            print("\nTransformation operations completed.")
-
-                    def delayed_5B08A():
-                        bpy.ops.wm.ply_export('INVOKE_DEFAULT', apply_modifiers=True, export_selected_objects=True, export_attributes=True)
-                    bpy.app.timers.register(delayed_5B08A, first_interval=0.10000000149011612)
-        return {"FINISHED"}
-
-    def draw(self, context):
-        layout = self.layout
-        box_44942 = layout.box()
-        box_44942.alert = False
-        box_44942.enabled = True
-        box_44942.active = True
-        box_44942.use_property_split = False
-        box_44942.use_property_decorate = False
-        box_44942.alignment = 'Expand'.upper()
-        box_44942.scale_x = 1.0
-        box_44942.scale_y = 1.0
-        if not True: box_44942.operator_context = "EXEC_DEFAULT"
-        box_44942.label(text='All modifiers will be applied. To continue working in Blender', icon_value=load_preview_icon(os.path.join(os.path.dirname(__file__), 'assets', 'tips-one.svg')))
-        box_44942.label(text='         it is advised to make a duplicate before exporting.', icon_value=0)
-        box_44942.label(text='         Press OK to continue exporting', icon_value=0)
-
-    def invoke(self, context, event):
-        return context.window_manager.invoke_props_dialog(self, width=400)
+# class SNA_OT_Dgs_Render_Export_Mesh_Object_As_3Dgs_Ply_Ce2F7(bpy.types.Operator):
+#     bl_idname = "sna.dgs_render_export_mesh_object_as_3dgs_ply_ce2f7"
+#     bl_label = "3DGS Render: Export Mesh Object As 3DGS PLY"
+#     bl_description = "Resets scale and rotation transforms, applies the Point Edit modifier and exports the active object for as a 3DGS .ply"
+#     bl_options = {"REGISTER", "UNDO"}
+#
+#     @classmethod
+#     def poll(cls, context):
+#         if bpy.app.version >= (3, 0, 0) and True:
+#             cls.poll_message_set('')
+#         return not False
+#
+#     def execute(self, context):
+#         if (bpy.context.view_layer.objects.active == None):
+#             self.report({'ERROR'}, message='No active object')
+#         else:
+#             if (len(bpy.context.view_layer.objects.selected) > 1):
+#                 self.report({'ERROR'}, message='Only select 1 object please.')
+#             else:
+#                 if (property_exists("bpy.context.view_layer.objects.active.modifiers", globals(), locals()) and 'KIRI_3DGS_Write F_DC_And_Merge' in bpy.context.view_layer.objects.active.modifiers):
+#                     bpy.context.view_layer.objects.active.select_set(state=True, view_layer=bpy.context.view_layer, )
+#                     bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Write F_DC_And_Merge'].show_viewport = True
+#                     bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Write F_DC_And_Merge'].show_render = True
+#                     bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Write F_DC_And_Merge']['Socket_2'] = True
+#                     object_name = bpy.context.view_layer.objects.active.name
+#                     # Replace this with your object's name
+#                     #object_name = "YourObjectName"
+#                     # Get the object
+#                     obj = bpy.data.objects.get(object_name)
+#                     if obj:
+#                         # Make sure the object is selected and active
+#                         bpy.context.view_layer.objects.active = obj
+#                         obj.select_set(True)
+#                         # Apply all modifiers
+#                         for modifier in obj.modifiers[:]:  # [:] creates a copy of the list to avoid modification issues
+#                             try:
+#                                 bpy.ops.object.modifier_apply(modifier=modifier.name)
+#                                 print(f"Applied modifier: {modifier.name}")
+#                             except Exception as e:
+#                                 print(f"Failed to apply modifier {modifier.name}: {str(e)}")
+#                     else:
+#                         print(f"Object '{object_name}' not found")
+#                     if False:
+#                         bpy.context.view_layer.objects.active.location = (0.0, 0.0, 0.0)
+#                     APPLY_SCALE = True
+#                     APPLY_ROTATION = True
+#                     TRANSFORM_ORDER = 'ROTATION_FIRST'
+#                     import numpy as np
+#                     from mathutils import Quaternion, Matrix, Euler
+#                     #------ INPUT VARIABLES (modify these) ------#
+#                     # The attributes to update
+#                     SCALE_ATTRIBUTES = ["scale_0", "scale_1", "scale_2"]
+#                     ROTATION_ATTRIBUTES = ["rot_0", "rot_1", "rot_2", "rot_3"]
+#                     # Whether to apply transformations after updating attributes
+#                     #APPLY_SCALE = True
+#                     #APPLY_ROTATION = True
+#                     # The order of operations: either "SCALE_FIRST" or "ROTATION_FIRST"
+#                     # 3DGS typically uses SCALE_FIRST (scale, then rotate)
+#                     #TRANSFORM_ORDER = "SCALE_FIRST"
+#                     # Whether to print debug information
+#                     VERBOSE = True
+#                     # Whether to normalize quaternions after transformation (PostShot does this)
+#                     NORMALIZE_QUATERNIONS = True
+#                     #------------------------------------------#
+#
+#                     def quaternion_multiply(q1, q2):
+#                         """
+#                         Multiply two quaternions (compose rotations)
+#                         q1 and q2 are in form [w, x, y, z]
+#                         """
+#                         w1, x1, y1, z1 = q1
+#                         w2, x2, y2, z2 = q2
+#                         w = w1 * w2 - x1 * x2 - y1 * y2 - z1 * z2
+#                         x = w1 * x2 + x1 * w2 + y1 * z2 - z1 * y2
+#                         y = w1 * y2 - x1 * z2 + y1 * w2 + z1 * x2
+#                         z = w1 * z2 + x1 * y2 - y1 * x2 + z1 * w2
+#                         return [w, x, y, z]
+#
+#                     def normalize_quaternion(q):
+#                         """
+#                         Normalize a quaternion to unit length
+#                         q is in form [w, x, y, z]
+#                         """
+#                         magnitude = math.sqrt(q[0]**2 + q[1]**2 + q[2]**2 + q[3]**2)
+#                         if magnitude > 0.00001:  # Avoid division by near-zero
+#                             return [q[0]/magnitude, q[1]/magnitude, q[2]/magnitude, q[3]/magnitude]
+#                         else:
+#                             return [1.0, 0.0, 0.0, 0.0]  # Default to identity quaternion
+#
+#                     def update_scale_attributes(obj, scale_attributes, log_scale_factors, verbose=False):
+#                         """
+#                         Update the scale attributes with logarithmic scale factors
+#                         """
+#                         success = True
+#                         for attr_idx, attr_name in enumerate(scale_attributes):
+#                             if attr_name not in obj.data.attributes:
+#                                 print(f"Attribute '{attr_name}' not found on object.")
+#                                 success = False
+#                                 continue
+#                             attr = obj.data.attributes[attr_name]
+#                             if verbose:
+#                                 print(f"\nUpdating attribute: {attr_name}")
+#                                 print(f"Data type: {attr.data_type}")
+#                                 print(f"Domain: {attr.domain}")
+#                                 print(f"Length: {len(attr.data)}")
+#                             # Determine which scale factor to use based on attribute name
+#                             if attr_name == "scale_0":
+#                                 log_scale = log_scale_factors[0]
+#                             elif attr_name == "scale_1":
+#                                 log_scale = log_scale_factors[1]
+#                             elif attr_name == "scale_2":
+#                                 log_scale = log_scale_factors[2]
+#                             else:
+#                                 # For custom-named attributes, use the index in the scale_attributes list
+#                                 log_scale = log_scale_factors[min(attr_idx, 2)]
+#                             if verbose:
+#                                 print(f"Using log scale factor: {log_scale}")
+#                             # Update the attribute values
+#                             if attr.data_type == 'FLOAT':
+#                                 # Sample a few values before and after for verification
+#                                 sample_size = min(5, len(attr.data))
+#                                 before_values = []
+#                                 for i in range(sample_size):
+#                                     before_values.append(attr.data[i].value)
+#                                 # Update all values
+#                                 for i in range(len(attr.data)):
+#                                     # In 3DGS, adding the log of the scale factor to the log-space scale value
+#                                     attr.data[i].value += log_scale
+#                                 # Print sample values after update
+#                                 if verbose:
+#                                     print("Sample values before and after update:")
+#                                     for i in range(sample_size):
+#                                         print(f"  [{i}]: {before_values[i]} -> {attr.data[i].value}")
+#                             else:
+#                                 print(f"Attribute '{attr_name}' is not of type FLOAT (found {attr.data_type}). Skipping.")
+#                                 success = False
+#                         return success
+#
+#                     def update_rotation_attributes(obj, rotation_attributes, blender_quat, verbose=False, normalize=True):
+#                         """
+#                         Update the rotation attributes with the object's rotation quaternion
+#                         """
+#                         # First, gather all data to avoid processing incomplete sets
+#                         attribute_data = {}
+#                         valid_attributes = True
+#                         for attr_name in rotation_attributes:
+#                             if attr_name not in obj.data.attributes:
+#                                 print(f"Attribute '{attr_name}' not found on object.")
+#                                 valid_attributes = False
+#                                 break
+#                             attr = obj.data.attributes[attr_name]
+#                             if attr.data_type != 'FLOAT':
+#                                 print(f"Attribute '{attr_name}' is not of type FLOAT (found {attr.data_type}). Skipping.")
+#                                 valid_attributes = False
+#                                 break
+#                             # Store the attribute for processing
+#                             attribute_data[attr_name] = attr
+#                         if not valid_attributes:
+#                             print("Unable to process rotation due to missing or invalid attributes.")
+#                             return False
+#                         # Sample a few values before the update for verification
+#                         sample_size = min(5, len(attribute_data[rotation_attributes[0]].data))
+#                         before_values = {attr_name: [] for attr_name in rotation_attributes}
+#                         for attr_name in rotation_attributes:
+#                             for i in range(sample_size):
+#                                 before_values[attr_name].append(attribute_data[attr_name].data[i].value)
+#                         # Process all points
+#                         num_points = len(attribute_data[rotation_attributes[0]].data)
+#                         print(f"Processing {num_points} points...")
+#                         for i in range(num_points):
+#                             # Get current quaternion values [w, x, y, z]
+#                             point_quat = [
+#                                 attribute_data[rotation_attributes[0]].data[i].value,  # w
+#                                 attribute_data[rotation_attributes[1]].data[i].value,  # x
+#                                 attribute_data[rotation_attributes[2]].data[i].value,  # y
+#                                 attribute_data[rotation_attributes[3]].data[i].value   # z
+#                             ]
+#                             # Apply rotation by multiplying quaternions
+#                             # The order matters: PostShot appears to use the object_rotation * point_quat
+#                             # format (rotating the local frame)
+#                             new_quat = quaternion_multiply(blender_quat, point_quat)
+#                             # Normalize the quaternion if requested (PostShot does this)
+#                             if normalize:
+#                                 new_quat = normalize_quaternion(new_quat)
+#                             # Enforce positive w component to match PostShot's convention
+#                             # Since q and -q represent the same rotation, we can flip all signs if w is negative
+#                             if new_quat[0] < 0:
+#                                 new_quat = [-q for q in new_quat]
+#                             # Update attribute values
+#                             attribute_data[rotation_attributes[0]].data[i].value = new_quat[0]  # w
+#                             attribute_data[rotation_attributes[1]].data[i].value = new_quat[1]  # x
+#                             attribute_data[rotation_attributes[2]].data[i].value = new_quat[2]  # y
+#                             attribute_data[rotation_attributes[3]].data[i].value = new_quat[3]  # z
+#                         # Print sample values after update for verification
+#                         if verbose:
+#                             print("\nSample values before and after update:")
+#                             for i in range(sample_size):
+#                                 print(f"Point [{i}]:")
+#                                 for j, attr_name in enumerate(rotation_attributes):
+#                                     print(f"  {attr_name}: {before_values[attr_name][i]} -> {attribute_data[attr_name].data[i].value}")
+#                         return True
+#
+#                     def apply_transformations(obj, apply_rotation=False, apply_scale=False):
+#                         """
+#                         Apply the transformations to the object
+#                         """
+#                         if not (apply_rotation or apply_scale):
+#                             return
+#                         # Store current context
+#                         original_mode = obj.mode
+#                         # Switch to object mode if needed
+#                         if original_mode != 'OBJECT':
+#                             bpy.ops.object.mode_set(mode='OBJECT')
+#                         # Apply transformations
+#                         bpy.ops.object.transform_apply(
+#                             location=False, 
+#                             rotation=apply_rotation, 
+#                             scale=apply_scale
+#                         )
+#                         # Restore original mode
+#                         if original_mode != 'OBJECT':
+#                             bpy.ops.object.mode_set(mode=original_mode)
+#                         transformations = []
+#                         if apply_rotation:
+#                             transformations.append("rotation")
+#                         if apply_scale:
+#                             transformations.append("scale")
+#                         print(f"Object {', '.join(transformations)} applied.")
+#                     # MAIN SCRIPT EXECUTION
+#                     # Get the active object
+#                     obj = bpy.context.active_object
+#                     if not obj:
+#                         print("No active object found.")
+#                     else:
+#                         print(f"Processing 3DGS transformations for object: {obj.name}")
+#                         # Get current object rotation (ensuring quaternion is updated)
+#                         original_rotation_mode = obj.rotation_mode
+#                         # If not already in quaternion mode, ensure the quaternion gets updated
+#                         if original_rotation_mode != 'QUATERNION':
+#                             # Switch to quaternion mode to ensure quaternion is updated
+#                             obj.rotation_mode = 'QUATERNION'
+#                             # Switch back to original mode
+#                             obj.rotation_mode = original_rotation_mode
+#                         # Get the quaternion values
+#                         obj_rotation_quat = obj.rotation_quaternion.copy()
+#                         # Convert to w, x, y, z format (from Blender's x, y, z, w)
+#                         blender_quat = [obj_rotation_quat.w, obj_rotation_quat.x, 
+#                                       obj_rotation_quat.y, obj_rotation_quat.z]
+#                         if VERBOSE:
+#                             print(f"Current object rotation quaternion [w,x,y,z]: {blender_quat}")
+#                         # Get current object scale
+#                         scale_x, scale_y, scale_z = obj.scale
+#                         if VERBOSE:
+#                             print(f"Current object scale: X={scale_x}, Y={scale_y}, Z={scale_z}")
+#                         # Calculate the logarithm of scale factors
+#                         log_scale_x = math.log(scale_x) if scale_x > 0 else 0
+#                         log_scale_y = math.log(scale_y) if scale_y > 0 else 0
+#                         log_scale_z = math.log(scale_z) if scale_z > 0 else 0
+#                         log_scale_factors = [log_scale_x, log_scale_y, log_scale_z]
+#                         if VERBOSE:
+#                             print(f"Log scale factors: X={log_scale_x}, Y={log_scale_y}, Z={log_scale_z}")
+#                         # Check if the object has attribute data
+#                         if not hasattr(obj.data, "attributes"):
+#                             print("Object does not have attribute data.")
+#                         else:
+#                             # Perform transformations in the specified order
+#                             if TRANSFORM_ORDER == "SCALE_FIRST":
+#                                 # First update scale attributes
+#                                 scale_success = update_scale_attributes(obj, SCALE_ATTRIBUTES, log_scale_factors, VERBOSE)
+#                                 print("Scale attributes update", "succeeded" if scale_success else "failed")
+#                                 # Then update rotation attributes
+#                                 rotation_success = update_rotation_attributes(obj, ROTATION_ATTRIBUTES, blender_quat, VERBOSE, NORMALIZE_QUATERNIONS)
+#                                 print("Rotation attributes update", "succeeded" if rotation_success else "failed")
+#                             else:  # ROTATION_FIRST
+#                                 # First update rotation attributes
+#                                 rotation_success = update_rotation_attributes(obj, ROTATION_ATTRIBUTES, blender_quat, VERBOSE, NORMALIZE_QUATERNIONS)
+#                                 print("Rotation attributes update", "succeeded" if rotation_success else "failed")
+#                                 # Then update scale attributes
+#                                 scale_success = update_scale_attributes(obj, SCALE_ATTRIBUTES, log_scale_factors, VERBOSE)
+#                                 print("Scale attributes update", "succeeded" if scale_success else "failed")
+#                             # Apply transformations to reset object transforms
+#                             apply_transformations(obj, APPLY_ROTATION, APPLY_SCALE)
+#                             print("\nTransformation operations completed.")
+#
+#                     def delayed_5B08A():
+#                         bpy.ops.wm.ply_export('INVOKE_DEFAULT', apply_modifiers=True, export_selected_objects=True, export_attributes=True)
+#                     bpy.app.timers.register(delayed_5B08A, first_interval=0.10000000149011612)
+#         return {"FINISHED"}
+#
+#     def draw(self, context):
+#         layout = self.layout
+#         box_44942 = layout.box()
+#         box_44942.alert = False
+#         box_44942.enabled = True
+#         box_44942.active = True
+#         box_44942.use_property_split = False
+#         box_44942.use_property_decorate = False
+#         box_44942.alignment = 'Expand'.upper()
+#         box_44942.scale_x = 1.0
+#         box_44942.scale_y = 1.0
+#         if not True: box_44942.operator_context = "EXEC_DEFAULT"
+#         box_44942.label(text='All modifiers will be applied. To continue working in Blender', icon_value=load_preview_icon(os.path.join(os.path.dirname(__file__), 'assets', 'tips-one.svg')))
+#         box_44942.label(text='         it is advised to make a duplicate before exporting.', icon_value=0)
+#         box_44942.label(text='         Press OK to continue exporting', icon_value=0)
+#
+#     def invoke(self, context, event):
+#         return context.window_manager.invoke_props_dialog(self, width=400)
 
 
 # def sna_hq_mode_function_interface_17C41(layout_function, ):
@@ -2752,81 +2752,81 @@ class SNA_OT_Dgs_Render_Update_Enabled_3Dgs_Objects_6D7F4(bpy.types.Operator):
         return self.execute(context)
 
 
-def sna_update_camera_single_time_9EF18():
-    from mathutils import Matrix
-    # Define helper function for updating the geometry node sockets
-
-    def update_gaussian_splat_camera(obj, view_matrix, proj_matrix, window_width, window_height):
-        geometryNodes_modifier = obj.modifiers.get('KIRI_3DGS_Render_GN')
-        if not geometryNodes_modifier:
-            print(f"Error: GeometryNodes modifier not found on object '{obj.name}'.")
-            return False
-        # Update view matrix
-        geometryNodes_modifier['Socket_2'] = view_matrix[0][0]
-        geometryNodes_modifier['Socket_3'] = view_matrix[1][0]
-        geometryNodes_modifier['Socket_4'] = view_matrix[2][0]
-        geometryNodes_modifier['Socket_5'] = view_matrix[3][0]
-        geometryNodes_modifier['Socket_6'] = view_matrix[0][1]
-        geometryNodes_modifier['Socket_7'] = view_matrix[1][1]
-        geometryNodes_modifier['Socket_8'] = view_matrix[2][1]
-        geometryNodes_modifier['Socket_9'] = view_matrix[3][1]
-        geometryNodes_modifier['Socket_10'] = view_matrix[0][2]
-        geometryNodes_modifier['Socket_11'] = view_matrix[1][2]
-        geometryNodes_modifier['Socket_12'] = view_matrix[2][2]
-        geometryNodes_modifier['Socket_13'] = view_matrix[3][2]
-        geometryNodes_modifier['Socket_14'] = view_matrix[0][3]
-        geometryNodes_modifier['Socket_15'] = view_matrix[1][3]
-        geometryNodes_modifier['Socket_16'] = view_matrix[2][3]
-        geometryNodes_modifier['Socket_17'] = view_matrix[3][3]
-        # Update projection matrix
-        geometryNodes_modifier['Socket_18'] = proj_matrix[0][0]
-        geometryNodes_modifier['Socket_19'] = proj_matrix[1][0]
-        geometryNodes_modifier['Socket_20'] = proj_matrix[2][0]
-        geometryNodes_modifier['Socket_21'] = proj_matrix[3][0]
-        geometryNodes_modifier['Socket_22'] = proj_matrix[0][1]
-        geometryNodes_modifier['Socket_23'] = proj_matrix[1][1]
-        geometryNodes_modifier['Socket_24'] = proj_matrix[2][1]
-        geometryNodes_modifier['Socket_25'] = proj_matrix[3][1]
-        geometryNodes_modifier['Socket_26'] = proj_matrix[0][2]
-        geometryNodes_modifier['Socket_27'] = proj_matrix[1][2]
-        geometryNodes_modifier['Socket_28'] = proj_matrix[2][2]
-        geometryNodes_modifier['Socket_29'] = proj_matrix[3][2]
-        geometryNodes_modifier['Socket_30'] = proj_matrix[0][3]
-        geometryNodes_modifier['Socket_31'] = proj_matrix[1][3]
-        geometryNodes_modifier['Socket_32'] = proj_matrix[2][3]
-        geometryNodes_modifier['Socket_33'] = proj_matrix[3][3]
-        # Update window dimensions
-        geometryNodes_modifier['Socket_34'] = window_width
-        geometryNodes_modifier['Socket_35'] = window_height
-        return True
-    # Main code for updating all relevant objects
-    updated_objects = []
-    # Find view and projection matrices from the 3D view area
-    found_3d_view = False
-    for area in bpy.context.screen.areas:
-        if area.type == 'VIEW_3D':
-            view_matrix = area.spaces.active.region_3d.view_matrix
-            proj_matrix = area.spaces.active.region_3d.window_matrix
-            window_width = area.width
-            window_height = area.height
-            found_3d_view = True
-            break
-    if not found_3d_view:
-        print("Error: No 3D View found to update camera information.")
-    else:
-        # Loop through objects and update those marked for update
-        for obj in bpy.context.scene.objects:
-            if obj.visible_get() and obj.get('update_rot_to_cam', False):
-                print(f"Attempting to update object: {obj.name}")  # Debugging print
-                if update_gaussian_splat_camera(obj, view_matrix, proj_matrix, window_width, window_height):
-                    updated_objects.append(obj.name)  # Add to updated list
-    # Print or output the list of updated objects
-    print("Updated objects:", updated_objects)
-    for i_56B01 in range(len(bpy.context.scene.objects)):
-        bpy.context.scene.objects[i_56B01].update_tag(refresh={'DATA'}, )
-        if bpy.context and bpy.context.screen:
-            for a in bpy.context.screen.areas:
-                a.tag_redraw()
+# def sna_update_camera_single_time_9EF18():
+#     from mathutils import Matrix
+#     # Define helper function for updating the geometry node sockets
+#
+#     def update_gaussian_splat_camera(obj, view_matrix, proj_matrix, window_width, window_height):
+#         geometryNodes_modifier = obj.modifiers.get('KIRI_3DGS_Render_GN')
+#         if not geometryNodes_modifier:
+#             print(f"Error: GeometryNodes modifier not found on object '{obj.name}'.")
+#             return False
+#         # Update view matrix
+#         geometryNodes_modifier['Socket_2'] = view_matrix[0][0]
+#         geometryNodes_modifier['Socket_3'] = view_matrix[1][0]
+#         geometryNodes_modifier['Socket_4'] = view_matrix[2][0]
+#         geometryNodes_modifier['Socket_5'] = view_matrix[3][0]
+#         geometryNodes_modifier['Socket_6'] = view_matrix[0][1]
+#         geometryNodes_modifier['Socket_7'] = view_matrix[1][1]
+#         geometryNodes_modifier['Socket_8'] = view_matrix[2][1]
+#         geometryNodes_modifier['Socket_9'] = view_matrix[3][1]
+#         geometryNodes_modifier['Socket_10'] = view_matrix[0][2]
+#         geometryNodes_modifier['Socket_11'] = view_matrix[1][2]
+#         geometryNodes_modifier['Socket_12'] = view_matrix[2][2]
+#         geometryNodes_modifier['Socket_13'] = view_matrix[3][2]
+#         geometryNodes_modifier['Socket_14'] = view_matrix[0][3]
+#         geometryNodes_modifier['Socket_15'] = view_matrix[1][3]
+#         geometryNodes_modifier['Socket_16'] = view_matrix[2][3]
+#         geometryNodes_modifier['Socket_17'] = view_matrix[3][3]
+#         # Update projection matrix
+#         geometryNodes_modifier['Socket_18'] = proj_matrix[0][0]
+#         geometryNodes_modifier['Socket_19'] = proj_matrix[1][0]
+#         geometryNodes_modifier['Socket_20'] = proj_matrix[2][0]
+#         geometryNodes_modifier['Socket_21'] = proj_matrix[3][0]
+#         geometryNodes_modifier['Socket_22'] = proj_matrix[0][1]
+#         geometryNodes_modifier['Socket_23'] = proj_matrix[1][1]
+#         geometryNodes_modifier['Socket_24'] = proj_matrix[2][1]
+#         geometryNodes_modifier['Socket_25'] = proj_matrix[3][1]
+#         geometryNodes_modifier['Socket_26'] = proj_matrix[0][2]
+#         geometryNodes_modifier['Socket_27'] = proj_matrix[1][2]
+#         geometryNodes_modifier['Socket_28'] = proj_matrix[2][2]
+#         geometryNodes_modifier['Socket_29'] = proj_matrix[3][2]
+#         geometryNodes_modifier['Socket_30'] = proj_matrix[0][3]
+#         geometryNodes_modifier['Socket_31'] = proj_matrix[1][3]
+#         geometryNodes_modifier['Socket_32'] = proj_matrix[2][3]
+#         geometryNodes_modifier['Socket_33'] = proj_matrix[3][3]
+#         # Update window dimensions
+#         geometryNodes_modifier['Socket_34'] = window_width
+#         geometryNodes_modifier['Socket_35'] = window_height
+#         return True
+#     # Main code for updating all relevant objects
+#     updated_objects = []
+#     # Find view and projection matrices from the 3D view area
+#     found_3d_view = False
+#     for area in bpy.context.screen.areas:
+#         if area.type == 'VIEW_3D':
+#             view_matrix = area.spaces.active.region_3d.view_matrix
+#             proj_matrix = area.spaces.active.region_3d.window_matrix
+#             window_width = area.width
+#             window_height = area.height
+#             found_3d_view = True
+#             break
+#     if not found_3d_view:
+#         print("Error: No 3D View found to update camera information.")
+#     else:
+#         # Loop through objects and update those marked for update
+#         for obj in bpy.context.scene.objects:
+#             if obj.visible_get() and obj.get('update_rot_to_cam', False):
+#                 print(f"Attempting to update object: {obj.name}")  # Debugging print
+#                 if update_gaussian_splat_camera(obj, view_matrix, proj_matrix, window_width, window_height):
+#                     updated_objects.append(obj.name)  # Add to updated list
+#     # Print or output the list of updated objects
+#     print("Updated objects:", updated_objects)
+#     for i_56B01 in range(len(bpy.context.scene.objects)):
+#         bpy.context.scene.objects[i_56B01].update_tag(refresh={'DATA'}, )
+#         if bpy.context and bpy.context.screen:
+#             for a in bpy.context.screen.areas:
+#                 a.tag_redraw()
 
 
 # def sna_mesh_to_3dgs_function_interface_8DDDC(layout_function, ):
@@ -2869,145 +2869,145 @@ def sna_update_camera_single_time_9EF18():
 #     op = box_8C171.operator('sna.dgs_render_mesh23dgs_3dfed', text='Select .OBJ', icon_value=0, emboss=True, depress=False)
 
 
-def sna_clean_up_scene_5F1F1(REMOVE_ALL_GAUSSIAN_OBJECTS):
-    REMOVE_ALL_GAUSSIAN_OBJECTS = REMOVE_ALL_GAUSSIAN_OBJECTS
-    # ========== VARIABLES (EDIT THESE) ==========
-    #REMOVE_ALL_GAUSSIAN_OBJECTS = False  # Remove all gaussian objects from scene
-    REMOVE_HANDLERS = True               # Remove draw handlers
-    REMOVE_GPU_RESOURCES = True          # Clean up GPU textures/shaders
-    CLEAR_OBJECT_CACHE = True            # Clear the global object cache
-    # ============================================
-    #import bpy
-
-    def remove_all_gaussian_objects():
-        """Remove all gaussian splat objects from the scene"""
-        try:
-            objects_to_remove = []
-            # Find all objects with gaussian properties
-            for obj in bpy.data.objects:
-                if obj.get("is_gaussian_splat", False):
-                    objects_to_remove.append(obj)
-            # Remove them
-            for obj in objects_to_remove:
-                print(f"Removing gaussian object: {obj.name}")
-                bpy.data.objects.remove(obj, do_unlink=True)
-            print(f"Removed {len(objects_to_remove)} gaussian objects")
-        except Exception as e:
-            print(f"Error removing gaussian objects: {e}")
-
-    def cleanup_draw_handlers():
-        """Remove gaussian draw handlers"""
-        try:
-            if hasattr(bpy, 'gaussian_draw_handle'):
-                bpy.types.SpaceView3D.draw_handler_remove(bpy.gaussian_draw_handle, 'WINDOW')
-                delattr(bpy, 'gaussian_draw_handle')
-                print("Draw handler removed")
-        except Exception as e:
-            print(f"Error removing draw handler: {e}")
-
-    def cleanup_gpu_resources():
-        """Clean up all GPU textures and shaders"""
-        try:
-            gpu_resources = [
-                # Shaders and batches
-                'gaussian_quad_shader', 'gaussian_quad_batch', 
-                'gaussian_composite_shader', 'gaussian_composite_batch',
-                # Textures
-                'gaussian_texture', 'gaussian_indices_texture',
-                'gaussian_metadata_texture', 'gaussian_depth_texture',
-                # Texture dimensions
-                'gaussian_texture_width', 'gaussian_texture_height', 'gaussian_texture_depth',
-                'gaussian_indices_width', 'gaussian_indices_height',
-                # Counts
-                'gaussian_count'
-            ]
-            removed_count = 0
-            for attr in gpu_resources:
-                if hasattr(bpy, attr):
-                    delattr(bpy, attr)
-                    removed_count += 1
-            print(f"Cleaned up {removed_count} GPU resources")
-        except Exception as e:
-            print(f"Error cleaning GPU resources: {e}")
-
-    def cleanup_framebuffers():
-        """Clean up persistent framebuffers"""
-        try:
-            # Clean up persistent framebuffer
-            if hasattr(bpy, 'gaussian_persistent_fb'):
-                try:
-                    color_tex, depth_tex, fb = bpy.gaussian_persistent_fb
-                    del fb, depth_tex, color_tex
-                    delattr(bpy, 'gaussian_persistent_fb')
-                    print("Persistent framebuffer cleaned up")
-                except:
-                    delattr(bpy, 'gaussian_persistent_fb')
-            # Clean up framebuffer size tracking
-            fb_attrs = ['gaussian_fb_width', 'gaussian_fb_height']
-            for attr in fb_attrs:
-                if hasattr(bpy, attr):
-                    delattr(bpy, attr)
-        except Exception as e:
-            print(f"Error cleaning framebuffers: {e}")
-
-    def cleanup_multi_object_cache():
-        """Clean up multi-object specific data structures"""
-        try:
-            multi_object_attrs = [
-                # Object cache and metadata
-                'gaussian_object_cache',           # Main object cache
-                'gaussian_object_metadata',        # Object metadata for rendering
-                # Transform tracking
-                'gaussian_last_transforms',        # Per-object transform tracking
-                'gaussian_last_transform',         # Single object transform (legacy)
-                # Camera tracking  
-                'gaussian_last_camera_pos',        # Camera position for depth sorting
-                # Update flags
-                'gaussian_global_needs_update',    # Global data update flag
-            ]
-            removed_count = 0
-            for attr in multi_object_attrs:
-                if hasattr(bpy, attr):
-                    delattr(bpy, attr)
-                    removed_count += 1
-            print(f"Cleaned up {removed_count} multi-object cache attributes")
-        except Exception as e:
-            print(f"Error cleaning multi-object cache: {e}")
-
-    def force_viewport_update():
-        """Force viewport redraw to show cleanup results"""
-        try:
-            for area in bpy.context.screen.areas:
-                if area.type == 'VIEW_3D':
-                    area.tag_redraw()
-            print("Viewport updated")
-        except Exception as e:
-            print(f"Error updating viewport: {e}")
-    # ========== MAIN CLEANUP EXECUTION ==========
-    print("Starting multi-object gaussian cleanup...")
-    # Remove draw handlers first
-    if REMOVE_HANDLERS:
-        cleanup_draw_handlers()
-    # Clean up framebuffers
-    cleanup_framebuffers()
-    # Remove GPU resources
-    if REMOVE_GPU_RESOURCES:
-        cleanup_gpu_resources()
-    # Clear multi-object cache and tracking data
-    if CLEAR_OBJECT_CACHE:
-        cleanup_multi_object_cache()
-    # Remove all gaussian objects from scene
-    if REMOVE_ALL_GAUSSIAN_OBJECTS:
-        remove_all_gaussian_objects()
-    # Force viewport update
-    force_viewport_update()
-    print("Multi-object cleanup complete!")
-    # Print summary of what was cleaned
-    if hasattr(bpy, 'gaussian_object_cache'):
-        remaining_objects = len(bpy.gaussian_object_cache)
-        print(f"Warning: {remaining_objects} objects still in cache")
-    else:
-        print("All caches cleared successfully")
+# def sna_clean_up_scene_5F1F1(REMOVE_ALL_GAUSSIAN_OBJECTS):
+#     REMOVE_ALL_GAUSSIAN_OBJECTS = REMOVE_ALL_GAUSSIAN_OBJECTS
+#     # ========== VARIABLES (EDIT THESE) ==========
+#     #REMOVE_ALL_GAUSSIAN_OBJECTS = False  # Remove all gaussian objects from scene
+#     REMOVE_HANDLERS = True               # Remove draw handlers
+#     REMOVE_GPU_RESOURCES = True          # Clean up GPU textures/shaders
+#     CLEAR_OBJECT_CACHE = True            # Clear the global object cache
+#     # ============================================
+#     #import bpy
+#
+#     def remove_all_gaussian_objects():
+#         """Remove all gaussian splat objects from the scene"""
+#         try:
+#             objects_to_remove = []
+#             # Find all objects with gaussian properties
+#             for obj in bpy.data.objects:
+#                 if obj.get("is_gaussian_splat", False):
+#                     objects_to_remove.append(obj)
+#             # Remove them
+#             for obj in objects_to_remove:
+#                 print(f"Removing gaussian object: {obj.name}")
+#                 bpy.data.objects.remove(obj, do_unlink=True)
+#             print(f"Removed {len(objects_to_remove)} gaussian objects")
+#         except Exception as e:
+#             print(f"Error removing gaussian objects: {e}")
+#
+#     def cleanup_draw_handlers():
+#         """Remove gaussian draw handlers"""
+#         try:
+#             if hasattr(bpy, 'gaussian_draw_handle'):
+#                 bpy.types.SpaceView3D.draw_handler_remove(bpy.gaussian_draw_handle, 'WINDOW')
+#                 delattr(bpy, 'gaussian_draw_handle')
+#                 print("Draw handler removed")
+#         except Exception as e:
+#             print(f"Error removing draw handler: {e}")
+#
+#     def cleanup_gpu_resources():
+#         """Clean up all GPU textures and shaders"""
+#         try:
+#             gpu_resources = [
+#                 # Shaders and batches
+#                 'gaussian_quad_shader', 'gaussian_quad_batch', 
+#                 'gaussian_composite_shader', 'gaussian_composite_batch',
+#                 # Textures
+#                 'gaussian_texture', 'gaussian_indices_texture',
+#                 'gaussian_metadata_texture', 'gaussian_depth_texture',
+#                 # Texture dimensions
+#                 'gaussian_texture_width', 'gaussian_texture_height', 'gaussian_texture_depth',
+#                 'gaussian_indices_width', 'gaussian_indices_height',
+#                 # Counts
+#                 'gaussian_count'
+#             ]
+#             removed_count = 0
+#             for attr in gpu_resources:
+#                 if hasattr(bpy, attr):
+#                     delattr(bpy, attr)
+#                     removed_count += 1
+#             print(f"Cleaned up {removed_count} GPU resources")
+#         except Exception as e:
+#             print(f"Error cleaning GPU resources: {e}")
+#
+#     def cleanup_framebuffers():
+#         """Clean up persistent framebuffers"""
+#         try:
+#             # Clean up persistent framebuffer
+#             if hasattr(bpy, 'gaussian_persistent_fb'):
+#                 try:
+#                     color_tex, depth_tex, fb = bpy.gaussian_persistent_fb
+#                     del fb, depth_tex, color_tex
+#                     delattr(bpy, 'gaussian_persistent_fb')
+#                     print("Persistent framebuffer cleaned up")
+#                 except:
+#                     delattr(bpy, 'gaussian_persistent_fb')
+#             # Clean up framebuffer size tracking
+#             fb_attrs = ['gaussian_fb_width', 'gaussian_fb_height']
+#             for attr in fb_attrs:
+#                 if hasattr(bpy, attr):
+#                     delattr(bpy, attr)
+#         except Exception as e:
+#             print(f"Error cleaning framebuffers: {e}")
+#
+#     def cleanup_multi_object_cache():
+#         """Clean up multi-object specific data structures"""
+#         try:
+#             multi_object_attrs = [
+#                 # Object cache and metadata
+#                 'gaussian_object_cache',           # Main object cache
+#                 'gaussian_object_metadata',        # Object metadata for rendering
+#                 # Transform tracking
+#                 'gaussian_last_transforms',        # Per-object transform tracking
+#                 'gaussian_last_transform',         # Single object transform (legacy)
+#                 # Camera tracking  
+#                 'gaussian_last_camera_pos',        # Camera position for depth sorting
+#                 # Update flags
+#                 'gaussian_global_needs_update',    # Global data update flag
+#             ]
+#             removed_count = 0
+#             for attr in multi_object_attrs:
+#                 if hasattr(bpy, attr):
+#                     delattr(bpy, attr)
+#                     removed_count += 1
+#             print(f"Cleaned up {removed_count} multi-object cache attributes")
+#         except Exception as e:
+#             print(f"Error cleaning multi-object cache: {e}")
+#
+#     def force_viewport_update():
+#         """Force viewport redraw to show cleanup results"""
+#         try:
+#             for area in bpy.context.screen.areas:
+#                 if area.type == 'VIEW_3D':
+#                     area.tag_redraw()
+#             print("Viewport updated")
+#         except Exception as e:
+#             print(f"Error updating viewport: {e}")
+#     # ========== MAIN CLEANUP EXECUTION ==========
+#     print("Starting multi-object gaussian cleanup...")
+#     # Remove draw handlers first
+#     if REMOVE_HANDLERS:
+#         cleanup_draw_handlers()
+#     # Clean up framebuffers
+#     cleanup_framebuffers()
+#     # Remove GPU resources
+#     if REMOVE_GPU_RESOURCES:
+#         cleanup_gpu_resources()
+#     # Clear multi-object cache and tracking data
+#     if CLEAR_OBJECT_CACHE:
+#         cleanup_multi_object_cache()
+#     # Remove all gaussian objects from scene
+#     if REMOVE_ALL_GAUSSIAN_OBJECTS:
+#         remove_all_gaussian_objects()
+#     # Force viewport update
+#     force_viewport_update()
+#     print("Multi-object cleanup complete!")
+#     # Print summary of what was cleaned
+#     if hasattr(bpy, 'gaussian_object_cache'):
+#         remaining_objects = len(bpy.gaussian_object_cache)
+#         print(f"Warning: {remaining_objects} objects still in cache")
+#     else:
+#         print("All caches cleared successfully")
 
 
 # def sna_viewport_render_A3941():
@@ -4020,228 +4020,228 @@ def sna_shader_system_A4AED():
         traceback.print_exc()
 
 
-def sna_b2_load_from_blender_object_F0CCB(OBJECT_BASE_NAME):
-    OBJECT_BASE_NAME = OBJECT_BASE_NAME
-    # ========== VARIABLES (EDIT THESE) ==========
-    SOURCE_MESH_OBJECT = None  # Set this to target mesh object, or leave None to use active object
-    #OBJECT_BASE_NAME = "GaussianSplat"  # Will auto-number: _001, _002, etc.
-    # ============================================
-    import numpy as np
-    from math import pi
-    #import time
-
-    def get_unique_object_name(base_name):
-        """Generate unique object name with auto-numbering"""
-        if base_name not in bpy.data.objects:
-            return base_name
-        counter = 1
-        while f"{base_name}_{counter:03d}" in bpy.data.objects:
-            counter += 1
-        return f"{base_name}_{counter:03d}"
-
-    def check_mesh_has_gaussian_attributes(mesh_obj):
-        """Check if mesh object has basic gaussian attributes"""
-        if not mesh_obj or not mesh_obj.data:
-            return False
-        # Check for basic gaussian attributes
-        required_attrs = ['f_dc_0', 'f_dc_1', 'f_dc_2']
-        available_attrs = [attr.name for attr in mesh_obj.data.attributes]
-        return all(attr in available_attrs for attr in required_attrs)
-
-    def extract_attribute_data(mesh_data, attr_name):
-        """Extract data from mesh attribute by name - optimized version"""
-        if attr_name not in [attr.name for attr in mesh_data.attributes]:
-            return None
-        attr = mesh_data.attributes[attr_name]
-        # Use foreach_get for much faster extraction
-        data_array = np.zeros(len(attr.data), dtype=np.float32)
-        attr.data.foreach_get("value", data_array)
-        return data_array
-
-    def extract_gaussian_data_from_evaluated_mesh(mesh_obj):
-        """Extract and process gaussian data from EVALUATED mesh object attributes"""
-        # Get evaluated mesh data
-        depsgraph = bpy.context.evaluated_depsgraph_get()
-        evaluated_object = mesh_obj.evaluated_get(depsgraph)
-        evaluated_mesh = evaluated_object.data
-        # Extract positions from evaluated vertices - optimized version
-        num_points = len(evaluated_mesh.vertices)
-        if num_points == 0:
-            raise ValueError("Evaluated mesh has no vertices")
-        # Use foreach_get for fast vertex coordinate extraction
-        positions = np.zeros(num_points * 3, dtype=np.float32)
-        evaluated_mesh.vertices.foreach_get("co", positions)
-        positions = positions.reshape(-1, 3)
-        # Get available attributes from evaluated mesh
-        available_attrs = [attr.name for attr in evaluated_mesh.attributes]
-        # Extract spherical harmonics from evaluated mesh
-        if all(attr in available_attrs for attr in ['f_dc_0', 'f_dc_1', 'f_dc_2']):
-            dc_0 = extract_attribute_data(evaluated_mesh, 'f_dc_0')
-            dc_1 = extract_attribute_data(evaluated_mesh, 'f_dc_1')
-            dc_2 = extract_attribute_data(evaluated_mesh, 'f_dc_2')
-            features_dc = np.column_stack([dc_0, dc_1, dc_2])
-            # Find f_rest fields
-            f_rest_fields = [attr for attr in available_attrs if attr.startswith('f_rest_')]
-            f_rest_fields = sorted(f_rest_fields, key=lambda x: int(x.split('_')[-1]))
-            if f_rest_fields:
-                features_extra_list = []
-                for field in f_rest_fields:
-                    data = extract_attribute_data(evaluated_mesh, field)
-                    if data is not None:
-                        features_extra_list.append(data)
-                if features_extra_list:
-                    features_extra = np.column_stack(features_extra_list)
-                    num_f_rest = len(f_rest_fields)
-                    # Determine degree and coefficients to use
-                    if num_f_rest >= 45:
-                        actual_degree = 3
-                        coeffs_to_use = 45
-                    elif num_f_rest >= 24:
-                        actual_degree = 2  
-                        coeffs_to_use = 24
-                    elif num_f_rest >= 9:
-                        actual_degree = 1
-                        coeffs_to_use = 9
-                    else:
-                        actual_degree = 0
-                        coeffs_to_use = 0
-                    if coeffs_to_use > 0:
-                        features_extra_used = features_extra[:, :coeffs_to_use]
-                        coeffs_per_degree = (actual_degree + 1) ** 2 - 1
-                        features_extra_reshaped = features_extra_used.reshape((num_points, 3, coeffs_per_degree))
-                        features_extra_reshaped = np.transpose(features_extra_reshaped, [0, 2, 1])
-                        features_dc_reshaped = features_dc.reshape(-1, 1, 3)
-                        all_features = np.concatenate([features_dc_reshaped, features_extra_reshaped], axis=1)
-                        sh_coeffs = all_features.reshape(num_points, -1)
-                    else:
-                        sh_coeffs = features_dc
-                else:
-                    sh_coeffs = features_dc
-            else:
-                sh_coeffs = features_dc
-        else:
-            # Default SH coeffs if not found
-            print(f"Warning: f_dc attributes not found on evaluated mesh, using defaults")
-            sh_coeffs = np.ones((num_points, 3)) * 0.28209479177387814
-        # Extract scales from evaluated mesh
-        if all(attr in available_attrs for attr in ['scale_0', 'scale_1', 'scale_2']):
-            scale_0 = extract_attribute_data(evaluated_mesh, 'scale_0')
-            scale_1 = extract_attribute_data(evaluated_mesh, 'scale_1')
-            scale_2 = extract_attribute_data(evaluated_mesh, 'scale_2')
-            scales = np.column_stack([scale_0, scale_1, scale_2])
-            scales = np.exp(scales)  # Apply exponential
-        else:
-            print(f"Warning: scale attributes not found on evaluated mesh, using defaults")
-            scales = np.ones((num_points, 3)) * 0.01
-        # Extract rotations from evaluated mesh
-        if all(attr in available_attrs for attr in ['rot_0', 'rot_1', 'rot_2', 'rot_3']):
-            rot_0 = extract_attribute_data(evaluated_mesh, 'rot_0')
-            rot_1 = extract_attribute_data(evaluated_mesh, 'rot_1')
-            rot_2 = extract_attribute_data(evaluated_mesh, 'rot_2')
-            rot_3 = extract_attribute_data(evaluated_mesh, 'rot_3')
-            rotations = np.column_stack([rot_0, rot_1, rot_2, rot_3])
-            # Normalize quaternions
-            norms = np.linalg.norm(rotations, axis=1, keepdims=True)
-            rotations = rotations / norms
-        else:
-            print(f"Warning: rotation attributes not found on evaluated mesh, using defaults")
-            rotations = np.zeros((num_points, 4))
-            rotations[:, 0] = 1.0  # Identity quaternion
-        # Extract opacity from evaluated mesh
-        if 'opacity' in available_attrs:
-            opacity_raw = extract_attribute_data(evaluated_mesh, 'opacity')
-            opacity = 1.0 / (1.0 + np.exp(-opacity_raw))  # Apply sigmoid
-        else:
-            print(f"Warning: opacity attribute not found on evaluated mesh, using defaults")
-            opacity = np.ones(num_points)
-        return {
-            'num_points': num_points,
-            'positions': positions,
-            'scales': scales,
-            'rotations': rotations,
-            'opacities': opacity,
-            'sh_coeffs': sh_coeffs,
-            'sh_dim': sh_coeffs.shape[1]
-        }
-    try:
-        # Determine source mesh object
-        if SOURCE_MESH_OBJECT is not None:
-            source_obj = SOURCE_MESH_OBJECT
-        else:
-            source_obj = bpy.context.active_object
-        if not source_obj:
-            raise ValueError("No source mesh object specified and no active object")
-        if source_obj.type != 'MESH':
-            raise ValueError(f"Object '{source_obj.name}' is not a mesh object")
-        # Check if mesh has gaussian attributes (check original mesh, not evaluated)
-        if not check_mesh_has_gaussian_attributes(source_obj):
-            raise ValueError(f"Mesh object '{source_obj.name}' does not have required gaussian attributes (f_dc_0, f_dc_1, f_dc_2)")
-        print(f"Extracting gaussian data from EVALUATED mesh: {source_obj.name}")
-        # Generate or get UUID for source mesh
-        import uuid
-        if "gaussian_source_uuid" not in source_obj:
-            source_obj["gaussian_source_uuid"] = str(uuid.uuid4())
-        source_uuid = source_obj["gaussian_source_uuid"]
-        # Extract gaussian data from EVALUATED mesh
-        gaussian_data_info = extract_gaussian_data_from_evaluated_mesh(source_obj)
-        # Create gaussian data array (59 floats per gaussian)
-        num_gaussians = gaussian_data_info['num_points']
-        sh_dim = 48
-        total_dim = 3 + 4 + 3 + 1 + sh_dim
-        gaussian_data = np.zeros((num_gaussians, total_dim), dtype=np.float32)
-        # Pack data in original order
-        gaussian_data[:, 0:3] = gaussian_data_info['positions']
-        gaussian_data[:, 3:7] = gaussian_data_info['rotations']
-        gaussian_data[:, 7:10] = gaussian_data_info['scales']
-        gaussian_data[:, 10] = gaussian_data_info['opacities'].flatten()
-        # Handle SH coefficients
-        source_sh_coeffs = gaussian_data_info['sh_coeffs']
-        if source_sh_coeffs.shape[1] >= sh_dim:
-            gaussian_data[:, 11:11+sh_dim] = source_sh_coeffs[:, :sh_dim]
-        else:
-            gaussian_data[:, 11:11+source_sh_coeffs.shape[1]] = source_sh_coeffs
-        # Generate unique object name
-        object_name = get_unique_object_name(OBJECT_BASE_NAME)
-        # Create Blender empty object
-        empty_object = bpy.data.objects.new(object_name, None)
-        empty_object.empty_display_type = 'PLAIN_AXES'
-        empty_object.empty_display_size = 0.1
-        empty_object.matrix_world = source_obj.matrix_world.copy()  # Match source object transform
-        # Store data in object properties
-        empty_object["gaussian_data"] = gaussian_data.tobytes()
-        empty_object["gaussian_count"] = num_gaussians
-        empty_object["sh_degree"] = gaussian_data_info['sh_dim']
-        empty_object["is_gaussian_splat"] = True
-        empty_object["is_mesh_source"] = True
-        empty_object["is_evaluated_mesh"] = True  # Mark as using evaluated mesh
-        empty_object["source_mesh_uuid"] = source_uuid  # Store UUID instead of name
-        empty_object["source_mesh_name"] = source_obj.name  # Store name for reference/debugging
-        empty_object["is_loaded"] = True
-        empty_object["last_load_time"] = time.time()
-        # Link to scene
-        bpy.context.collection.objects.link(empty_object)
-        # Initialize global cache if needed
-        if not hasattr(bpy, 'gaussian_object_cache'):
-            bpy.gaussian_object_cache = {}
-        # Add to global cache
-        bpy.gaussian_object_cache[object_name] = {
-            'gaussian_data': gaussian_data,
-            'gaussian_count': num_gaussians,
-            'sh_degree': gaussian_data_info['sh_dim'],
-            'object': empty_object,
-            'source_mesh_uuid': source_uuid,
-            'source_mesh_name': source_obj.name  # Keep name for reference
-        }
-        # Mark that global textures need rebuilding
-        bpy.gaussian_global_needs_update = True
-        total_objects = len(bpy.gaussian_object_cache)
-        total_gaussians = sum(obj['gaussian_count'] for obj in bpy.gaussian_object_cache.values())
-        print(f"Loaded {object_name}: {num_gaussians:,} gaussians from EVALUATED mesh '{source_obj.name}' (SH degree {gaussian_data_info['sh_dim']})")
-        print(f"Total: {total_objects} objects, {total_gaussians:,} gaussians")
-    except Exception as e:
-        print(f"Error extracting from evaluated mesh: {e}")
-        import traceback
-        traceback.print_exc()
+# def sna_b2_load_from_blender_object_F0CCB(OBJECT_BASE_NAME):
+#     OBJECT_BASE_NAME = OBJECT_BASE_NAME
+#     # ========== VARIABLES (EDIT THESE) ==========
+#     SOURCE_MESH_OBJECT = None  # Set this to target mesh object, or leave None to use active object
+#     #OBJECT_BASE_NAME = "GaussianSplat"  # Will auto-number: _001, _002, etc.
+#     # ============================================
+#     import numpy as np
+#     from math import pi
+#     #import time
+#
+#     def get_unique_object_name(base_name):
+#         """Generate unique object name with auto-numbering"""
+#         if base_name not in bpy.data.objects:
+#             return base_name
+#         counter = 1
+#         while f"{base_name}_{counter:03d}" in bpy.data.objects:
+#             counter += 1
+#         return f"{base_name}_{counter:03d}"
+#
+#     def check_mesh_has_gaussian_attributes(mesh_obj):
+#         """Check if mesh object has basic gaussian attributes"""
+#         if not mesh_obj or not mesh_obj.data:
+#             return False
+#         # Check for basic gaussian attributes
+#         required_attrs = ['f_dc_0', 'f_dc_1', 'f_dc_2']
+#         available_attrs = [attr.name for attr in mesh_obj.data.attributes]
+#         return all(attr in available_attrs for attr in required_attrs)
+#
+#     def extract_attribute_data(mesh_data, attr_name):
+#         """Extract data from mesh attribute by name - optimized version"""
+#         if attr_name not in [attr.name for attr in mesh_data.attributes]:
+#             return None
+#         attr = mesh_data.attributes[attr_name]
+#         # Use foreach_get for much faster extraction
+#         data_array = np.zeros(len(attr.data), dtype=np.float32)
+#         attr.data.foreach_get("value", data_array)
+#         return data_array
+#
+#     def extract_gaussian_data_from_evaluated_mesh(mesh_obj):
+#         """Extract and process gaussian data from EVALUATED mesh object attributes"""
+#         # Get evaluated mesh data
+#         depsgraph = bpy.context.evaluated_depsgraph_get()
+#         evaluated_object = mesh_obj.evaluated_get(depsgraph)
+#         evaluated_mesh = evaluated_object.data
+#         # Extract positions from evaluated vertices - optimized version
+#         num_points = len(evaluated_mesh.vertices)
+#         if num_points == 0:
+#             raise ValueError("Evaluated mesh has no vertices")
+#         # Use foreach_get for fast vertex coordinate extraction
+#         positions = np.zeros(num_points * 3, dtype=np.float32)
+#         evaluated_mesh.vertices.foreach_get("co", positions)
+#         positions = positions.reshape(-1, 3)
+#         # Get available attributes from evaluated mesh
+#         available_attrs = [attr.name for attr in evaluated_mesh.attributes]
+#         # Extract spherical harmonics from evaluated mesh
+#         if all(attr in available_attrs for attr in ['f_dc_0', 'f_dc_1', 'f_dc_2']):
+#             dc_0 = extract_attribute_data(evaluated_mesh, 'f_dc_0')
+#             dc_1 = extract_attribute_data(evaluated_mesh, 'f_dc_1')
+#             dc_2 = extract_attribute_data(evaluated_mesh, 'f_dc_2')
+#             features_dc = np.column_stack([dc_0, dc_1, dc_2])
+#             # Find f_rest fields
+#             f_rest_fields = [attr for attr in available_attrs if attr.startswith('f_rest_')]
+#             f_rest_fields = sorted(f_rest_fields, key=lambda x: int(x.split('_')[-1]))
+#             if f_rest_fields:
+#                 features_extra_list = []
+#                 for field in f_rest_fields:
+#                     data = extract_attribute_data(evaluated_mesh, field)
+#                     if data is not None:
+#                         features_extra_list.append(data)
+#                 if features_extra_list:
+#                     features_extra = np.column_stack(features_extra_list)
+#                     num_f_rest = len(f_rest_fields)
+#                     # Determine degree and coefficients to use
+#                     if num_f_rest >= 45:
+#                         actual_degree = 3
+#                         coeffs_to_use = 45
+#                     elif num_f_rest >= 24:
+#                         actual_degree = 2  
+#                         coeffs_to_use = 24
+#                     elif num_f_rest >= 9:
+#                         actual_degree = 1
+#                         coeffs_to_use = 9
+#                     else:
+#                         actual_degree = 0
+#                         coeffs_to_use = 0
+#                     if coeffs_to_use > 0:
+#                         features_extra_used = features_extra[:, :coeffs_to_use]
+#                         coeffs_per_degree = (actual_degree + 1) ** 2 - 1
+#                         features_extra_reshaped = features_extra_used.reshape((num_points, 3, coeffs_per_degree))
+#                         features_extra_reshaped = np.transpose(features_extra_reshaped, [0, 2, 1])
+#                         features_dc_reshaped = features_dc.reshape(-1, 1, 3)
+#                         all_features = np.concatenate([features_dc_reshaped, features_extra_reshaped], axis=1)
+#                         sh_coeffs = all_features.reshape(num_points, -1)
+#                     else:
+#                         sh_coeffs = features_dc
+#                 else:
+#                     sh_coeffs = features_dc
+#             else:
+#                 sh_coeffs = features_dc
+#         else:
+#             # Default SH coeffs if not found
+#             print(f"Warning: f_dc attributes not found on evaluated mesh, using defaults")
+#             sh_coeffs = np.ones((num_points, 3)) * 0.28209479177387814
+#         # Extract scales from evaluated mesh
+#         if all(attr in available_attrs for attr in ['scale_0', 'scale_1', 'scale_2']):
+#             scale_0 = extract_attribute_data(evaluated_mesh, 'scale_0')
+#             scale_1 = extract_attribute_data(evaluated_mesh, 'scale_1')
+#             scale_2 = extract_attribute_data(evaluated_mesh, 'scale_2')
+#             scales = np.column_stack([scale_0, scale_1, scale_2])
+#             scales = np.exp(scales)  # Apply exponential
+#         else:
+#             print(f"Warning: scale attributes not found on evaluated mesh, using defaults")
+#             scales = np.ones((num_points, 3)) * 0.01
+#         # Extract rotations from evaluated mesh
+#         if all(attr in available_attrs for attr in ['rot_0', 'rot_1', 'rot_2', 'rot_3']):
+#             rot_0 = extract_attribute_data(evaluated_mesh, 'rot_0')
+#             rot_1 = extract_attribute_data(evaluated_mesh, 'rot_1')
+#             rot_2 = extract_attribute_data(evaluated_mesh, 'rot_2')
+#             rot_3 = extract_attribute_data(evaluated_mesh, 'rot_3')
+#             rotations = np.column_stack([rot_0, rot_1, rot_2, rot_3])
+#             # Normalize quaternions
+#             norms = np.linalg.norm(rotations, axis=1, keepdims=True)
+#             rotations = rotations / norms
+#         else:
+#             print(f"Warning: rotation attributes not found on evaluated mesh, using defaults")
+#             rotations = np.zeros((num_points, 4))
+#             rotations[:, 0] = 1.0  # Identity quaternion
+#         # Extract opacity from evaluated mesh
+#         if 'opacity' in available_attrs:
+#             opacity_raw = extract_attribute_data(evaluated_mesh, 'opacity')
+#             opacity = 1.0 / (1.0 + np.exp(-opacity_raw))  # Apply sigmoid
+#         else:
+#             print(f"Warning: opacity attribute not found on evaluated mesh, using defaults")
+#             opacity = np.ones(num_points)
+#         return {
+#             'num_points': num_points,
+#             'positions': positions,
+#             'scales': scales,
+#             'rotations': rotations,
+#             'opacities': opacity,
+#             'sh_coeffs': sh_coeffs,
+#             'sh_dim': sh_coeffs.shape[1]
+#         }
+#     try:
+#         # Determine source mesh object
+#         if SOURCE_MESH_OBJECT is not None:
+#             source_obj = SOURCE_MESH_OBJECT
+#         else:
+#             source_obj = bpy.context.active_object
+#         if not source_obj:
+#             raise ValueError("No source mesh object specified and no active object")
+#         if source_obj.type != 'MESH':
+#             raise ValueError(f"Object '{source_obj.name}' is not a mesh object")
+#         # Check if mesh has gaussian attributes (check original mesh, not evaluated)
+#         if not check_mesh_has_gaussian_attributes(source_obj):
+#             raise ValueError(f"Mesh object '{source_obj.name}' does not have required gaussian attributes (f_dc_0, f_dc_1, f_dc_2)")
+#         print(f"Extracting gaussian data from EVALUATED mesh: {source_obj.name}")
+#         # Generate or get UUID for source mesh
+#         import uuid
+#         if "gaussian_source_uuid" not in source_obj:
+#             source_obj["gaussian_source_uuid"] = str(uuid.uuid4())
+#         source_uuid = source_obj["gaussian_source_uuid"]
+#         # Extract gaussian data from EVALUATED mesh
+#         gaussian_data_info = extract_gaussian_data_from_evaluated_mesh(source_obj)
+#         # Create gaussian data array (59 floats per gaussian)
+#         num_gaussians = gaussian_data_info['num_points']
+#         sh_dim = 48
+#         total_dim = 3 + 4 + 3 + 1 + sh_dim
+#         gaussian_data = np.zeros((num_gaussians, total_dim), dtype=np.float32)
+#         # Pack data in original order
+#         gaussian_data[:, 0:3] = gaussian_data_info['positions']
+#         gaussian_data[:, 3:7] = gaussian_data_info['rotations']
+#         gaussian_data[:, 7:10] = gaussian_data_info['scales']
+#         gaussian_data[:, 10] = gaussian_data_info['opacities'].flatten()
+#         # Handle SH coefficients
+#         source_sh_coeffs = gaussian_data_info['sh_coeffs']
+#         if source_sh_coeffs.shape[1] >= sh_dim:
+#             gaussian_data[:, 11:11+sh_dim] = source_sh_coeffs[:, :sh_dim]
+#         else:
+#             gaussian_data[:, 11:11+source_sh_coeffs.shape[1]] = source_sh_coeffs
+#         # Generate unique object name
+#         object_name = get_unique_object_name(OBJECT_BASE_NAME)
+#         # Create Blender empty object
+#         empty_object = bpy.data.objects.new(object_name, None)
+#         empty_object.empty_display_type = 'PLAIN_AXES'
+#         empty_object.empty_display_size = 0.1
+#         empty_object.matrix_world = source_obj.matrix_world.copy()  # Match source object transform
+#         # Store data in object properties
+#         empty_object["gaussian_data"] = gaussian_data.tobytes()
+#         empty_object["gaussian_count"] = num_gaussians
+#         empty_object["sh_degree"] = gaussian_data_info['sh_dim']
+#         empty_object["is_gaussian_splat"] = True
+#         empty_object["is_mesh_source"] = True
+#         empty_object["is_evaluated_mesh"] = True  # Mark as using evaluated mesh
+#         empty_object["source_mesh_uuid"] = source_uuid  # Store UUID instead of name
+#         empty_object["source_mesh_name"] = source_obj.name  # Store name for reference/debugging
+#         empty_object["is_loaded"] = True
+#         empty_object["last_load_time"] = time.time()
+#         # Link to scene
+#         bpy.context.collection.objects.link(empty_object)
+#         # Initialize global cache if needed
+#         if not hasattr(bpy, 'gaussian_object_cache'):
+#             bpy.gaussian_object_cache = {}
+#         # Add to global cache
+#         bpy.gaussian_object_cache[object_name] = {
+#             'gaussian_data': gaussian_data,
+#             'gaussian_count': num_gaussians,
+#             'sh_degree': gaussian_data_info['sh_dim'],
+#             'object': empty_object,
+#             'source_mesh_uuid': source_uuid,
+#             'source_mesh_name': source_obj.name  # Keep name for reference
+#         }
+#         # Mark that global textures need rebuilding
+#         bpy.gaussian_global_needs_update = True
+#         total_objects = len(bpy.gaussian_object_cache)
+#         total_gaussians = sum(obj['gaussian_count'] for obj in bpy.gaussian_object_cache.values())
+#         print(f"Loaded {object_name}: {num_gaussians:,} gaussians from EVALUATED mesh '{source_obj.name}' (SH degree {gaussian_data_info['sh_dim']})")
+#         print(f"Total: {total_objects} objects, {total_gaussians:,} gaussians")
+#     except Exception as e:
+#         print(f"Error extracting from evaluated mesh: {e}")
+#         import traceback
+#         traceback.print_exc()
 
 
 # def sna_render_new_menu_66133(layout_function, ):
@@ -5502,241 +5502,241 @@ class SNA_PT_DGS_RENDER_BY_KIRI_ENGINE_A02CB(bpy.types.Panel):
 #         col_9E249.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Adjust_Attributes_GN'], attr_33CFF, text='', icon_value=0, emboss=True, toggle=True)
 
 
-class SNA_OT_Dgs_Render_Remove_Higher_Sh_Attributes_86F09(bpy.types.Operator):
-    bl_idname = "sna.dgs_render_remove_higher_sh_attributes_86f09"
-    bl_label = "3DGS Render: Remove Higher SH Attributes"
-    bl_description = ""
-    bl_options = {"REGISTER", "UNDO"}
-
-    @classmethod
-    def poll(cls, context):
-        if bpy.app.version >= (3, 0, 0) and True:
-            cls.poll_message_set('')
-        return not False
-
-    def execute(self, context):
-        TARGET_OBJECT_NAME = bpy.context.view_layer.objects.active.name
-        import bmesh
-        # ===== GLOBAL INPUT VARIABLES - EDIT THESE =====
-        MODE = "remove_named"  # Options: "remove_active", "remove_selected", "remove_named", "list_attributes"
-        #TARGET_OBJECT_NAME = ""  # Only used when MODE = "remove_named" - leave empty to use active object
-        VERBOSE_OUTPUT = False    # Set to False for minimal console output
-        # Additional f_rest patterns to search for (add your specific naming conventions here)
-        CUSTOM_F_REST_PATTERNS = [
-            # Add any custom patterns your 3DGS implementation uses
-            # Examples: "custom_sh_rest", "features_rest", etc.
-        ]
-        # ===== SCRIPT FUNCTIONS =====
-
-        def remove_f_rest_attributes(obj: Optional[bpy.types.Object] = None) -> dict:
-            """
-            Remove SH f_rest attributes from a 3DGS object while keeping other 3DGS attributes.
-            Args:
-                obj: Target object. If None, uses the active object.
-            Returns:
-                dict: Summary of removed attributes and operation status
-            """
-            # Get target object
-            if obj is None:
-                obj = bpy.context.active_object
-            if obj is None:
-                return {
-                    "success": False,
-                    "error": "No object provided and no active object found",
-                    "removed_attributes": []
-                }
-            if obj.type != 'MESH':
-                return {
-                    "success": False,
-                    "error": f"Object '{obj.name}' is not a mesh object",
-                    "removed_attributes": []
-                }
-            mesh = obj.data
-            removed_attributes = []
-            # Common f_rest attribute naming patterns in 3DGS implementations
-            f_rest_patterns = [
-                "f_rest",           # Simple naming
-                "f_rest_0",         # Indexed naming
-                "f_rest_1", 
-                "f_rest_2",
-                "sh_rest",          # Alternative naming
-                "sh_features_rest", # Another common pattern
-                "spherical_harmonics_rest",
-            ]
-            # Add custom patterns from global variables
-            f_rest_patterns.extend(CUSTOM_F_REST_PATTERNS)
-            # Also check for numbered f_rest attributes (up to reasonable limit)
-            for i in range(50):  # Adjust range based on your SH degree
-                f_rest_patterns.extend([
-                    f"f_rest_{i}",
-                    f"sh_rest_{i}",
-                    f"f_rest_{i:02d}",  # Zero-padded
-                ])
-            # Get list of attribute names to check
-            attribute_names = list(mesh.attributes.keys())
-            # Remove f_rest attributes
-            for attr_name in attribute_names:
-                # Check if attribute name matches f_rest patterns
-                is_f_rest = False
-                # Direct pattern matching
-                if attr_name in f_rest_patterns:
-                    is_f_rest = True
-                # Pattern matching for variations
-                attr_lower = attr_name.lower()
-                if any(pattern in attr_lower for pattern in ["f_rest", "sh_rest", "spherical_harmonics_rest"]):
-                    # Additional check to avoid false positives
-                    if not any(keep_pattern in attr_lower for keep_pattern in ["f_dc", "position", "scale", "rotation", "opacity"]):
-                        is_f_rest = True
-                if is_f_rest:
-                    try:
-                        mesh.attributes.remove(mesh.attributes[attr_name])
-                        removed_attributes.append(attr_name)
-                        if VERBOSE_OUTPUT:
-                            print(f"Removed attribute: {attr_name}")
-                    except Exception as e:
-                        print(f"Failed to remove attribute '{attr_name}': {e}")
-            # Update the mesh
-            mesh.update()
-            return {
-                "success": True,
-                "object_name": obj.name,
-                "removed_attributes": removed_attributes,
-                "remaining_attributes": list(mesh.attributes.keys())
-            }
-
-        def remove_f_rest_from_selected() -> None:
-            """Remove f_rest attributes from all selected mesh objects."""
-            selected_meshes = [obj for obj in bpy.context.selected_objects if obj.type == 'MESH']
-            if not selected_meshes:
-                print("No mesh objects selected")
-                return
-            total_removed = 0
-            for obj in selected_meshes:
-                result = remove_f_rest_attributes(obj)
-                if result["success"]:
-                    total_removed += len(result["removed_attributes"])
-                    print(f"✓ Processed '{result['object_name']}': removed {len(result['removed_attributes'])} f_rest attributes")
-                    if VERBOSE_OUTPUT and result["removed_attributes"]:
-                        print(f"  Removed: {', '.join(result['removed_attributes'])}")
-                else:
-                    print(f"✗ Failed to process '{obj.name}': {result['error']}")
-            print(f"\nTotal f_rest attributes removed across all objects: {total_removed}")
-
-        def list_3dgs_attributes(obj: Optional[bpy.types.Object] = None) -> dict:
-            """
-            List all attributes on an object, categorizing them as 3DGS-related or other.
-            Args:
-                obj: Target object. If None, uses the active object.
-            Returns:
-                dict: Categorized attribute information
-            """
-            if obj is None:
-                obj = bpy.context.active_object
-            if obj is None or obj.type != 'MESH':
-                return {"error": "No valid mesh object"}
-            mesh = obj.data
-            all_attributes = list(mesh.attributes.keys())
-            # Categorize attributes
-            f_dc_attrs = [name for name in all_attributes if "f_dc" in name.lower()]
-            f_rest_attrs = [name for name in all_attributes if any(pattern in name.lower() for pattern in ["f_rest", "sh_rest"])]
-            position_attrs = [name for name in all_attributes if any(pattern in name.lower() for pattern in ["position", "pos", "xyz"])]
-            scale_attrs = [name for name in all_attributes if "scale" in name.lower()]
-            rotation_attrs = [name for name in all_attributes if any(pattern in name.lower() for pattern in ["rotation", "rot", "quaternion", "quat"])]
-            opacity_attrs = [name for name in all_attributes if any(pattern in name.lower() for pattern in ["opacity", "alpha"])]
-            known_3dgs = f_dc_attrs + f_rest_attrs + position_attrs + scale_attrs + rotation_attrs + opacity_attrs
-            other_attrs = [name for name in all_attributes if name not in known_3dgs]
-            return {
-                "object_name": obj.name,
-                "total_attributes": len(all_attributes),
-                "f_dc": f_dc_attrs,
-                "f_rest": f_rest_attrs,
-                "position": position_attrs,
-                "scale": scale_attrs,
-                "rotation": rotation_attrs,
-                "opacity": opacity_attrs,
-                "other": other_attrs
-            }
-        # ===== MAIN EXECUTION =====
-        print("=== 3DGS f_rest Attribute Removal Script ===")
-        print(f"Mode: {MODE}")
-        if MODE == "remove_active":
-            print("Removing f_rest attributes from active object...")
-            result = remove_f_rest_attributes()
-            if result["success"]:
-                print(f"✓ Successfully processed '{result['object_name']}'")
-                print(f"Removed {len(result['removed_attributes'])} f_rest attributes")
-                if VERBOSE_OUTPUT and result["removed_attributes"]:
-                    print(f"Removed attributes: {', '.join(result['removed_attributes'])}")
-                if VERBOSE_OUTPUT:
-                    print(f"Remaining attributes: {', '.join(result['remaining_attributes'])}")
-            else:
-                print(f"✗ Error: {result['error']}")
-        elif MODE == "remove_selected":
-            print("Removing f_rest attributes from all selected objects...")
-            remove_f_rest_from_selected()
-        elif MODE == "remove_named":
-            if not TARGET_OBJECT_NAME:
-                print("✗ Error: TARGET_OBJECT_NAME must be specified when using 'remove_named' mode")
-            else:
-                target_obj = bpy.data.objects.get(TARGET_OBJECT_NAME)
-                if target_obj is None:
-                    print(f"✗ Error: Object '{TARGET_OBJECT_NAME}' not found")
-                else:
-                    print(f"Removing f_rest attributes from object '{TARGET_OBJECT_NAME}'...")
-                    result = remove_f_rest_attributes(target_obj)
-                    if result["success"]:
-                        print(f"✓ Successfully processed '{result['object_name']}'")
-                        print(f"Removed {len(result['removed_attributes'])} f_rest attributes")
-                        if VERBOSE_OUTPUT and result["removed_attributes"]:
-                            print(f"Removed attributes: {', '.join(result['removed_attributes'])}")
-                        if VERBOSE_OUTPUT:
-                            print(f"Remaining attributes: {', '.join(result['remaining_attributes'])}")
-                    else:
-                        print(f"✗ Error: {result['error']}")
-        elif MODE == "list_attributes":
-            target_obj = None
-            if TARGET_OBJECT_NAME:
-                target_obj = bpy.data.objects.get(TARGET_OBJECT_NAME)
-                if target_obj is None:
-                    print(f"Warning: Object '{TARGET_OBJECT_NAME}' not found, using active object instead")
-            print("Listing 3DGS attributes...")
-            attr_info = list_3dgs_attributes(target_obj)
-            if "error" not in attr_info:
-                print(f"\n=== Attribute Summary for '{attr_info['object_name']}' ===")
-                print(f"Total attributes: {attr_info['total_attributes']}")
-                print(f"f_dc attributes ({len(attr_info['f_dc'])}): {attr_info['f_dc']}")
-                print(f"f_rest attributes ({len(attr_info['f_rest'])}): {attr_info['f_rest']}")
-                print(f"Position attributes ({len(attr_info['position'])}): {attr_info['position']}")
-                print(f"Scale attributes ({len(attr_info['scale'])}): {attr_info['scale']}")
-                print(f"Rotation attributes ({len(attr_info['rotation'])}): {attr_info['rotation']}")
-                print(f"Opacity attributes ({len(attr_info['opacity'])}): {attr_info['opacity']}")
-                print(f"Other attributes ({len(attr_info['other'])}): {attr_info['other']}")
-            else:
-                print(f"✗ Error: {attr_info['error']}")
-        else:
-            print(f"✗ Error: Unknown mode '{MODE}'")
-            print("Valid modes: 'remove_active', 'remove_selected', 'remove_named', 'list_attributes'")
-        print("=== Script Complete ===")
-        return {"FINISHED"}
-
-    def draw(self, context):
-        layout = self.layout
-        box_8FEFB = layout.box()
-        box_8FEFB.alert = False
-        box_8FEFB.enabled = True
-        box_8FEFB.active = True
-        box_8FEFB.use_property_split = False
-        box_8FEFB.use_property_decorate = False
-        box_8FEFB.alignment = 'Expand'.upper()
-        box_8FEFB.scale_x = 1.0
-        box_8FEFB.scale_y = 1.0
-        if not True: box_8FEFB.operator_context = "EXEC_DEFAULT"
-        box_8FEFB.label(text='This action is destructive and not reversible', icon_value=load_preview_icon(os.path.join(os.path.dirname(__file__), 'assets', 'tips-one.svg')))
-        box_8FEFB.label(text='Removing higher SH attributes (f_rest attributes) can save memory and increase performance in some areas.', icon_value=0)
-        box_8FEFB.label(text='If you are unsure about what to do, try working on a duplicate.', icon_value=0)
-
-    def invoke(self, context, event):
-        return context.window_manager.invoke_props_dialog(self, width=500)
+# class SNA_OT_Dgs_Render_Remove_Higher_Sh_Attributes_86F09(bpy.types.Operator):
+#     bl_idname = "sna.dgs_render_remove_higher_sh_attributes_86f09"
+#     bl_label = "3DGS Render: Remove Higher SH Attributes"
+#     bl_description = ""
+#     bl_options = {"REGISTER", "UNDO"}
+#
+#     @classmethod
+#     def poll(cls, context):
+#         if bpy.app.version >= (3, 0, 0) and True:
+#             cls.poll_message_set('')
+#         return not False
+#
+#     def execute(self, context):
+#         TARGET_OBJECT_NAME = bpy.context.view_layer.objects.active.name
+#         import bmesh
+#         # ===== GLOBAL INPUT VARIABLES - EDIT THESE =====
+#         MODE = "remove_named"  # Options: "remove_active", "remove_selected", "remove_named", "list_attributes"
+#         #TARGET_OBJECT_NAME = ""  # Only used when MODE = "remove_named" - leave empty to use active object
+#         VERBOSE_OUTPUT = False    # Set to False for minimal console output
+#         # Additional f_rest patterns to search for (add your specific naming conventions here)
+#         CUSTOM_F_REST_PATTERNS = [
+#             # Add any custom patterns your 3DGS implementation uses
+#             # Examples: "custom_sh_rest", "features_rest", etc.
+#         ]
+#         # ===== SCRIPT FUNCTIONS =====
+#
+#         def remove_f_rest_attributes(obj: Optional[bpy.types.Object] = None) -> dict:
+#             """
+#             Remove SH f_rest attributes from a 3DGS object while keeping other 3DGS attributes.
+#             Args:
+#                 obj: Target object. If None, uses the active object.
+#             Returns:
+#                 dict: Summary of removed attributes and operation status
+#             """
+#             # Get target object
+#             if obj is None:
+#                 obj = bpy.context.active_object
+#             if obj is None:
+#                 return {
+#                     "success": False,
+#                     "error": "No object provided and no active object found",
+#                     "removed_attributes": []
+#                 }
+#             if obj.type != 'MESH':
+#                 return {
+#                     "success": False,
+#                     "error": f"Object '{obj.name}' is not a mesh object",
+#                     "removed_attributes": []
+#                 }
+#             mesh = obj.data
+#             removed_attributes = []
+#             # Common f_rest attribute naming patterns in 3DGS implementations
+#             f_rest_patterns = [
+#                 "f_rest",           # Simple naming
+#                 "f_rest_0",         # Indexed naming
+#                 "f_rest_1", 
+#                 "f_rest_2",
+#                 "sh_rest",          # Alternative naming
+#                 "sh_features_rest", # Another common pattern
+#                 "spherical_harmonics_rest",
+#             ]
+#             # Add custom patterns from global variables
+#             f_rest_patterns.extend(CUSTOM_F_REST_PATTERNS)
+#             # Also check for numbered f_rest attributes (up to reasonable limit)
+#             for i in range(50):  # Adjust range based on your SH degree
+#                 f_rest_patterns.extend([
+#                     f"f_rest_{i}",
+#                     f"sh_rest_{i}",
+#                     f"f_rest_{i:02d}",  # Zero-padded
+#                 ])
+#             # Get list of attribute names to check
+#             attribute_names = list(mesh.attributes.keys())
+#             # Remove f_rest attributes
+#             for attr_name in attribute_names:
+#                 # Check if attribute name matches f_rest patterns
+#                 is_f_rest = False
+#                 # Direct pattern matching
+#                 if attr_name in f_rest_patterns:
+#                     is_f_rest = True
+#                 # Pattern matching for variations
+#                 attr_lower = attr_name.lower()
+#                 if any(pattern in attr_lower for pattern in ["f_rest", "sh_rest", "spherical_harmonics_rest"]):
+#                     # Additional check to avoid false positives
+#                     if not any(keep_pattern in attr_lower for keep_pattern in ["f_dc", "position", "scale", "rotation", "opacity"]):
+#                         is_f_rest = True
+#                 if is_f_rest:
+#                     try:
+#                         mesh.attributes.remove(mesh.attributes[attr_name])
+#                         removed_attributes.append(attr_name)
+#                         if VERBOSE_OUTPUT:
+#                             print(f"Removed attribute: {attr_name}")
+#                     except Exception as e:
+#                         print(f"Failed to remove attribute '{attr_name}': {e}")
+#             # Update the mesh
+#             mesh.update()
+#             return {
+#                 "success": True,
+#                 "object_name": obj.name,
+#                 "removed_attributes": removed_attributes,
+#                 "remaining_attributes": list(mesh.attributes.keys())
+#             }
+#
+#         def remove_f_rest_from_selected() -> None:
+#             """Remove f_rest attributes from all selected mesh objects."""
+#             selected_meshes = [obj for obj in bpy.context.selected_objects if obj.type == 'MESH']
+#             if not selected_meshes:
+#                 print("No mesh objects selected")
+#                 return
+#             total_removed = 0
+#             for obj in selected_meshes:
+#                 result = remove_f_rest_attributes(obj)
+#                 if result["success"]:
+#                     total_removed += len(result["removed_attributes"])
+#                     print(f"✓ Processed '{result['object_name']}': removed {len(result['removed_attributes'])} f_rest attributes")
+#                     if VERBOSE_OUTPUT and result["removed_attributes"]:
+#                         print(f"  Removed: {', '.join(result['removed_attributes'])}")
+#                 else:
+#                     print(f"✗ Failed to process '{obj.name}': {result['error']}")
+#             print(f"\nTotal f_rest attributes removed across all objects: {total_removed}")
+#
+#         def list_3dgs_attributes(obj: Optional[bpy.types.Object] = None) -> dict:
+#             """
+#             List all attributes on an object, categorizing them as 3DGS-related or other.
+#             Args:
+#                 obj: Target object. If None, uses the active object.
+#             Returns:
+#                 dict: Categorized attribute information
+#             """
+#             if obj is None:
+#                 obj = bpy.context.active_object
+#             if obj is None or obj.type != 'MESH':
+#                 return {"error": "No valid mesh object"}
+#             mesh = obj.data
+#             all_attributes = list(mesh.attributes.keys())
+#             # Categorize attributes
+#             f_dc_attrs = [name for name in all_attributes if "f_dc" in name.lower()]
+#             f_rest_attrs = [name for name in all_attributes if any(pattern in name.lower() for pattern in ["f_rest", "sh_rest"])]
+#             position_attrs = [name for name in all_attributes if any(pattern in name.lower() for pattern in ["position", "pos", "xyz"])]
+#             scale_attrs = [name for name in all_attributes if "scale" in name.lower()]
+#             rotation_attrs = [name for name in all_attributes if any(pattern in name.lower() for pattern in ["rotation", "rot", "quaternion", "quat"])]
+#             opacity_attrs = [name for name in all_attributes if any(pattern in name.lower() for pattern in ["opacity", "alpha"])]
+#             known_3dgs = f_dc_attrs + f_rest_attrs + position_attrs + scale_attrs + rotation_attrs + opacity_attrs
+#             other_attrs = [name for name in all_attributes if name not in known_3dgs]
+#             return {
+#                 "object_name": obj.name,
+#                 "total_attributes": len(all_attributes),
+#                 "f_dc": f_dc_attrs,
+#                 "f_rest": f_rest_attrs,
+#                 "position": position_attrs,
+#                 "scale": scale_attrs,
+#                 "rotation": rotation_attrs,
+#                 "opacity": opacity_attrs,
+#                 "other": other_attrs
+#             }
+#         # ===== MAIN EXECUTION =====
+#         print("=== 3DGS f_rest Attribute Removal Script ===")
+#         print(f"Mode: {MODE}")
+#         if MODE == "remove_active":
+#             print("Removing f_rest attributes from active object...")
+#             result = remove_f_rest_attributes()
+#             if result["success"]:
+#                 print(f"✓ Successfully processed '{result['object_name']}'")
+#                 print(f"Removed {len(result['removed_attributes'])} f_rest attributes")
+#                 if VERBOSE_OUTPUT and result["removed_attributes"]:
+#                     print(f"Removed attributes: {', '.join(result['removed_attributes'])}")
+#                 if VERBOSE_OUTPUT:
+#                     print(f"Remaining attributes: {', '.join(result['remaining_attributes'])}")
+#             else:
+#                 print(f"✗ Error: {result['error']}")
+#         elif MODE == "remove_selected":
+#             print("Removing f_rest attributes from all selected objects...")
+#             remove_f_rest_from_selected()
+#         elif MODE == "remove_named":
+#             if not TARGET_OBJECT_NAME:
+#                 print("✗ Error: TARGET_OBJECT_NAME must be specified when using 'remove_named' mode")
+#             else:
+#                 target_obj = bpy.data.objects.get(TARGET_OBJECT_NAME)
+#                 if target_obj is None:
+#                     print(f"✗ Error: Object '{TARGET_OBJECT_NAME}' not found")
+#                 else:
+#                     print(f"Removing f_rest attributes from object '{TARGET_OBJECT_NAME}'...")
+#                     result = remove_f_rest_attributes(target_obj)
+#                     if result["success"]:
+#                         print(f"✓ Successfully processed '{result['object_name']}'")
+#                         print(f"Removed {len(result['removed_attributes'])} f_rest attributes")
+#                         if VERBOSE_OUTPUT and result["removed_attributes"]:
+#                             print(f"Removed attributes: {', '.join(result['removed_attributes'])}")
+#                         if VERBOSE_OUTPUT:
+#                             print(f"Remaining attributes: {', '.join(result['remaining_attributes'])}")
+#                     else:
+#                         print(f"✗ Error: {result['error']}")
+#         elif MODE == "list_attributes":
+#             target_obj = None
+#             if TARGET_OBJECT_NAME:
+#                 target_obj = bpy.data.objects.get(TARGET_OBJECT_NAME)
+#                 if target_obj is None:
+#                     print(f"Warning: Object '{TARGET_OBJECT_NAME}' not found, using active object instead")
+#             print("Listing 3DGS attributes...")
+#             attr_info = list_3dgs_attributes(target_obj)
+#             if "error" not in attr_info:
+#                 print(f"\n=== Attribute Summary for '{attr_info['object_name']}' ===")
+#                 print(f"Total attributes: {attr_info['total_attributes']}")
+#                 print(f"f_dc attributes ({len(attr_info['f_dc'])}): {attr_info['f_dc']}")
+#                 print(f"f_rest attributes ({len(attr_info['f_rest'])}): {attr_info['f_rest']}")
+#                 print(f"Position attributes ({len(attr_info['position'])}): {attr_info['position']}")
+#                 print(f"Scale attributes ({len(attr_info['scale'])}): {attr_info['scale']}")
+#                 print(f"Rotation attributes ({len(attr_info['rotation'])}): {attr_info['rotation']}")
+#                 print(f"Opacity attributes ({len(attr_info['opacity'])}): {attr_info['opacity']}")
+#                 print(f"Other attributes ({len(attr_info['other'])}): {attr_info['other']}")
+#             else:
+#                 print(f"✗ Error: {attr_info['error']}")
+#         else:
+#             print(f"✗ Error: Unknown mode '{MODE}'")
+#             print("Valid modes: 'remove_active', 'remove_selected', 'remove_named', 'list_attributes'")
+#         print("=== Script Complete ===")
+#         return {"FINISHED"}
+#
+#     def draw(self, context):
+#         layout = self.layout
+#         box_8FEFB = layout.box()
+#         box_8FEFB.alert = False
+#         box_8FEFB.enabled = True
+#         box_8FEFB.active = True
+#         box_8FEFB.use_property_split = False
+#         box_8FEFB.use_property_decorate = False
+#         box_8FEFB.alignment = 'Expand'.upper()
+#         box_8FEFB.scale_x = 1.0
+#         box_8FEFB.scale_y = 1.0
+#         if not True: box_8FEFB.operator_context = "EXEC_DEFAULT"
+#         box_8FEFB.label(text='This action is destructive and not reversible', icon_value=load_preview_icon(os.path.join(os.path.dirname(__file__), 'assets', 'tips-one.svg')))
+#         box_8FEFB.label(text='Removing higher SH attributes (f_rest attributes) can save memory and increase performance in some areas.', icon_value=0)
+#         box_8FEFB.label(text='If you are unsure about what to do, try working on a duplicate.', icon_value=0)
+#
+#     def invoke(self, context, event):
+#         return context.window_manager.invoke_props_dialog(self, width=500)
 
 
 # def sna_camera_cull_8069C(layout_function, ):

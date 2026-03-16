@@ -78,3 +78,9 @@ from .sna_shader_system import *
 from .export_mesh_object_as_3dgs_ply import *
 
 from .sna_dgs_render_main_function_menu import *
+from .sna_clean_up_scene import *
+from .render_remove_higher_sh_attributes import *
+from .material_properties_group import *
+from .sna_append_and_add_geo_nodes_function_execute import *
+from .load_from_blender_object import *
+from .update_camera_single_time import *
