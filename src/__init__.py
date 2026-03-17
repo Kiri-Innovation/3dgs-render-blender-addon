@@ -80,9 +80,18 @@ from .sna_dgs_render_main_function_menu import *
 from .sna_clean_up_scene import *
 from .render_remove_higher_sh_attributes import *
 from .material_properties_group import *
-from .sna_append_and_add_geo_nodes_function_execute import *
+from .append_and_add_geo_nodes_function_execute import *
 from .load_from_blender_object import *
 from .update_camera_single_time import *
 from .shader_system import *
 
 from .align_active_values_to_x import *
+from .align_active_to_x_axis import *
+from .render_import_ply import *
+from .render_refresh_scene import *
+from .update_enabled_3dgs_objects import *
+from .disable_hq_overlap import *
+from .create_proxy_from_mesh import *
+from .render_by_kiri_engine import *
+from .add_animate_modifier import *
+from .append_rough_mesh_modifier import *
