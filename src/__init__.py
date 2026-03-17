@@ -74,7 +74,6 @@ from .apply_3dgs_transforms import *
 from .align_active_to_z_axis import *
 from .sna_viewport_render import *
 
-from .sna_shader_system import *
 from .export_mesh_object_as_3dgs_ply import *
 
 from .sna_dgs_render_main_function_menu import *
@@ -84,3 +83,6 @@ from .material_properties_group import *
 from .sna_append_and_add_geo_nodes_function_execute import *
 from .load_from_blender_object import *
 from .update_camera_single_time import *
+from .shader_system import *
+
+from .align_active_values_to_x import *

@@ -3888,136 +3888,136 @@ class SNA_OT_Dgs_Render_Update_Enabled_3Dgs_Objects_6D7F4(bpy.types.Operator):
 #         traceback.print_exc()
 
 
-def sna_shader_system_A4AED():
-    VERTEX_SHADER_PATH = os.path.join(os.path.dirname(__file__), 'assets', 'vert.glsl')
-    FRAGMENT_SHADER_PATH = os.path.join(os.path.dirname(__file__), 'assets', 'frag.glsl')
-    COMPOSITE_VERTEX_SHADER_PATH = os.path.join(os.path.dirname(__file__), 'assets', 'composite_vert.glsl')
-    COMPOSITE_FRAGMENT_SHADER_PATH = os.path.join(os.path.dirname(__file__), 'assets', 'composite_frag.glsl')
-    # ========== VARIABLES (EDIT THESE) ==========
-    #VERTEX_SHADER_PATH = r"D:\3d\Blender\my work\KIRI\KIRI - Tools\KIRI - Blender 3DGS Render\SplatForge Adaption\shaders\vert.glsl"
-    #FRAGMENT_SHADER_PATH = r"D:\3d\Blender\my work\KIRI\KIRI - Tools\KIRI - Blender 3DGS Render\SplatForge Adaption\shaders\frag.glsl"
-    #COMPOSITE_VERTEX_SHADER_PATH = r"D:\3d\Blender\my work\KIRI\KIRI - Tools\KIRI - Blender 3DGS Render\SplatForge Adaption\shaders\composite_vert.glsl"
-    #COMPOSITE_FRAGMENT_SHADER_PATH = r"D:\3d\Blender\my work\KIRI\KIRI - Tools\KIRI - Blender 3DGS Render\SplatForge Adaption\shaders\composite_frag.glsl"
-    MAX_GAUSSIANS = 1000000
-    # ============================================
-    #import bpy
-    import gpu.types
-    import numpy as np
-
-    def read_shader_file(filepath):
-        try:
-            with open(filepath, 'r', encoding='utf-8') as f:
-                content = f.read()
-            return content
-        except Exception as e:
-            print(f"Error reading shader file {filepath}: {e}")
-            return None
-    try:
-        # ========== CLEANUP EXISTING SHADERS ==========
-        print("Cleaning up existing shader resources...")
-        cleanup_attrs = [
-            'gaussian_quad_shader', 'gaussian_quad_batch', 
-            'gaussian_composite_shader', 'gaussian_composite_batch'
-        ]
-        for attr in cleanup_attrs:
-            if hasattr(bpy, attr):
-                delattr(bpy, attr)
-        # Check shader files exist
-        shader_files = [VERTEX_SHADER_PATH, FRAGMENT_SHADER_PATH, 
-                       COMPOSITE_VERTEX_SHADER_PATH, COMPOSITE_FRAGMENT_SHADER_PATH]
-        for shader_file in shader_files:
-            if not os.path.exists(shader_file):
-                raise FileNotFoundError(f"Shader not found: {shader_file}")
-        # Read shader sources
-        vertex_source = read_shader_file(VERTEX_SHADER_PATH)
-        fragment_source = read_shader_file(FRAGMENT_SHADER_PATH)
-        composite_vertex_source = read_shader_file(COMPOSITE_VERTEX_SHADER_PATH)
-        composite_fragment_source = read_shader_file(COMPOSITE_FRAGMENT_SHADER_PATH)
-        if not all([vertex_source, fragment_source, composite_vertex_source, composite_fragment_source]):
-            raise ValueError("Failed to read shader files")
-        print("Loaded all shader files successfully")
-        # ========== CREATE MAIN GAUSSIAN SHADER ==========
-        shader_info = gpu.types.GPUShaderCreateInfo()
-        # Vertex inputs
-        shader_info.vertex_in(0, 'VEC2', "quad_coord")
-        # Push constants
-        shader_info.push_constant("MAT4", "ViewMatrix")
-        shader_info.push_constant("MAT4", "ProjectionMatrix") 
-        shader_info.push_constant("VEC3", "focal_parameters")
-        shader_info.push_constant("VEC3", "camera_position")
-        shader_info.push_constant("INT", "render_mode")
-        shader_info.push_constant("INT", "sh_degree")
-        shader_info.push_constant("VEC2", "texture_dimensions")
-        shader_info.push_constant("VEC2", "indices_dimensions")
-        shader_info.push_constant("VEC2", "depth_texture_size")
-        # Samplers
-        shader_info.sampler(0, 'FLOAT_3D', "gaussian_data")
-        shader_info.sampler(1, 'FLOAT_2D', "sorted_indices")
-        shader_info.sampler(2, 'FLOAT_2D', "blender_depth")
-        shader_info.sampler(3, 'FLOAT_2D', "object_metadata")
-        # Interface
-        interface = gpu.types.GPUStageInterfaceInfo("splat_forge_quad_interface")
-        interface.smooth('VEC3', "v_color")
-        interface.smooth('VEC3', "v_conic")
-        interface.smooth('VEC2', "v_coordxy")
-        interface.smooth('FLOAT', "v_alpha")
-        interface.smooth('VEC4', "v_rotation")
-        interface.flat('INT', "v_render_mode")
-        interface.smooth('FLOAT', "v_depth")
-        shader_info.vertex_out(interface)
-        shader_info.fragment_out(0, 'VEC4', 'fragColor')
-        shader_info.vertex_source(vertex_source)
-        shader_info.fragment_source(fragment_source)
-        # Create main shader
-        quad_shader = gpu.shader.create_from_info(shader_info)
-        del interface
-        del shader_info
-        # ========== CREATE COMPOSITE SHADER ==========
-        composite_shader_info = gpu.types.GPUShaderCreateInfo()
-        composite_shader_info.vertex_in(0, 'VEC2', "position")
-        composite_shader_info.vertex_in(1, 'VEC2', "uv")
-        composite_interface = gpu.types.GPUStageInterfaceInfo("composite_interface")
-        composite_interface.smooth('VEC2', "uvInterp")
-        composite_shader_info.vertex_out(composite_interface)
-        composite_shader_info.sampler(0, 'FLOAT_2D', "image")
-        composite_shader_info.fragment_out(0, 'VEC4', "FragColor")
-        composite_shader_info.vertex_source(composite_vertex_source)
-        composite_shader_info.fragment_source(composite_fragment_source)
-        composite_shader = gpu.shader.create_from_info(composite_shader_info)
-        del composite_interface
-        del composite_shader_info
-        # ========== CREATE BATCHES ==========
-        base_quad = np.array([
-            [-1.0,  1.0],
-            [ 1.0,  1.0],
-            [ 1.0, -1.0],
-            [-1.0, -1.0],
-        ], dtype=np.float32)
-        base_indices = np.array([0, 1, 2, 0, 2, 3], dtype=np.uint32)
-        quad_batch = batch_for_shader(
-            quad_shader, 
-            'TRIS',
-            {"quad_coord": base_quad},
-            indices=base_indices
-        )
-        composite_batch = batch_for_shader(
-            composite_shader, 
-            'TRI_FAN',
-            {
-                "position": ((-1, -1), (1, -1), (1, 1), (-1, 1)),
-                "uv": ((0, 0), (1, 0), (1, 1), (0, 1)),
-            }
-        )
-        # Store globally
-        bpy.gaussian_quad_shader = quad_shader
-        bpy.gaussian_quad_batch = quad_batch
-        bpy.gaussian_composite_shader = composite_shader  
-        bpy.gaussian_composite_batch = composite_batch
-        print("Multi-object shader system created successfully")
-    except Exception as e:
-        print(f"Error creating shader system: {e}")
-        import traceback
-        traceback.print_exc()
+# def sna_shader_system_A4AED():
+#     VERTEX_SHADER_PATH = os.path.join(os.path.dirname(__file__), 'assets', 'vert.glsl')
+#     FRAGMENT_SHADER_PATH = os.path.join(os.path.dirname(__file__), 'assets', 'frag.glsl')
+#     COMPOSITE_VERTEX_SHADER_PATH = os.path.join(os.path.dirname(__file__), 'assets', 'composite_vert.glsl')
+#     COMPOSITE_FRAGMENT_SHADER_PATH = os.path.join(os.path.dirname(__file__), 'assets', 'composite_frag.glsl')
+#     # ========== VARIABLES (EDIT THESE) ==========
+#     #VERTEX_SHADER_PATH = r"D:\3d\Blender\my work\KIRI\KIRI - Tools\KIRI - Blender 3DGS Render\SplatForge Adaption\shaders\vert.glsl"
+#     #FRAGMENT_SHADER_PATH = r"D:\3d\Blender\my work\KIRI\KIRI - Tools\KIRI - Blender 3DGS Render\SplatForge Adaption\shaders\frag.glsl"
+#     #COMPOSITE_VERTEX_SHADER_PATH = r"D:\3d\Blender\my work\KIRI\KIRI - Tools\KIRI - Blender 3DGS Render\SplatForge Adaption\shaders\composite_vert.glsl"
+#     #COMPOSITE_FRAGMENT_SHADER_PATH = r"D:\3d\Blender\my work\KIRI\KIRI - Tools\KIRI - Blender 3DGS Render\SplatForge Adaption\shaders\composite_frag.glsl"
+#     MAX_GAUSSIANS = 1000000
+#     # ============================================
+#     #import bpy
+#     import gpu.types
+#     import numpy as np
+#
+#     def read_shader_file(filepath):
+#         try:
+#             with open(filepath, 'r', encoding='utf-8') as f:
+#                 content = f.read()
+#             return content
+#         except Exception as e:
+#             print(f"Error reading shader file {filepath}: {e}")
+#             return None
+#     try:
+#         # ========== CLEANUP EXISTING SHADERS ==========
+#         print("Cleaning up existing shader resources...")
+#         cleanup_attrs = [
+#             'gaussian_quad_shader', 'gaussian_quad_batch', 
+#             'gaussian_composite_shader', 'gaussian_composite_batch'
+#         ]
+#         for attr in cleanup_attrs:
+#             if hasattr(bpy, attr):
+#                 delattr(bpy, attr)
+#         # Check shader files exist
+#         shader_files = [VERTEX_SHADER_PATH, FRAGMENT_SHADER_PATH, 
+#                        COMPOSITE_VERTEX_SHADER_PATH, COMPOSITE_FRAGMENT_SHADER_PATH]
+#         for shader_file in shader_files:
+#             if not os.path.exists(shader_file):
+#                 raise FileNotFoundError(f"Shader not found: {shader_file}")
+#         # Read shader sources
+#         vertex_source = read_shader_file(VERTEX_SHADER_PATH)
+#         fragment_source = read_shader_file(FRAGMENT_SHADER_PATH)
+#         composite_vertex_source = read_shader_file(COMPOSITE_VERTEX_SHADER_PATH)
+#         composite_fragment_source = read_shader_file(COMPOSITE_FRAGMENT_SHADER_PATH)
+#         if not all([vertex_source, fragment_source, composite_vertex_source, composite_fragment_source]):
+#             raise ValueError("Failed to read shader files")
+#         print("Loaded all shader files successfully")
+#         # ========== CREATE MAIN GAUSSIAN SHADER ==========
+#         shader_info = gpu.types.GPUShaderCreateInfo()
+#         # Vertex inputs
+#         shader_info.vertex_in(0, 'VEC2', "quad_coord")
+#         # Push constants
+#         shader_info.push_constant("MAT4", "ViewMatrix")
+#         shader_info.push_constant("MAT4", "ProjectionMatrix") 
+#         shader_info.push_constant("VEC3", "focal_parameters")
+#         shader_info.push_constant("VEC3", "camera_position")
+#         shader_info.push_constant("INT", "render_mode")
+#         shader_info.push_constant("INT", "sh_degree")
+#         shader_info.push_constant("VEC2", "texture_dimensions")
+#         shader_info.push_constant("VEC2", "indices_dimensions")
+#         shader_info.push_constant("VEC2", "depth_texture_size")
+#         # Samplers
+#         shader_info.sampler(0, 'FLOAT_3D', "gaussian_data")
+#         shader_info.sampler(1, 'FLOAT_2D', "sorted_indices")
+#         shader_info.sampler(2, 'FLOAT_2D', "blender_depth")
+#         shader_info.sampler(3, 'FLOAT_2D', "object_metadata")
+#         # Interface
+#         interface = gpu.types.GPUStageInterfaceInfo("splat_forge_quad_interface")
+#         interface.smooth('VEC3', "v_color")
+#         interface.smooth('VEC3', "v_conic")
+#         interface.smooth('VEC2', "v_coordxy")
+#         interface.smooth('FLOAT', "v_alpha")
+#         interface.smooth('VEC4', "v_rotation")
+#         interface.flat('INT', "v_render_mode")
+#         interface.smooth('FLOAT', "v_depth")
+#         shader_info.vertex_out(interface)
+#         shader_info.fragment_out(0, 'VEC4', 'fragColor')
+#         shader_info.vertex_source(vertex_source)
+#         shader_info.fragment_source(fragment_source)
+#         # Create main shader
+#         quad_shader = gpu.shader.create_from_info(shader_info)
+#         del interface
+#         del shader_info
+#         # ========== CREATE COMPOSITE SHADER ==========
+#         composite_shader_info = gpu.types.GPUShaderCreateInfo()
+#         composite_shader_info.vertex_in(0, 'VEC2', "position")
+#         composite_shader_info.vertex_in(1, 'VEC2', "uv")
+#         composite_interface = gpu.types.GPUStageInterfaceInfo("composite_interface")
+#         composite_interface.smooth('VEC2', "uvInterp")
+#         composite_shader_info.vertex_out(composite_interface)
+#         composite_shader_info.sampler(0, 'FLOAT_2D', "image")
+#         composite_shader_info.fragment_out(0, 'VEC4', "FragColor")
+#         composite_shader_info.vertex_source(composite_vertex_source)
+#         composite_shader_info.fragment_source(composite_fragment_source)
+#         composite_shader = gpu.shader.create_from_info(composite_shader_info)
+#         del composite_interface
+#         del composite_shader_info
+#         # ========== CREATE BATCHES ==========
+#         base_quad = np.array([
+#             [-1.0,  1.0],
+#             [ 1.0,  1.0],
+#             [ 1.0, -1.0],
+#             [-1.0, -1.0],
+#         ], dtype=np.float32)
+#         base_indices = np.array([0, 1, 2, 0, 2, 3], dtype=np.uint32)
+#         quad_batch = batch_for_shader(
+#             quad_shader, 
+#             'TRIS',
+#             {"quad_coord": base_quad},
+#             indices=base_indices
+#         )
+#         composite_batch = batch_for_shader(
+#             composite_shader, 
+#             'TRI_FAN',
+#             {
+#                 "position": ((-1, -1), (1, -1), (1, 1), (-1, 1)),
+#                 "uv": ((0, 0), (1, 0), (1, 1), (0, 1)),
+#             }
+#         )
+#         # Store globally
+#         bpy.gaussian_quad_shader = quad_shader
+#         bpy.gaussian_quad_batch = quad_batch
+#         bpy.gaussian_composite_shader = composite_shader  
+#         bpy.gaussian_composite_batch = composite_batch
+#         print("Multi-object shader system created successfully")
+#     except Exception as e:
+#         print(f"Error creating shader system: {e}")
+#         import traceback
+#         traceback.print_exc()
 
 
 # def sna_b2_load_from_blender_object_F0CCB(OBJECT_BASE_NAME):
@@ -4745,45 +4745,45 @@ class SNA_OT_Dgs_Render_Clean_Up_Advanced_Render_Scene_09450(bpy.types.Operator)
 #             box_3BEA2.label(text='transparent bounces', icon_value=0)
 
 
-def sna_align_active_values_to_x_4CE1F():
-    bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_2'] = -4.3711398944878965e-08
-    bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_3'] = -4.3711398944878965e-08
-    bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_4'] = -1.0
-    bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_5'] = -0.0
-    bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_6'] = -1.0
-    bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_7'] = 1.910689912087678e-15
-    bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_8'] = 4.3711398944878965e-08
-    bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_9'] = -0.0
-    bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_10'] = 2.117579969998599e-22
-    bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_11'] = 1.0
-    bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_12'] = -4.3711398944878965e-08
-    bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_13'] = 0.0
-    bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_14'] = -3.553000027523012e-08
-    bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_15'] = -3.571039915084839
-    bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_16'] = -8.938460350036621
-    bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_17'] = 1.0
-    bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_34'] = 958.0
-    bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_35'] = 962.0
-    bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_18'] = 3.095370054244995
-    bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_19'] = 0.0
-    bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_20'] = 0.0
-    bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_21'] = 0.0
-    bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_22'] = 0.0
-    bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_23'] = 3.0824999809265137
-    bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_24'] = 0.0
-    bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_25'] = 0.0
-    bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_26'] = 0.19324299693107605
-    bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_27'] = 0.21085800230503082
-    bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_28'] = -1.0002000331878662
-    bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_30'] = 0.0
-    bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_31'] = 0.0
-    bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_29'] = -1.0
-    bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_32'] = -0.20002000033855438
-    bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_33'] = 0.0
-    bpy.context.view_layer.objects.active.update_tag(refresh={'OBJECT'}, )
-    if bpy.context and bpy.context.screen:
-        for a in bpy.context.screen.areas:
-            a.tag_redraw()
+# def sna_align_active_values_to_x_4CE1F():
+#     bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_2'] = -4.3711398944878965e-08
+#     bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_3'] = -4.3711398944878965e-08
+#     bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_4'] = -1.0
+#     bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_5'] = -0.0
+#     bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_6'] = -1.0
+#     bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_7'] = 1.910689912087678e-15
+#     bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_8'] = 4.3711398944878965e-08
+#     bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_9'] = -0.0
+#     bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_10'] = 2.117579969998599e-22
+#     bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_11'] = 1.0
+#     bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_12'] = -4.3711398944878965e-08
+#     bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_13'] = 0.0
+#     bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_14'] = -3.553000027523012e-08
+#     bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_15'] = -3.571039915084839
+#     bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_16'] = -8.938460350036621
+#     bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_17'] = 1.0
+#     bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_34'] = 958.0
+#     bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_35'] = 962.0
+#     bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_18'] = 3.095370054244995
+#     bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_19'] = 0.0
+#     bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_20'] = 0.0
+#     bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_21'] = 0.0
+#     bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_22'] = 0.0
+#     bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_23'] = 3.0824999809265137
+#     bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_24'] = 0.0
+#     bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_25'] = 0.0
+#     bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_26'] = 0.19324299693107605
+#     bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_27'] = 0.21085800230503082
+#     bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_28'] = -1.0002000331878662
+#     bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_30'] = 0.0
+#     bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_31'] = 0.0
+#     bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_29'] = -1.0
+#     bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_32'] = -0.20002000033855438
+#     bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_33'] = 0.0
+#     bpy.context.view_layer.objects.active.update_tag(refresh={'OBJECT'}, )
+#     if bpy.context and bpy.context.screen:
+#         for a in bpy.context.screen.areas:
+#             a.tag_redraw()
 
 def sna_align_active_values_to_z_7B9ED():
     bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_2'] = 1.0
@@ -5055,17 +5055,17 @@ class SNA_OT_Dgs_Render_Import_Ply_E0A3A(bpy.types.Operator, ImportHelper):
         return {"FINISHED"}
 
 
-def sna_append_and_add_geo_nodes_function_execute_6BCD7(Node_Group_Name, Modifier_Name, Object):
-    if property_exists("bpy.data.node_groups[Node_Group_Name]", globals(), locals()):
-        pass
-    else:
-        before_data = list(bpy.data.node_groups)
-        bpy.ops.wm.append(directory=os.path.join(os.path.dirname(__file__), 'assets', '3DGS Render APPEND V4.blend') + r'\NodeTree', filename=Node_Group_Name, link=False)
-        new_data = list(filter(lambda d: not d in before_data, list(bpy.data.node_groups)))
-        appended_65345 = None if not new_data else new_data[0]
-    modifier_6D624 = Object.modifiers.new(name=Modifier_Name, type='NODES', )
-    modifier_6D624.node_group = bpy.data.node_groups[Node_Group_Name]
-    return modifier_6D624
+# def sna_append_and_add_geo_nodes_function_execute_6BCD7(Node_Group_Name, Modifier_Name, Object):
+#     if property_exists("bpy.data.node_groups[Node_Group_Name]", globals(), locals()):
+#         pass
+#     else:
+#         before_data = list(bpy.data.node_groups)
+#         bpy.ops.wm.append(directory=os.path.join(os.path.dirname(__file__), '..', 'assets', '3DGS Render APPEND V4.blend') + r'\NodeTree', filename=Node_Group_Name, link=False)
+#         new_data = list(filter(lambda d: not d in before_data, list(bpy.data.node_groups)))
+#         appended_65345 = None if not new_data else new_data[0]
+#     modifier_6D624 = Object.modifiers.new(name=Modifier_Name, type='NODES', )
+#     modifier_6D624.node_group = bpy.data.node_groups[Node_Group_Name]
+#     return modifier_6D624
 
 
 class SNA_PT_DGS_RENDER_BY_KIRI_ENGINE_A02CB(bpy.types.Panel):

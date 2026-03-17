@@ -1,10 +1,14 @@
-import os
-
+from .important import *
 def sna_shader_system_A4AED():
-    VERTEX_SHADER_PATH = os.path.join(os.path.dirname(__file__), 'assets', 'vert.glsl')
-    FRAGMENT_SHADER_PATH = os.path.join(os.path.dirname(__file__), 'assets', 'frag.glsl')
-    COMPOSITE_VERTEX_SHADER_PATH = os.path.join(os.path.dirname(__file__), 'assets', 'composite_vert.glsl')
-    COMPOSITE_FRAGMENT_SHADER_PATH = os.path.join(os.path.dirname(__file__), 'assets', 'composite_frag.glsl')
+    import bpy
+    import os
+    from gpu_extras.batch import batch_for_shader
+    import gpu.types
+    import numpy as np
+    VERTEX_SHADER_PATH = os.path.join(os.path.dirname(__file__), '..', 'assets', 'vert.glsl')
+    FRAGMENT_SHADER_PATH = os.path.join(os.path.dirname(__file__), '..', 'assets', 'frag.glsl')
+    COMPOSITE_VERTEX_SHADER_PATH = os.path.join(os.path.dirname(__file__), '..', 'assets', 'composite_vert.glsl')
+    COMPOSITE_FRAGMENT_SHADER_PATH = os.path.join(os.path.dirname(__file__), '..', 'assets', 'composite_frag.glsl')
     # ========== VARIABLES (EDIT THESE) ==========
     #VERTEX_SHADER_PATH = r"D:\3d\Blender\my work\KIRI\KIRI - Tools\KIRI - Blender 3DGS Render\SplatForge Adaption\shaders\vert.glsl"
     #FRAGMENT_SHADER_PATH = r"D:\3d\Blender\my work\KIRI\KIRI - Tools\KIRI - Blender 3DGS Render\SplatForge Adaption\shaders\frag.glsl"
@@ -12,9 +16,6 @@ def sna_shader_system_A4AED():
     #COMPOSITE_FRAGMENT_SHADER_PATH = r"D:\3d\Blender\my work\KIRI\KIRI - Tools\KIRI - Blender 3DGS Render\SplatForge Adaption\shaders\composite_frag.glsl"
     MAX_GAUSSIANS = 1000000
     # ============================================
-    import bpy
-    import gpu.types
-    import numpy as np
 
     def read_shader_file(filepath):
         try:
@@ -28,14 +29,14 @@ def sna_shader_system_A4AED():
         # ========== CLEANUP EXISTING SHADERS ==========
         print("Cleaning up existing shader resources...")
         cleanup_attrs = [
-            'gaussian_quad_shader', 'gaussian_quad_batch',
+            'gaussian_quad_shader', 'gaussian_quad_batch', 
             'gaussian_composite_shader', 'gaussian_composite_batch'
         ]
         for attr in cleanup_attrs:
             if hasattr(bpy, attr):
                 delattr(bpy, attr)
         # Check shader files exist
-        shader_files = [VERTEX_SHADER_PATH, FRAGMENT_SHADER_PATH,
+        shader_files = [VERTEX_SHADER_PATH, FRAGMENT_SHADER_PATH, 
                        COMPOSITE_VERTEX_SHADER_PATH, COMPOSITE_FRAGMENT_SHADER_PATH]
         for shader_file in shader_files:
             if not os.path.exists(shader_file):
@@ -54,7 +55,7 @@ def sna_shader_system_A4AED():
         shader_info.vertex_in(0, 'VEC2', "quad_coord")
         # Push constants
         shader_info.push_constant("MAT4", "ViewMatrix")
-        shader_info.push_constant("MAT4", "ProjectionMatrix")
+        shader_info.push_constant("MAT4", "ProjectionMatrix") 
         shader_info.push_constant("VEC3", "focal_parameters")
         shader_info.push_constant("VEC3", "camera_position")
         shader_info.push_constant("INT", "render_mode")
@@ -107,13 +108,13 @@ def sna_shader_system_A4AED():
         ], dtype=np.float32)
         base_indices = np.array([0, 1, 2, 0, 2, 3], dtype=np.uint32)
         quad_batch = batch_for_shader(
-            quad_shader,
+            quad_shader, 
             'TRIS',
             {"quad_coord": base_quad},
             indices=base_indices
         )
         composite_batch = batch_for_shader(
-            composite_shader,
+            composite_shader, 
             'TRI_FAN',
             {
                 "position": ((-1, -1), (1, -1), (1, 1), (-1, 1)),
@@ -123,11 +124,10 @@ def sna_shader_system_A4AED():
         # Store globally
         bpy.gaussian_quad_shader = quad_shader
         bpy.gaussian_quad_batch = quad_batch
-        bpy.gaussian_composite_shader = composite_shader
+        bpy.gaussian_composite_shader = composite_shader  
         bpy.gaussian_composite_batch = composite_batch
         print("Multi-object shader system created successfully")
     except Exception as e:
         print(f"Error creating shader system: {e}")
         import traceback
         traceback.print_exc()
-
