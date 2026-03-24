@@ -1,3 +1,5 @@
+**Blendr 5.1 broke the addon as Blender updates usually do - it is going to be fixed. Thanks for everyone's patience :D**
+
 # 3DGS Render Blender Addon by KIRI Engine
 <a href="./LICENSE">
         <img alt="License" src="https://img.shields.io/badge/License-Apache_2.0-blue.svg"></a>
