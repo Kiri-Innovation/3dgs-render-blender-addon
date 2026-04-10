@@ -1,4 +1,7 @@
 #**Blendr 5.1 broke the addon as Blender updates usually do - it is going to be fixed. Thanks for everyone's patience :D**
+In the meanwhile - since there are a lot of other things to fix - you can try using this fork which resolves the Python13 issue at least
+https://github.com/taosiuman/3dgs-render-blender-addon-5.1Fix
+
 ---
 
 
