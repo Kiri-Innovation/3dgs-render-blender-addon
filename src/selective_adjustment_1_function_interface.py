@@ -1,0 +1,106 @@
+import os as _kiri_os
+__file__ = _kiri_os.path.join(_kiri_os.path.dirname(_kiri_os.path.dirname(__file__)), '__init__.py')
+del _kiri_os
+
+from .important import *
+from .append_wire_effectors import sna_append_wire_effectors_D3038
+
+__package__ = __package__.rsplit('.', 1)[0]
+
+
+def sna_selective_adjustment_1_function_interface_AD57C(layout_function, ):
+    col_8C182 = layout_function.column(heading='', align=False)
+    col_8C182.alert = False
+    col_8C182.enabled = True
+    col_8C182.active = True
+    col_8C182.use_property_split = False
+    col_8C182.use_property_decorate = False
+    col_8C182.scale_x = 1.0
+    col_8C182.scale_y = 1.0
+    col_8C182.alignment = 'Expand'.upper()
+    col_8C182.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
+    col_8C182.label(text='Selective Adjustment 1', icon_value=0)
+    col_8C182.separator(factor=1.0)
+    attr_8071F = '["' + str('Socket_10' + '"]') 
+    col_8C182.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Adjust_Colour_And_Material'], attr_8071F, text='Enable Selective Colour 1', icon_value=0, emboss=True, toggle=True)
+    col_8C182.separator(factor=1.0)
+    col_B3736 = col_8C182.column(heading='', align=False)
+    col_B3736.alert = False
+    col_B3736.enabled = bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Adjust_Colour_And_Material']['Socket_10']
+    col_B3736.active = True
+    col_B3736.use_property_split = False
+    col_B3736.use_property_decorate = False
+    col_B3736.scale_x = 1.0
+    col_B3736.scale_y = 1.0
+    col_B3736.alignment = 'Expand'.upper()
+    col_B3736.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
+    box_98D42 = col_B3736.box()
+    box_98D42.alert = False
+    box_98D42.enabled = True
+    box_98D42.active = True
+    box_98D42.use_property_split = False
+    box_98D42.use_property_decorate = False
+    box_98D42.alignment = 'Expand'.upper()
+    box_98D42.scale_x = 1.0
+    box_98D42.scale_y = 1.0
+    if not True: box_98D42.operator_context = "EXEC_DEFAULT"
+    box_98D42.label(text='Selection Type', icon_value=0)
+    attr_8D909 = '["' + str('Socket_24' + '"]') 
+    box_98D42.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Adjust_Colour_And_Material'], attr_8D909, text='', icon_value=0, emboss=True)
+    attr_34C57 = '["' + str('Socket_7' + '"]') 
+    box_98D42.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Adjust_Colour_And_Material'], attr_34C57, text='Selection', icon_value=0, emboss=True)
+    attr_AA353 = '["' + str('Socket_9' + '"]') 
+    box_98D42.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Adjust_Colour_And_Material'], attr_AA353, text='Change To', icon_value=0, emboss=True)
+    attr_A5076 = '["' + str('Socket_8' + '"]') 
+    box_98D42.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Adjust_Colour_And_Material'], attr_A5076, text='Colour Threshold', icon_value=0, emboss=True)
+    attr_82487 = '["' + str('Socket_25' + '"]') 
+    box_98D42.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Adjust_Colour_And_Material'], attr_82487, text='Saturation Threshold', icon_value=0, emboss=True)
+    attr_0164F = '["' + str('Socket_28' + '"]') 
+    box_98D42.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Adjust_Colour_And_Material'], attr_0164F, text='Value Threshold', icon_value=0, emboss=True)
+    box_067A3 = col_B3736.box()
+    box_067A3.alert = False
+    box_067A3.enabled = True
+    box_067A3.active = True
+    box_067A3.use_property_split = False
+    box_067A3.use_property_decorate = False
+    box_067A3.alignment = 'Expand'.upper()
+    box_067A3.scale_x = 1.0
+    box_067A3.scale_y = 1.0
+    if not True: box_067A3.operator_context = "EXEC_DEFAULT"
+    box_067A3.label(text='Blend Mode', icon_value=0)
+    attr_F9F7E = '["' + str('Socket_31' + '"]') 
+    box_067A3.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Adjust_Colour_And_Material'], attr_F9F7E, text='', icon_value=0, emboss=True)
+    attr_D1562 = '["' + str('Socket_32' + '"]') 
+    box_067A3.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Adjust_Colour_And_Material'], attr_D1562, text='Mix Factor', icon_value=0, emboss=True)
+    attr_BFCE5 = '["' + str('Socket_36' + '"]') 
+    box_067A3.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Adjust_Colour_And_Material'], attr_BFCE5, text='Randomise Mix', icon_value=0, emboss=True)
+    box_3ED76 = col_B3736.box()
+    box_3ED76.alert = bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Adjust_Colour_And_Material']['Socket_33']
+    box_3ED76.enabled = True
+    box_3ED76.active = True
+    box_3ED76.use_property_split = False
+    box_3ED76.use_property_decorate = False
+    box_3ED76.alignment = 'Expand'.upper()
+    box_3ED76.scale_x = 1.0
+    box_3ED76.scale_y = 1.0
+    if not True: box_3ED76.operator_context = "EXEC_DEFAULT"
+    box_3ED76.label(text='Masking', icon_value=0)
+    attr_74E93 = '["' + str('Socket_33' + '"]') 
+    box_3ED76.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Adjust_Colour_And_Material'], attr_74E93, text='Mask By Object', icon_value=0, emboss=True, toggle=True)
+    if bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Adjust_Colour_And_Material']['Socket_33']:
+        col_29C70 = box_3ED76.column(heading='', align=False)
+        col_29C70.alert = False
+        col_29C70.enabled = True
+        col_29C70.active = True
+        col_29C70.use_property_split = False
+        col_29C70.use_property_decorate = False
+        col_29C70.scale_x = 1.0
+        col_29C70.scale_y = 1.0
+        col_29C70.alignment = 'Expand'.upper()
+        col_29C70.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
+        attr_6C86C = '["' + str('Socket_35' + '"]') 
+        col_29C70.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Adjust_Colour_And_Material'], attr_6C86C, text='', icon_value=0, emboss=True, toggle=True)
+        attr_1D6B4 = '["' + str('Socket_34' + '"]') 
+        col_29C70.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Adjust_Colour_And_Material'], attr_1D6B4, text='', icon_value=0, emboss=True, toggle=True)
+    layout_function = col_B3736
+    sna_append_wire_effectors_D3038(layout_function, )
