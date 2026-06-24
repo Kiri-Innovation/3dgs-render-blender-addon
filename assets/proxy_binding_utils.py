@@ -58,7 +58,9 @@ SH_C3_5 = 1.445305721320277
 SH_C3_6 = -0.5900435899266435
 
 _SH_ROTATION_CACHE = {}
-_BINDING_PACKAGE_CACHE = {}
+if not hasattr(bpy, "_proxy_binding_package_cache"):
+    bpy._proxy_binding_package_cache = {}
+_BINDING_PACKAGE_CACHE = bpy._proxy_binding_package_cache
 SH_QUALITY_SAMPLE_COUNTS = {
     "Fast": 24,
     "Balanced": 32,
