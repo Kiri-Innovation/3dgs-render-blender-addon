@@ -34,3 +34,15 @@ def property_exists(prop_path, glob, loc):
         return True
     except:
         return False
+
+
+def load_export_transform_utils():
+    cached = sys.modules.get("export_transform_utils")
+    if cached is not None and getattr(cached, "__file__", None) and os.path.exists(cached.__file__):
+        return cached
+    module_path = os.path.join(os.path.dirname(__file__), "assets", "export_transform_utils.py")
+    spec = importlib.util.spec_from_file_location("export_transform_utils", module_path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    sys.modules["export_transform_utils"] = module
+    return module
