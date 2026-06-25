@@ -1028,7 +1028,7 @@ class SNA_OT_Dgs_Render_Export_Mesh_As_3Dgs4Dgs_Ce2F7(bpy.types.Operator):
                             #RIG_BAKED_UPDATE_MODE = "None"  # Input: None, Enabled Baked, or All Baked
                             RIG_BAKED_ENABLED_PROP_NAME = "rig_baked_render_enabled"  # Input: source object custom property checked when mode is Enabled Baked
                             MISSING_BAKED_FRAME_MODE = "Keep Current"  # Input: Keep Current, Skip Frame, Restore Rest, or Error
-                            proxy_binding_utils_path = "D:/GithubRepos/3DGS Render_Render Updates/rigging/proxy_binding_utils.py"  # Input: full path to proxy_binding_utils.py
+                            proxy_binding_utils_path = os.path.join(os.path.dirname(__file__), 'assets', 'proxy_binding_utils.py')
                             raise_on_error = False  # Input: when False, missing/corrupt baked data reports softly instead of raising
                             output_object_list = []
                             success = False
