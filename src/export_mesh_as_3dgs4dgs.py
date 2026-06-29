@@ -255,7 +255,7 @@ class SNA_OT_Dgs_Render_Export_Mesh_As_3Dgs4Dgs_Ce2F7(bpy.types.Operator):
                                         if rig_should_apply:
                                             bake_path = proxy_utils.bake_state_file_path(rig_paths["bake_dir"], frame_number)
                                             if os.path.exists(bake_path):
-                                                state = proxy_utils.load_baked_state(rig_paths["bake_dir"], frame_number)
+                                                state = proxy_utils.load_baked_state(rig_paths["bake_dir"], frame_number, rig_rest_state)
                                                 proxy_utils.apply_bound_state(source_obj, state)
                                                 rig_applied_frame_count += 1
                                             else:

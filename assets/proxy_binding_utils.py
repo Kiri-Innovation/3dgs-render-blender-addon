@@ -1328,6 +1328,92 @@ def compute_knn_indices(points, proxy_vertices_world, neighbor_count):
     return all_indices, all_distances
 
 
+def _atomic_savez_compressed(path, **arrays):
+    tmp_path = f"{path}.tmp.{os.getpid()}.{uuid.uuid4().hex}"
+    try:
+        with open(tmp_path, "wb") as fh:
+            np.savez_compressed(fh, **arrays)
+        os.replace(tmp_path, path)
+    except Exception:
+        try:
+            os.remove(tmp_path)
+        except OSError:
+            pass
+        raise
+
+
+def _atomic_write_json(path, payload):
+    tmp_path = f"{path}.tmp.{os.getpid()}.{uuid.uuid4().hex}"
+    try:
+        with open(tmp_path, "w", encoding="utf-8") as json_file:
+            json.dump(payload, json_file, indent=2)
+        os.replace(tmp_path, path)
+    except Exception:
+        try:
+            os.remove(tmp_path)
+        except OSError:
+            pass
+        raise
+
+
+BAKED_STATE_FORMAT_VERSION = 2
+
+
+def _serialize_baked_state(state, include_sh):
+    arrays = {
+        "format_version": np.array([BAKED_STATE_FORMAT_VERSION], dtype=np.int32),
+        "logical_positions_local": state["logical_positions_local"].astype(np.float32),
+        "log_scales": state["log_scales"].astype(np.float32),
+        "quaternions": state["quaternions"].astype(np.float32),
+        "opacities": state["opacities"].astype(np.float32),
+    }
+    if state["is_face_based"]:
+        arrays["vertex_positions_local"] = state["vertex_positions_local"].astype(np.float32)
+    if include_sh and "sh_coeffs" in state:
+        arrays["sh_coeffs"] = state["sh_coeffs"].astype(np.float32)
+        arrays["sh_degree"] = np.array([state["sh_degree"]], dtype=np.int32)
+    return arrays
+
+
+def _deserialize_baked_state(npz_data, rest_state):
+    npz_keys = set(npz_data.files)
+    state = {
+        "logical_positions_local": npz_data["logical_positions_local"].astype(np.float64),
+        "log_scales": npz_data["log_scales"].astype(np.float64),
+        "quaternions": npz_data["quaternions"].astype(np.float64),
+        "opacities": npz_data["opacities"].astype(np.float64),
+    }
+
+    if "splat_vertex_groups" in npz_keys:
+        state["splat_vertex_groups"] = npz_data["splat_vertex_groups"].astype(np.int32)
+    else:
+        state["splat_vertex_groups"] = rest_state["splat_vertex_groups"].astype(np.int32)
+
+    if "is_face_based" in npz_keys:
+        state["is_face_based"] = bool(int(npz_data["is_face_based"][0]))
+    else:
+        state["is_face_based"] = bool(rest_state["is_face_based"])
+
+    if "vertex_positions_local" in npz_keys:
+        state["vertex_positions_local"] = npz_data["vertex_positions_local"].astype(np.float64)
+    else:
+        num_vertices = rest_state["vertex_positions_local"].shape[0]
+        state["vertex_positions_local"] = scatter_logical_to_vertices(
+            state["logical_positions_local"],
+            state["splat_vertex_groups"],
+            num_vertices,
+        )
+
+    if "sh_coeffs" in npz_keys:
+        state["sh_coeffs"] = npz_data["sh_coeffs"].astype(np.float64)
+        state["sh_degree"] = int(npz_data["sh_degree"][0])
+    else:
+        state["sh_coeffs"] = rest_state["sh_coeffs"].astype(np.float64)
+        state["sh_degree"] = int(rest_state["sh_degree"])
+
+    return state
+
+
 def serialize_state_for_save(state):
     return {
         "vertex_positions_local": state["vertex_positions_local"].astype(np.float32),
@@ -1418,10 +1504,9 @@ def save_binding_package(mesh_obj, proxy_obj, rest_state, binding_method, bindin
     if extra_metadata:
         metadata.update(extra_metadata)
 
-    np.savez_compressed(paths["rest_path"], **serialize_state_for_save(rest_state))
-    np.savez_compressed(paths["binding_path"], **binding_arrays)
-    with open(paths["json_path"], "w", encoding="utf-8") as json_file:
-        json.dump(metadata, json_file, indent=2)
+    _atomic_savez_compressed(paths["rest_path"], **serialize_state_for_save(rest_state))
+    _atomic_savez_compressed(paths["binding_path"], **binding_arrays)
+    _atomic_write_json(paths["json_path"], metadata)
 
     _BINDING_PACKAGE_CACHE.pop(paths["package_dir"], None)
     mesh_obj[PROXY_BINDING_PATH_PROP] = paths["package_dir"]
@@ -1498,8 +1583,7 @@ def load_binding_package(mesh_obj):
 
 
 def save_binding_metadata(json_path, metadata):
-    with open(json_path, "w", encoding="utf-8") as json_file:
-        json.dump(metadata, json_file, indent=2)
+    _atomic_write_json(json_path, metadata)
 
 
 def get_runtime_binding_cache(mesh_obj, metadata, rest_state, binding_data):
@@ -2005,19 +2089,19 @@ def bake_state_file_path(bake_dir, frame_number):
     return os.path.join(bake_dir, f"frame_{int(frame_number):04d}.npz")
 
 
-def save_baked_state(bake_dir, frame_number, state):
+def save_baked_state(bake_dir, frame_number, state, include_sh=True):
     os.makedirs(bake_dir, exist_ok=True)
     save_path = bake_state_file_path(bake_dir, frame_number)
-    np.savez(save_path, **serialize_state_for_save(state))
+    _atomic_savez_compressed(save_path, **_serialize_baked_state(state, include_sh))
     return save_path
 
 
-def load_baked_state(bake_dir, frame_number):
+def load_baked_state(bake_dir, frame_number, rest_state):
     bake_path = bake_state_file_path(bake_dir, frame_number)
     if not os.path.exists(bake_path):
         raise ProxyBindingError(f"No baked state found for frame {frame_number}.")
     with np.load(bake_path) as baked_npz:
-        return deserialize_saved_state(baked_npz)
+        return _deserialize_baked_state(baked_npz, rest_state)
 
 
 def clear_bake_dir(bake_dir):
@@ -2234,7 +2318,7 @@ def bake_bound_animation(mesh_obj, frame_start=None, frame_end=None, frame_step=
             scene.frame_set(frame_number)
             current_proxy_vertices_world = collect_proxy_vertices_world(proxy_obj)
             state = compute_bound_state(mesh_obj, metadata, rest_state, binding_data, current_proxy_vertices_world)
-            save_baked_state(paths["bake_dir"], frame_number, state)
+            save_baked_state(paths["bake_dir"], frame_number, state, include_sh=True)
             baked_frames.append(int(frame_number))
     finally:
         scene.frame_set(original_frame)
@@ -2265,6 +2349,7 @@ def bake_bound_animation_with_options(
         raise ProxyBindingError(f"'{mesh_obj.name}' is not currently active as a live proxy binding.")
 
     show_bake_progress_overlay = normalize_update_sh_attributes(show_bake_progress_overlay)
+    include_sh_in_baked_frames = normalize_update_sh_attributes(update_sh_attributes)
     proxy_obj = get_bound_proxy_object(metadata)
     scene = bpy.context.scene
     original_frame = int(scene.frame_current)
@@ -2303,7 +2388,7 @@ def bake_bound_animation_with_options(
                 sh_quality_mode=sh_quality_mode,
                 update_sh_attributes=update_sh_attributes,
             )
-            save_baked_state(paths["bake_dir"], frame_number, state)
+            save_baked_state(paths["bake_dir"], frame_number, state, include_sh=include_sh_in_baked_frames)
             baked_frames.append(int(frame_number))
             if show_bake_progress_overlay:
                 update_bake_progress_overlay(
@@ -2334,8 +2419,8 @@ def bake_bound_animation_with_options(
 
 
 def apply_baked_frame_to_mesh(mesh_obj, frame_number):
-    paths, metadata, _, _ = load_binding_package(mesh_obj)
+    paths, metadata, rest_state, _ = load_binding_package(mesh_obj)
     validate_current_3dgs_object(mesh_obj, metadata)
-    state = load_baked_state(paths["bake_dir"], frame_number)
+    state = load_baked_state(paths["bake_dir"], frame_number, rest_state)
     apply_bound_state(mesh_obj, state)
     return state
