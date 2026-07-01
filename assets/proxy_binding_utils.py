@@ -2123,6 +2123,62 @@ def apply_bound_state(mesh_obj, state):
     write_logical_gaussian_state(mesh_obj, state)
 
 
+def _pack_state_to_gaussian_texture_layout(state):
+    """Pack baked state into the 59-float-per-gaussian layout used by the renderer's
+    bpy.gaussian_object_cache (see src/render_comp.py 836-851 for the canonical layout).
+    Layout per splat: positions[3], rotations[4], scales[3] (exp of log_scales),
+    opacity[1] (sigmoid of raw), sh_coeffs[48] band-major (K bands of 3 channels each)."""
+    logical_positions = np.asarray(state["logical_positions_local"], dtype=np.float32)
+    quaternions = np.asarray(state["quaternions"], dtype=np.float32)
+    norms = np.linalg.norm(quaternions, axis=1, keepdims=True)
+    norms[norms == 0.0] = 1.0
+    quaternions = quaternions / norms
+    log_scales = np.asarray(state["log_scales"], dtype=np.float32)
+    scales = np.exp(log_scales)
+    opacities_raw = np.asarray(state["opacities"], dtype=np.float32).reshape(-1)
+    opacities = 1.0 / (1.0 + np.exp(-opacities_raw))
+    sh_coeffs_bake = np.asarray(state["sh_coeffs"], dtype=np.float32)
+    N = logical_positions.shape[0]
+    sh_band_major = np.transpose(sh_coeffs_bake, (0, 2, 1)).reshape(N, -1)
+    out = np.zeros((N, 59), dtype=np.float32)
+    out[:, 0:3] = logical_positions
+    out[:, 3:7] = quaternions
+    out[:, 7:10] = scales
+    out[:, 10] = opacities
+    sh_dim = 48
+    take = min(sh_band_major.shape[1], sh_dim)
+    out[:, 11:11 + take] = sh_band_major[:, :take]
+    return out
+
+
+def apply_baked_state_to_gpu_texture(mesh_obj, state):
+    """Update the renderer's per-object gaussian_data cache entry directly so the
+    next texture rebuild reflects this frame, bypassing the 18x foreach_set mesh
+    attribute writes in write_logical_gaussian_state. Returns True on success,
+    False if no render-side cache entry exists for mesh_obj (caller should fall
+    back to apply_bound_state)."""
+    cache = getattr(bpy, "gaussian_object_cache", None)
+    if not cache:
+        return False
+    entry = cache.get(mesh_obj.name)
+    if entry is None:
+        source_uuid = mesh_obj.get("gaussian_source_uuid")
+        if source_uuid:
+            for candidate in cache.values():
+                cached_obj = candidate.get("object")
+                if cached_obj is None:
+                    continue
+                if cached_obj.get("gaussian_source_uuid") == source_uuid or cached_obj.get("source_mesh_uuid") == source_uuid:
+                    entry = candidate
+                    break
+    if entry is None:
+        return False
+    packed = _pack_state_to_gaussian_texture_layout(state)
+    entry["gaussian_data"] = packed
+    entry["gaussian_count"] = int(packed.shape[0])
+    return True
+
+
 def bake_state_file_path(bake_dir, frame_number):
     return os.path.join(bake_dir, f"frame_{int(frame_number):04d}.npz")
 
@@ -2460,5 +2516,16 @@ def apply_baked_frame_to_mesh(mesh_obj, frame_number):
     paths, metadata, rest_state, _ = load_binding_package(mesh_obj)
     validate_current_3dgs_object(mesh_obj, metadata)
     state = load_baked_state(paths["bake_dir"], frame_number, rest_state)
-    apply_bound_state(mesh_obj, state)
+    used_fast_path = False
+    scene = getattr(bpy.context, "scene", None)
+    if scene is not None and scene.get("__proxy_render_fast_path", False):
+        used_fast_path = apply_baked_state_to_gpu_texture(mesh_obj, state)
+    if not used_fast_path:
+        apply_bound_state(mesh_obj, state)
+    else:
+        if not hasattr(bpy, "_proxy_render_fast_path_uuids"):
+            bpy._proxy_render_fast_path_uuids = set()
+        source_uuid = mesh_obj.get("gaussian_source_uuid")
+        if source_uuid:
+            bpy._proxy_render_fast_path_uuids.add(source_uuid)
     return state

@@ -191,6 +191,7 @@ def sna_render_comp_0DAEE(RENDER_ANIMATION, RENDER_COLOR, RENDER_DEPTH, COMP_WIT
         result = {
             "mode": rig_mode,
             "source_uuid_filter": set(),
+            "fast_path_uuids": set(),
             "processed_count": 0,
             "applied_count": 0,
             "kept_current_count": 0,
@@ -207,34 +208,50 @@ def sna_render_comp_0DAEE(RENDER_ANIMATION, RENDER_COLOR, RENDER_DEPTH, COMP_WIT
             debug_print(f"Rig baked mode '{rig_mode}' found no eligible source mesh 3DGS objects.")
             return result
         proxy_binding_error = getattr(proxy_utils, "ProxyBindingError", RuntimeError)
-        for mesh_obj in target_objects:
-            source_uuid = mesh_obj.get("gaussian_source_uuid")
-            result["processed_count"] += 1
-            try:
-                proxy_utils.apply_baked_frame_to_mesh(mesh_obj, frame_number)
-                if source_uuid:
-                    result["source_uuid_filter"].add(source_uuid)
-                result["applied_count"] += 1
-            except proxy_binding_error as exc:
-                message = str(exc)
-                if "No baked state found for frame" in message:
+        scene = bpy.context.scene
+        prev_fast_flag = scene.get("__proxy_render_fast_path", False)
+        bpy._proxy_render_fast_path_uuids = set()
+        # Fast path bypasses the mesh-attribute write entirely; only safe when
+        # the downstream refresh path won't read mesh attributes back. When
+        # REFRESH_EVALUATED_DATA is True every source is re-extracted from mesh
+        # attrs each frame, so the bypass would leave them stale.
+        fast_path_active = not REFRESH_EVALUATED_DATA
+        scene["__proxy_render_fast_path"] = fast_path_active
+        try:
+            for mesh_obj in target_objects:
+                source_uuid = mesh_obj.get("gaussian_source_uuid")
+                result["processed_count"] += 1
+                try:
+                    proxy_utils.apply_baked_frame_to_mesh(mesh_obj, frame_number)
                     if source_uuid:
                         result["source_uuid_filter"].add(source_uuid)
-                    result["kept_current_count"] += 1
-                    debug_print(
-                        f"Rig baked frame missing for '{mesh_obj.name}' on frame {frame_number}; keeping current source mesh state."
-                    )
-                    continue
-                result["warning_count"] += 1
-                print(f"Rig baked render warning for '{mesh_obj.name}': {message}")
-            except Exception as exc:
-                result["warning_count"] += 1
-                print(f"Rig baked render warning for '{mesh_obj.name}': {exc}")
+                    result["applied_count"] += 1
+                except proxy_binding_error as exc:
+                    message = str(exc)
+                    if "No baked state found for frame" in message:
+                        if source_uuid:
+                            result["source_uuid_filter"].add(source_uuid)
+                        result["kept_current_count"] += 1
+                        debug_print(
+                            f"Rig baked frame missing for '{mesh_obj.name}' on frame {frame_number}; keeping current source mesh state."
+                        )
+                        continue
+                    result["warning_count"] += 1
+                    print(f"Rig baked render warning for '{mesh_obj.name}': {message}")
+                except Exception as exc:
+                    result["warning_count"] += 1
+                    print(f"Rig baked render warning for '{mesh_obj.name}': {exc}")
+        finally:
+            scene["__proxy_render_fast_path"] = prev_fast_flag
+            result["fast_path_uuids"] = set(getattr(bpy, "_proxy_render_fast_path_uuids", set()))
+            # Fast-path UUIDs already have their gaussian_data cache entry updated,
+            # so they don't need to be refreshed from mesh attrs.
+            result["source_uuid_filter"] -= result["fast_path_uuids"]
         if result["processed_count"] > 0:
             debug_print(
                 f"Rig baked update mode '{rig_mode}': processed {result['processed_count']} object(s), "
-                f"applied {result['applied_count']}, kept current {result['kept_current_count']}, "
-                f"warnings {result['warning_count']}"
+                f"applied {result['applied_count']} (fast-path {len(result['fast_path_uuids'])}), "
+                f"kept current {result['kept_current_count']}, warnings {result['warning_count']}"
             )
         return result
 
@@ -1570,13 +1587,14 @@ def sna_render_comp_0DAEE(RENDER_ANIMATION, RENDER_COLOR, RENDER_DEPTH, COMP_WIT
                     debug_print(f"Depsgraph update took {(time.perf_counter() - depsgraph_start)*1000:.2f}ms")
                 rig_update_result = apply_baked_rig_updates_for_frame(current_frame)
                 rig_source_uuid_filter = rig_update_result["source_uuid_filter"]
+                rig_fast_path_uuids = rig_update_result.get("fast_path_uuids", set())
                 if rig_update_result["processed_count"] > 0:
                     bpy.context.evaluated_depsgraph_get().update()
                 # Optional source object updates WITH DEBUG
                 if UPDATE_SOURCE_TRANSFORMS:
                     debug_print("Updating transforms from source objects...")
                     update_transforms_from_sources()
-                data_updated = False
+                data_updated = bool(rig_fast_path_uuids)
                 if rig_source_uuid_filter and not REFRESH_EVALUATED_DATA:
                     debug_print("=== REFRESHING RIG BAKED SOURCE DATA ===")
                     data_updated = refresh_data_from_evaluated_sources(rig_source_uuid_filter) or data_updated
@@ -1607,7 +1625,7 @@ def sna_render_comp_0DAEE(RENDER_ANIMATION, RENDER_COLOR, RENDER_DEPTH, COMP_WIT
                     rebuild_success = rebuild_textures_after_source_refresh()
                     if not rebuild_success:
                         return False
-                elif rig_source_uuid_filter or REFRESH_EVALUATED_DATA:
+                elif rig_source_uuid_filter or REFRESH_EVALUATED_DATA or rig_fast_path_uuids:
                     debug_print("No data updates detected, skipping texture rebuild")
             # Determine render resolution
             if RENDER_WIDTH > 0 and RENDER_HEIGHT > 0:
