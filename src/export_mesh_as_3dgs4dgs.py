@@ -223,6 +223,8 @@ class SNA_OT_Dgs_Render_Export_Mesh_As_3Dgs4Dgs_Ce2F7(bpy.types.Operator):
                                 original_3dgs_state = None
                                 if rig_baked_update_mode != "None":
                                     proxy_utils = load_proxy_binding_utils()
+                                    register_proxy_binding_gpu_module(proxy_utils)
+                                    apply_gpu_sh_addon_pref()
                                     if rig_baked_update_mode == "Enabled Baked":
                                         rig_should_apply = bool(source_obj.get(RIG_BAKED_ENABLED_PROP_NAME, False))
                                     else:

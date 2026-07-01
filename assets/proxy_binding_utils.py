@@ -1089,6 +1089,39 @@ def get_sh_rotation_precompute(max_degree, sh_quality_mode=DEFAULT_SH_QUALITY_MO
     return precompute
 
 
+def _get_sh_gpu_state():
+    if not hasattr(bpy, "_proxy_sh_gpu_state"):
+        bpy._proxy_sh_gpu_state = {"sticky_cpu": False, "enabled": True, "gpu_module": None}
+    return bpy._proxy_sh_gpu_state
+
+
+def _try_rotate_sh_coeffs_gpu(sh_coeffs, rotation_matrices, sh_degree, precompute):
+    state = _get_sh_gpu_state()
+    if state["sticky_cpu"] or not state["enabled"]:
+        return None
+    gpu_mod = state["gpu_module"]
+    if gpu_mod is None:
+        import sys as _sys
+        gpu_mod = _sys.modules.get("proxy_binding_gpu")
+        if gpu_mod is None:
+            return None
+        state["gpu_module"] = gpu_mod
+    if not gpu_mod.is_available():
+        return None
+    try:
+        result = gpu_mod.rotate_sh_coeffs_gpu(sh_coeffs, rotation_matrices, sh_degree, precompute)
+    except Exception as exc:
+        state["sticky_cpu"] = True
+        print(f"[proxy_binding] GPU SH rotation raised ({exc}); CPU for the rest of session.")
+        return None
+    if result is None:
+        state["sticky_cpu"] = True
+        err = getattr(gpu_mod, "last_error", lambda: "unknown")()
+        print(f"[proxy_binding] GPU SH rotation unavailable ({err}); CPU for the rest of session.")
+        return None
+    return result
+
+
 def rotate_sh_coeffs(
     sh_coeffs,
     rotation_matrices,
@@ -1103,8 +1136,13 @@ def rotate_sh_coeffs(
         return sh_coeffs.copy()
 
     total_coeffs = (sh_degree + 1) ** 2
-    rotated = sh_coeffs.copy()
     precompute = get_sh_rotation_precompute(sh_degree, sh_quality_mode=sh_quality_mode)
+
+    gpu_result = _try_rotate_sh_coeffs_gpu(sh_coeffs, rotation_matrices, sh_degree, precompute)
+    if gpu_result is not None:
+        return gpu_result[:, :, :total_coeffs]
+
+    rotated = sh_coeffs.copy()
     sample_dirs = precompute["sample_dirs"]
 
     for start_index in range(0, len(sh_coeffs), chunk_size):

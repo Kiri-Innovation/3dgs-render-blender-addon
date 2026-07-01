@@ -46,3 +46,39 @@ def load_export_transform_utils():
     spec.loader.exec_module(module)
     sys.modules["export_transform_utils"] = module
     return module
+
+
+def register_proxy_binding_gpu_module(proxy_utils_module):
+    """Load proxy_binding_gpu.py from next to proxy_binding_utils.py and register it
+    under sys.modules['proxy_binding_gpu'] so rotate_sh_coeffs can find it for the
+    GPU fast path. Best-effort — silently no-op on any failure (CPU path still works)."""
+    try:
+        utils_file = getattr(proxy_utils_module, "__file__", None)
+        if not utils_file:
+            return None
+        gpu_path = os.path.join(os.path.dirname(utils_file), "proxy_binding_gpu.py")
+        if not os.path.exists(gpu_path):
+            return None
+        cached = sys.modules.get("proxy_binding_gpu")
+        if cached is not None and getattr(cached, "__file__", None) == gpu_path:
+            return cached
+        spec = importlib.util.spec_from_file_location("proxy_binding_gpu", gpu_path)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        sys.modules["proxy_binding_gpu"] = module
+        return module
+    except Exception:
+        return None
+
+
+def apply_gpu_sh_addon_pref():
+    """Read the addon preference and update bpy._proxy_sh_gpu_state['enabled']
+    so proxy_binding_utils.rotate_sh_coeffs honors the user toggle."""
+    try:
+        prefs = bpy.context.preferences.addons[__package__].preferences
+        enabled = bool(getattr(prefs, "sna_use_gpu_sh_rotation", True))
+    except Exception:
+        return
+    if not hasattr(bpy, "_proxy_sh_gpu_state"):
+        bpy._proxy_sh_gpu_state = {"sticky_cpu": False, "enabled": True, "gpu_module": None}
+    bpy._proxy_sh_gpu_state["enabled"] = enabled

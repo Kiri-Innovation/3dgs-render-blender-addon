@@ -201,6 +201,7 @@ def sna_render_comp_0DAEE(RENDER_ANIMATION, RENDER_COLOR, RENDER_DEPTH, COMP_WIT
         proxy_utils = load_proxy_binding_utils()
         if proxy_utils is None:
             return result
+        register_proxy_binding_gpu_module(proxy_utils)
         target_objects = get_candidate_rig_baked_objects(rig_mode, proxy_utils)
         if not target_objects:
             debug_print(f"Rig baked mode '{rig_mode}' found no eligible source mesh 3DGS objects.")
