@@ -1,7 +1,9 @@
 import json
 import math
 import os
+import queue
 import tempfile
+import threading
 import uuid
 from datetime import datetime, timezone
 
@@ -1366,11 +1368,12 @@ def compute_knn_indices(points, proxy_vertices_world, neighbor_count):
     return all_indices, all_distances
 
 
-def _atomic_savez_compressed(path, **arrays):
+def _atomic_savez(path, compressed=True, **arrays):
     tmp_path = f"{path}.tmp.{os.getpid()}.{uuid.uuid4().hex}"
+    saver = np.savez_compressed if compressed else np.savez
     try:
         with open(tmp_path, "wb") as fh:
-            np.savez_compressed(fh, **arrays)
+            saver(fh, **arrays)
         os.replace(tmp_path, path)
     except Exception:
         try:
@@ -1378,6 +1381,10 @@ def _atomic_savez_compressed(path, **arrays):
         except OSError:
             pass
         raise
+
+
+def _atomic_savez_compressed(path, **arrays):
+    _atomic_savez(path, compressed=True, **arrays)
 
 
 def _atomic_write_json(path, payload):
@@ -2183,11 +2190,58 @@ def bake_state_file_path(bake_dir, frame_number):
     return os.path.join(bake_dir, f"frame_{int(frame_number):04d}.npz")
 
 
-def save_baked_state(bake_dir, frame_number, state, include_sh=True):
+def save_baked_state(bake_dir, frame_number, state, include_sh=True, compressed=True):
     os.makedirs(bake_dir, exist_ok=True)
     save_path = bake_state_file_path(bake_dir, frame_number)
-    _atomic_savez_compressed(save_path, **_serialize_baked_state(state, include_sh))
+    _atomic_savez(save_path, compressed=compressed, **_serialize_baked_state(state, include_sh))
     return save_path
+
+
+class _BakeWriter:
+    """Bounded-queue background writer for baked-frame .npz files.
+
+    Serialization stays on the caller's thread; only the zip+deflate work moves
+    off. The bounded queue caps memory to ~max_in_flight state dicts and applies
+    back-pressure when the writer can't keep up with compute.
+    """
+
+    _SHUTDOWN = object()
+
+    def __init__(self, compressed, max_in_flight=2):
+        self._compressed = bool(compressed)
+        self._queue = queue.Queue(maxsize=max(1, int(max_in_flight)))
+        self._error = None
+        self._thread = threading.Thread(target=self._worker_loop, daemon=True)
+        self._thread.start()
+
+    def _worker_loop(self):
+        while True:
+            item = self._queue.get()
+            try:
+                if item is self._SHUTDOWN:
+                    return
+                if self._error is not None:
+                    continue
+                save_path, arrays = item
+                try:
+                    _atomic_savez(save_path, compressed=self._compressed, **arrays)
+                except Exception as exc:
+                    self._error = exc
+            finally:
+                self._queue.task_done()
+
+    def enqueue(self, save_path, arrays):
+        self._queue.put((save_path, arrays))
+
+    def check_error(self):
+        if self._error is not None:
+            raise self._error
+
+    def drain(self):
+        self._queue.put(self._SHUTDOWN)
+        self._thread.join()
+        if self._error is not None:
+            raise self._error
 
 
 def load_baked_state(bake_dir, frame_number, rest_state):
@@ -2437,6 +2491,7 @@ def bake_bound_animation_with_options(
     frame_start=None,
     frame_end=None,
     frame_step=1,
+    write_mode="Fast",
 ):
     paths, metadata, rest_state, binding_data = load_binding_package(mesh_obj)
     if not mesh_obj.get(PROXY_BINDING_ACTIVE_PROP):
@@ -2444,6 +2499,7 @@ def bake_bound_animation_with_options(
 
     show_bake_progress_overlay = normalize_update_sh_attributes(show_bake_progress_overlay)
     include_sh_in_baked_frames = normalize_update_sh_attributes(update_sh_attributes)
+    write_compressed = str(write_mode).strip().lower() != "fast"
     proxy_obj = get_bound_proxy_object(metadata)
     scene = bpy.context.scene
     original_frame = int(scene.frame_current)
@@ -2467,6 +2523,8 @@ def bake_bound_animation_with_options(
         )
 
     baked_frames = []
+    writer = _BakeWriter(compressed=write_compressed, max_in_flight=2)
+    os.makedirs(paths["bake_dir"], exist_ok=True)
     try:
         for step_index, frame_number in enumerate(frame_numbers, start=1):
             scene.frame_set(frame_number)
@@ -2482,7 +2540,10 @@ def bake_bound_animation_with_options(
                 sh_quality_mode=sh_quality_mode,
                 update_sh_attributes=update_sh_attributes,
             )
-            save_baked_state(paths["bake_dir"], frame_number, state, include_sh=include_sh_in_baked_frames)
+            save_path = bake_state_file_path(paths["bake_dir"], frame_number)
+            arrays = _serialize_baked_state(state, include_sh_in_baked_frames)
+            writer.enqueue(save_path, arrays)
+            writer.check_error()
             baked_frames.append(int(frame_number))
             if show_bake_progress_overlay:
                 update_bake_progress_overlay(
@@ -2491,8 +2552,20 @@ def bake_bound_animation_with_options(
                     frame_number=frame_number,
                     status_message=f"Baked frame {frame_number}",
                 )
+        if show_bake_progress_overlay:
+            update_bake_progress_overlay(
+                current_step=len(frame_numbers),
+                total_steps=len(frame_numbers),
+                frame_number=frame_numbers[-1] if frame_numbers else 0,
+                status_message="Flushing writes...",
+            )
     finally:
         scene.frame_set(original_frame)
+        try:
+            writer.drain()
+        except Exception as drain_exc:
+            print(f"[3DGS bake] writer drain error: {drain_exc}")
+            raise
         if show_bake_progress_overlay:
             end_bake_progress_overlay(
                 status_message=f"Finished baking {len(baked_frames)} frame(s) for {mesh_obj.name}."

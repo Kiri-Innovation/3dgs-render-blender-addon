@@ -12,6 +12,7 @@ class SNA_AddonPreferences_AB8B3(bpy.types.AddonPreferences):
     sna_cache_file_directory: bpy.props.StringProperty(name='Cache File Directory', description='', default='', subtype='DIR_PATH', maxlen=0)
     sna_show_tips: bpy.props.BoolProperty(name='Show Tips', description='', default=True)
     sna_use_gpu_sh_rotation: bpy.props.BoolProperty(name='Use GPU for SH rotation during bake', description='Accelerates the spherical-harmonics rotation step of compute_bound_state via a Blender compute shader. Falls back to CPU automatically on failure', default=True)
+    sna_bake_write_mode: bpy.props.EnumProperty(name='Bake write mode', description='Fast writes uncompressed .npz per frame (removes zlib from the bake critical path; ~3-5x larger on disk). Balanced keeps the current compressed .npz. Writes always run on a background thread', items=[('Fast', 'Fast (uncompressed)', 'Skip zlib compression; largest disk footprint, fastest bake'), ('Balanced', 'Balanced (compressed)', 'zlib-compressed .npz; matches upstream disk footprint')], default='Fast')
 
     def draw(self, context):
         if not (False):
