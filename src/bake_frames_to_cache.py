@@ -21,6 +21,7 @@ class SNA_OT_Dgs_Render_Bake_Frames_To_Cache_90885(bpy.types.Operator):
 
     def execute(self, context):
         proxy_binding_cache_root = bpy.context.preferences.addons[__package__].preferences.sna_cache_file_directory
+        bake_write_mode = getattr(bpy.context.preferences.addons[__package__].preferences, 'sna_bake_write_mode', 'Fast')
 
         deform_mode = bpy.context.scene.sna_dgs_scene_properties.rig_deform_mode
         scale_safety_mode = bpy.context.scene.sna_dgs_scene_properties.rig_scale_safety_mode
@@ -113,6 +114,8 @@ class SNA_OT_Dgs_Render_Bake_Frames_To_Cache_90885(bpy.types.Operator):
                 "proxy_binding_utils.py as a Blender text block too."
             )
         proxy_utils = load_proxy_binding_utils()
+        register_proxy_binding_gpu_module(proxy_utils)
+        apply_gpu_sh_addon_pref()
         proxy_utils.PROXY_BINDING_ROOT_OVERRIDE = str(proxy_binding_cache_root).strip()
         scene = bpy.context.scene
         try:
@@ -134,6 +137,7 @@ class SNA_OT_Dgs_Render_Bake_Frames_To_Cache_90885(bpy.types.Operator):
                 allow_all=True,
                 active_only=True,
             )
+            single_target = len(mesh_objects) == 1
             for mesh_obj in mesh_objects:
                 try:
                     proxy_obj, baked_frames, removed_files = proxy_utils.bake_bound_animation_with_options(
@@ -146,6 +150,7 @@ class SNA_OT_Dgs_Render_Bake_Frames_To_Cache_90885(bpy.types.Operator):
                         frame_start=resolved_frame_start,
                         frame_end=resolved_frame_end,
                         frame_step=resolved_frame_step,
+                        write_mode=bake_write_mode,
                     )
                     processed_count += 1
                     processed_names.append(mesh_obj.name)

@@ -143,6 +143,8 @@ class SNA_OT_Dgs_Render_Bind_To_Proxy_Mesh_6C58F(bpy.types.Operator):
                         "proxy_binding_utils.py as a Blender text block too."
                     )
                 proxy_utils = load_proxy_binding_utils()
+                register_proxy_binding_gpu_module(proxy_utils)
+                apply_gpu_sh_addon_pref()
                 proxy_utils.PROXY_BINDING_ROOT_OVERRIDE = str(proxy_binding_cache_root).strip()
                 print("Binding active mesh 3DGS object to proxy mesh...")
                 try:

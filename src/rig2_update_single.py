@@ -91,6 +91,8 @@ def sna_rig2_update_single_DC225():
             "proxy_binding_utils.py as a Blender text block too."
         )
     proxy_utils = load_proxy_binding_utils()
+    register_proxy_binding_gpu_module(proxy_utils)
+    apply_gpu_sh_addon_pref()
     proxy_utils.PROXY_BINDING_ROOT_OVERRIDE = str(proxy_binding_cache_root).strip()
     print("Updating bound 3DGS attributes from the current proxy mesh pose...")
     try:
