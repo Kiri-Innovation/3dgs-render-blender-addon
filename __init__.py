@@ -55,6 +55,7 @@ dgs_render__export = {'sna_export_base_object': None, 'sna_export_temp_object': 
 dgs_render__hq_mode = {'sna_lq_object_list': [], }
 dgs_renderdb_filter = {'sna_db_filter_input_object': None, 'sna_db_filter_force_scale_factor': 0.0, }
 dgs_on_prop_update_on_render = {'sna_dgs_proxies_in_scene': False, }
+_viewport_shadow_refresh_scheduled = False
 
 
 def load_preview_icon(path):
@@ -376,6 +377,31 @@ def _safe_delattr(obj, name):
         pass
 
 
+def _refresh_viewport_shadows():
+    global _viewport_shadow_refresh_scheduled
+    _viewport_shadow_refresh_scheduled = False
+    try:
+        if update_shadow_maps_for_frame(bpy.context, is_animation=False):
+            for window in bpy.context.window_manager.windows:
+                for area in window.screen.areas:
+                    if area.type == 'VIEW_3D':
+                        area.tag_redraw()
+    except Exception as error:
+        print(f"KIRI 3DGS viewport shadow refresh failed: {error}")
+    return None
+
+
+@persistent
+def _viewport_shadow_frame_change(scene, depsgraph):
+    global _viewport_shadow_refresh_scheduled
+    props = getattr(scene, 'sna_dgs_scene_properties', None)
+    if not props or not (props.r2_relight and props.r2_shadows) or props.r2_shadow_update_mode == 'Manual':
+        return
+    if not _viewport_shadow_refresh_scheduled:
+        _viewport_shadow_refresh_scheduled = True
+        bpy.app.timers.register(_refresh_viewport_shadows, first_interval=0.0)
+
+
 def register():
     global _icons
     _icons = bpy.utils.previews.new()
@@ -427,6 +453,7 @@ def register():
     _safe_register_class(SNA_OT_Dgs_Render_Apply_Light_Data_6C5Ad)
     _safe_register_class(SNA_OT_Dgs_Render_Add_Uv_Edit_Modifier_E8Ae6)
     _safe_append_handler(bpy.app.handlers.render_pre, render_pre_handler_77179)
+    _safe_append_handler(bpy.app.handlers.frame_change_post, _viewport_shadow_frame_change)
     _safe_register_class(SNA_AddonPreferences_AB8B3)
     _safe_register_class(SNA_OT_Dgs_Render_Bind_To_Proxy_Mesh_6C58F)
     _safe_register_class(SNA_OT_Dgs_Render_Select_Proxy_Mesh_E76B7)
@@ -503,6 +530,9 @@ def unregister():
     _safe_unregister_class(SNA_OT_Dgs_Render_Apply_Light_Data_6C5Ad)
     _safe_unregister_class(SNA_OT_Dgs_Render_Add_Uv_Edit_Modifier_E8Ae6)
     _safe_remove_handler(bpy.app.handlers.render_pre, render_pre_handler_77179)
+    _safe_remove_handler(bpy.app.handlers.frame_change_post, _viewport_shadow_frame_change)
+    if bpy.app.timers.is_registered(_refresh_viewport_shadows):
+        bpy.app.timers.unregister(_refresh_viewport_shadows)
     _safe_unregister_class(SNA_AddonPreferences_AB8B3)
     _safe_unregister_class(SNA_OT_Dgs_Render_Bind_To_Proxy_Mesh_6C58F)
     _safe_unregister_class(SNA_OT_Dgs_Render_Select_Proxy_Mesh_E76B7)

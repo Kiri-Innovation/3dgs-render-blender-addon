@@ -3,7 +3,7 @@ __file__ = _kiri_os.path.join(_kiri_os.path.dirname(_kiri_os.path.dirname(__file
 del _kiri_os
 
 from .important import *
-from .realtime_relighting import add_relighting_shader_inputs, bind_relighting_uniforms
+from .realtime_relighting import add_relighting_shader_inputs, bind_relighting_uniforms, update_shadow_maps_for_frame
 
 __package__ = __package__.rsplit('.', 1)[0]
 
