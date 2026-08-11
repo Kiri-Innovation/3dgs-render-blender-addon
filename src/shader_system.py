@@ -3,6 +3,7 @@ __file__ = _kiri_os.path.join(_kiri_os.path.dirname(_kiri_os.path.dirname(__file
 del _kiri_os
 
 from .important import *
+from .realtime_relighting import add_relighting_shader_inputs
 
 __package__ = __package__.rsplit('.', 1)[0]
 
@@ -66,6 +67,7 @@ def sna_shader_system_A4AED():
         shader_info.push_constant("VEC3", "camera_position")
         shader_info.push_constant("INT", "render_mode")
         shader_info.push_constant("INT", "sh_degree")
+        add_relighting_shader_inputs(shader_info)
         shader_info.push_constant("VEC2", "texture_dimensions")
         shader_info.push_constant("VEC2", "indices_dimensions")
         shader_info.push_constant("VEC2", "depth_texture_size")

@@ -3,6 +3,7 @@ __file__ = _kiri_os.path.join(_kiri_os.path.dirname(_kiri_os.path.dirname(__file
 del _kiri_os
 
 from .important import *
+from .realtime_relighting import add_relighting_shader_inputs, bind_relighting_uniforms
 
 __package__ = __package__.rsplit('.', 1)[0]
 
@@ -15,7 +16,7 @@ def sna_render_comp_0DAEE(RENDER_ANIMATION, RENDER_COLOR, RENDER_DEPTH, COMP_WIT
     UPDATE_SOURCE_TRANSFORMS = UPDATE_SOURCE_TRANSFORMS
     REFRESH_EVALUATED_DATA = REFRESH_EVALUATED_DATA
     FRAME_STEP = FRAME_STEP
-    SHADER_DIRECTORY = os.path.join(os.path.dirname(__file__), 'assets', 'shaders_sh_rotation_color_precision_display_fix')
+    SHADER_DIRECTORY = os.path.join(os.path.dirname(__file__), 'assets')
     DELETE_TEMP_FILES_AFTER_SUCCESS = DELETE_TEMP_FILES_AFTER_SUCCESS
     RIG_BAKED_UPDATE_MODE = RIG_BAKED_UPDATE_MODE
     SH_DEGREE = SH_DEGREE
@@ -353,6 +354,7 @@ def sna_render_comp_0DAEE(RENDER_ANIMATION, RENDER_COLOR, RENDER_DEPTH, COMP_WIT
             shader_info.push_constant("VEC3", "camera_position")
             shader_info.push_constant("INT", "render_mode")
             shader_info.push_constant("INT", "sh_degree")
+            add_relighting_shader_inputs(shader_info)
             shader_info.push_constant("VEC2", "texture_dimensions")
             shader_info.push_constant("VEC2", "indices_dimensions")
             shader_info.push_constant("VEC2", "depth_texture_size")
@@ -1459,6 +1461,7 @@ def sna_render_comp_0DAEE(RENDER_ANIMATION, RENDER_COLOR, RENDER_DEPTH, COMP_WIT
                             bpy.gaussian_quad_shader.uniform_float("camera_position", camera_pos)
                             bpy.gaussian_quad_shader.uniform_int("render_mode", render_mode)
                             bpy.gaussian_quad_shader.uniform_int("sh_degree", SH_DEGREE if render_mode == 0 else 0)
+                            bind_relighting_uniforms(bpy.gaussian_quad_shader, bpy.context.scene)
                             # Set texture dimensions
                             bpy.gaussian_quad_shader.uniform_float("texture_dimensions", 
                                                                   (bpy.gaussian_texture_width, bpy.gaussian_texture_height))

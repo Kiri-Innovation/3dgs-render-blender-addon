@@ -3,6 +3,7 @@ __file__ = _kiri_os.path.join(_kiri_os.path.dirname(_kiri_os.path.dirname(__file
 del _kiri_os
 
 from .important import *
+from .realtime_relighting import bind_relighting_uniforms
 
 __package__ = __package__.rsplit('.', 1)[0]
 
@@ -371,6 +372,7 @@ def sna_viewport_render_A3941(SH_DEGREE, SORT_THRESHOLD):
                 bpy.gaussian_quad_shader.uniform_float("camera_position", camera_pos)
                 bpy.gaussian_quad_shader.uniform_int("render_mode", RENDER_MODE)
                 bpy.gaussian_quad_shader.uniform_int("sh_degree", SH_DEGREE)
+                bind_relighting_uniforms(bpy.gaussian_quad_shader, bpy.context.scene)
                 if hasattr(bpy, 'gaussian_texture_width'):
                     bpy.gaussian_quad_shader.uniform_float("texture_dimensions", 
                                                           (bpy.gaussian_texture_width, bpy.gaussian_texture_height))

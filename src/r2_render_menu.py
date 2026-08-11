@@ -24,6 +24,30 @@ def sna_r2_render_menu_7AD0F(layout_function, ):
     box_3D205.prop(bpy.context.scene.sna_dgs_scene_properties, 'r2_depth', text='Export Depth Pass', icon_value=0, emboss=True)
     box_3D205.prop(bpy.context.scene.sna_dgs_scene_properties, 'r2_comp', text='Combine With Native Render', icon_value=0, emboss=True)
     box_3D205.prop(bpy.context.scene.sna_dgs_scene_properties, 'r2_delete_temp_files', text='Delete Temp Files', icon_value=0, emboss=True)
+    relight_box = box_3D205.box()
+    relight_box.label(text='Realtime Relighting')
+    relight_box.prop(bpy.context.scene.sna_dgs_scene_properties, 'r2_relight', text='Use Blender Lights')
+    if bpy.context.scene.sna_dgs_scene_properties.r2_relight:
+        relight_box.prop(bpy.context.scene.sna_dgs_scene_properties, 'r2_relight_mode', text='Appearance')
+        relight_box.prop(bpy.context.scene.sna_dgs_scene_properties, 'r2_relight_response', text='Light Response')
+        relight_box.prop(bpy.context.scene.sna_dgs_scene_properties, 'r2_relight_strength', text='Direct Strength')
+        relight_box.prop(bpy.context.scene.sna_dgs_scene_properties, 'r2_relight_ambient', text='Ambient')
+        relight_box.prop(bpy.context.scene.sna_dgs_scene_properties, 'r2_relight_ambient_strength', text='Ambient Strength')
+        relight_box.prop(bpy.context.scene.sna_dgs_scene_properties, 'r2_shadows', text='Cached Mesh Shadows')
+        if bpy.context.scene.sna_dgs_scene_properties.r2_shadows:
+            relight_box.prop_search(bpy.context.scene.sna_dgs_scene_properties, 'r2_shadow_light', bpy.data, 'objects', text='Shadow Light')
+            relight_box.prop(bpy.context.scene.sna_dgs_scene_properties, 'r2_shadow_light_limit', text='Shadow Lights')
+            relight_box.prop(bpy.context.scene.sna_dgs_scene_properties, 'r2_shadow_resolution', text='Resolution')
+            relight_box.prop(bpy.context.scene.sna_dgs_scene_properties, 'r2_shadow_bias', text='Bias')
+            relight_box.prop(bpy.context.scene.sna_dgs_scene_properties, 'r2_shadow_normal_bias', text='Normal Bias')
+            relight_box.prop(bpy.context.scene.sna_dgs_scene_properties, 'r2_shadow_filter_radius', text='Filter Radius')
+            relight_box.prop(bpy.context.scene.sna_dgs_scene_properties, 'r2_shadow_density', text='Shadow Density')
+            relight_box.operator('sna.dgs_render_refresh_shadows_16f2b')
+        relight_box.prop(bpy.context.scene.sna_dgs_scene_properties, 'r2_shadow_proxy', text='Eevee Shadow Proxies')
+        if bpy.context.scene.sna_dgs_scene_properties.r2_shadow_proxy:
+            relight_box.prop(bpy.context.scene.sna_dgs_scene_properties, 'r2_shadow_proxy_limit', text='Max Cards')
+            relight_box.prop(bpy.context.scene.sna_dgs_scene_properties, 'r2_shadow_proxy_cutoff', text='Alpha Cutoff')
+            relight_box.operator('sna.dgs_render_build_shadow_proxies_5b787')
     split_A5CFC = box_3D205.split(factor=0.5, align=False)
     split_A5CFC.alert = False
     split_A5CFC.enabled = True
