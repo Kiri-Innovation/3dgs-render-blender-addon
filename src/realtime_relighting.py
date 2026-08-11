@@ -307,21 +307,91 @@ def build_native_shadow_map(context, light):
         shutil.rmtree(temp_dir, ignore_errors=True)
 
 
-def refresh_shadow_maps(context):
+def _rounded_matrix(matrix):
+    return tuple(round(value, 6) for row in matrix for value in row)
+
+
+def _sample_points(points, limit=64):
+    count = len(points)
+    if count == 0:
+        return ()
+    step = max(1, count // limit)
+    return tuple(round(component, 5) for index in range(0, count, step) for component in points[index][:])
+
+
+def _shadow_scene_signature(scene, light):
+    """Capture light/caster state without hashing every Gaussian every frame."""
+    depsgraph = bpy.context.evaluated_depsgraph_get()
+    light_data = light.data
+    signature = [
+        light.name, light_data.type, _rounded_matrix(light.matrix_world),
+        tuple(round(value, 5) for value in light_data.color), round(light_data.energy, 5),
+        round(getattr(light_data, "cutoff_distance", 0.0), 5),
+        round(getattr(light_data, "spot_size", 0.0), 5),
+        round(getattr(light_data, "size", 0.0), 5),
+    ]
+    for obj in scene.objects:
+        if obj.get("kiri_3dgs_shadow_proxy", False) or obj.type == "LIGHT":
+            continue
+        if obj.type == "MESH":
+            evaluated = obj.evaluated_get(depsgraph)
+            mesh = evaluated.data
+            sample = _sample_points([obj.matrix_world @ vertex.co for vertex in mesh.vertices])
+            signature.extend((obj.name, _rounded_matrix(obj.matrix_world), len(mesh.vertices), sample))
+        elif obj.get("is_gaussian_splat", False):
+            data = _gaussian_data(obj)
+            sample = _sample_points(data[:, :3])
+            signature.extend((obj.name, _rounded_matrix(obj.matrix_world), len(data), sample))
+    return tuple(signature)
+
+
+def _shadow_cache_status(rebuilt, total):
+    bpy.dgs_shadow_cache_status = {
+        "frame": bpy.context.scene.frame_current,
+        "rebuilt": rebuilt,
+        "total": total,
+    }
+
+
+def refresh_shadow_maps(context, force=True):
     scene, props = context.scene, context.scene.sna_dgs_scene_properties
+    context.evaluated_depsgraph_get().update()
     preferred = shadow_light_object(scene)
     lights = get_relight_lights(scene, preferred)[:props.r2_shadow_light_limit]
     if not lights:
         raise RuntimeError("Add an enabled Blender light before building shadow maps.")
-    if props.r2_shadow_proxy:
-        build_shadow_proxies(context)
-    maps = []
+    cache = getattr(bpy, "dgs_shadow_map_cache", {})
+    maps, rebuilt = [], 0
     for index, light in enumerate(lights):
-        shadow_map = build_native_shadow_map(context, light["object"])
+        signature = _shadow_scene_signature(scene, light["object"])
+        cached = cache.get(light["object"].name)
+        needs_rebuild = force or not cached or cached["signature"] != signature
+        if needs_rebuild:
+            shadow_map = build_native_shadow_map(context, light["object"])
+            cache[light["object"].name] = {"signature": signature, "map": shadow_map}
+            rebuilt += 1
+        else:
+            shadow_map = cached["map"]
         shadow_map["light_index"] = index
         maps.append(shadow_map)
+    active_names = {light["object"].name for light in lights}
+    bpy.dgs_shadow_map_cache = {name: entry for name, entry in cache.items() if name in active_names}
+    if props.r2_shadow_proxy and (rebuilt or not any(obj.get("kiri_3dgs_shadow_proxy", False) for obj in scene.objects)):
+        build_shadow_proxies(context)
     bpy.dgs_mesh_shadow_maps = maps
+    _shadow_cache_status(rebuilt, len(maps))
     return maps
+
+
+def update_shadow_maps_for_frame(context, is_animation):
+    """Apply the selected update policy after the animation frame is evaluated."""
+    props = context.scene.sna_dgs_scene_properties
+    if not (props.r2_relight and props.r2_shadows):
+        return False
+    mode = props.r2_shadow_update_mode
+    if mode == "Manual":
+        return False
+    return bool(refresh_shadow_maps(context, force=mode == "Every Frame"))
 
 
 class SNA_OT_Dgs_Render_Build_Shadow_Proxies_5B787(bpy.types.Operator):
@@ -345,7 +415,7 @@ class SNA_OT_Dgs_Render_Refresh_Shadows_16F2B(bpy.types.Operator):
 
     def execute(self, context):
         try:
-            self.report({"INFO"}, f"Refreshed {len(refresh_shadow_maps(context))} shadow maps")
+            self.report({"INFO"}, f"Refreshed {len(refresh_shadow_maps(context, force=True))} shadow maps")
             return {"FINISHED"}
         except (RuntimeError, subprocess.CalledProcessError) as error:
             self.report({"ERROR"}, str(error))

@@ -1630,6 +1630,8 @@ def sna_render_comp_0DAEE(RENDER_ANIMATION, RENDER_COLOR, RENDER_DEPTH, COMP_WIT
                         return False
                 elif rig_source_uuid_filter or REFRESH_EVALUATED_DATA or rig_fast_path_uuids:
                     debug_print("No data updates detected, skipping texture rebuild")
+            if is_animation:
+                update_shadow_maps_for_frame(bpy.context, is_animation=True)
             # Determine render resolution
             if RENDER_WIDTH > 0 and RENDER_HEIGHT > 0:
                 width = RENDER_WIDTH

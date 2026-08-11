@@ -37,12 +37,16 @@ def sna_r2_render_menu_7AD0F(layout_function, ):
         if bpy.context.scene.sna_dgs_scene_properties.r2_shadows:
             relight_box.prop_search(bpy.context.scene.sna_dgs_scene_properties, 'r2_shadow_light', bpy.data, 'objects', text='Shadow Light')
             relight_box.prop(bpy.context.scene.sna_dgs_scene_properties, 'r2_shadow_light_limit', text='Shadow Lights')
+            relight_box.prop(bpy.context.scene.sna_dgs_scene_properties, 'r2_shadow_update_mode', text='Animation Update')
             relight_box.prop(bpy.context.scene.sna_dgs_scene_properties, 'r2_shadow_resolution', text='Resolution')
             relight_box.prop(bpy.context.scene.sna_dgs_scene_properties, 'r2_shadow_bias', text='Bias')
             relight_box.prop(bpy.context.scene.sna_dgs_scene_properties, 'r2_shadow_normal_bias', text='Normal Bias')
             relight_box.prop(bpy.context.scene.sna_dgs_scene_properties, 'r2_shadow_filter_radius', text='Filter Radius')
             relight_box.prop(bpy.context.scene.sna_dgs_scene_properties, 'r2_shadow_density', text='Shadow Density')
             relight_box.operator('sna.dgs_render_refresh_shadows_16f2b')
+            shadow_status = getattr(bpy, 'dgs_shadow_cache_status', None)
+            if shadow_status:
+                relight_box.label(text=f"Cached: {shadow_status['total']} lights, rebuilt {shadow_status['rebuilt']} at frame {shadow_status['frame']}")
         relight_box.prop(bpy.context.scene.sna_dgs_scene_properties, 'r2_shadow_proxy', text='Eevee Shadow Proxies')
         if bpy.context.scene.sna_dgs_scene_properties.r2_shadow_proxy:
             relight_box.prop(bpy.context.scene.sna_dgs_scene_properties, 'r2_shadow_proxy_limit', text='Max Cards')

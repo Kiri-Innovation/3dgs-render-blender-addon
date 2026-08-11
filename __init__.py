@@ -272,6 +272,7 @@ class SNA_GROUP_sna_dgs_scene_properties_group(bpy.types.PropertyGroup):
     r2_shadow_light: bpy.props.PointerProperty(name='Shadow_Light', type=bpy.types.Object)
     r2_shadow_resolution: bpy.props.IntProperty(name='Shadow_Resolution', default=1024, min=256, max=4096)
     r2_shadow_light_limit: bpy.props.IntProperty(name='Shadow_Light_Limit', default=4, min=1, max=4)
+    r2_shadow_update_mode: bpy.props.EnumProperty(name='Shadow_Update_Mode', items=[('Auto', 'Auto', 'Rebuild only dirty light maps after frame evaluation', 0, 0), ('Every Frame', 'Every Frame', 'Rebuild all active shadow maps every frame', 0, 1), ('Manual', 'Manual', 'Only rebuild from Refresh Gaussian Shadows', 0, 2)], default='Auto')
     r2_shadow_proxy: bpy.props.BoolProperty(name='Shadow_Proxy', description='Build Eevee shadow cards for Gaussian splats', default=False)
     r2_shadow_proxy_limit: bpy.props.IntProperty(name='Shadow_Proxy_Limit', default=50000, min=1000, max=1000000)
     r2_shadow_proxy_cutoff: bpy.props.FloatProperty(name='Shadow_Proxy_Cutoff', default=0.02, min=0.0, max=1.0, precision=3)
