@@ -23,6 +23,11 @@ def add_relighting_shader_inputs(shader_info):
     shader_info.push_constant("INT", "relight_light_count")
     shader_info.push_constant("VEC4", "relight_ambient")
     shader_info.push_constant("VEC4", "relight_settings")
+    # Keep every direct-light value in the initial push-constant range supported by Metal.
+    for index in range(MAX_LIGHTS):
+        shader_info.push_constant("VEC4", f"relight_light_position_{index}")
+        shader_info.push_constant("VEC4", f"relight_light_color_{index}")
+        shader_info.push_constant("VEC4", f"relight_light_settings_{index}")
     shader_info.push_constant("INT", "shadow_enabled")
     shader_info.push_constant("INT", "shadow_light_count")
     shader_info.push_constant("FLOAT", "shadow_filter_radius")
@@ -32,9 +37,6 @@ def add_relighting_shader_inputs(shader_info):
         shader_info.push_constant("INT", f"shadow_light_index_{index}")
         shader_info.push_constant("MAT4", f"shadow_view_matrix_{index}")
         shader_info.push_constant("MAT4", f"shadow_projection_matrix_{index}")
-        shader_info.push_constant("VEC4", f"relight_light_position_{index}")
-        shader_info.push_constant("VEC4", f"relight_light_color_{index}")
-        shader_info.push_constant("VEC4", f"relight_light_settings_{index}")
         shader_info.sampler(4 + index, "FLOAT_2D", f"mesh_shadow_depth_{index}")
     for index in range(4):
         shader_info.sampler(8 + index, "FLOAT_2D", f"proxy_shadow_layer_{index}")
