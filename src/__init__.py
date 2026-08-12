@@ -89,6 +89,7 @@ from .relight2_2_build_proxy_hdri_relight import *
 from .relight2_3_commit_proxy_relight_to_3dgs import *
 from .relight2_4_restore_original_3dgs_color import *
 from .relight_5_create_col_and_vertex_paint import *
+from .realtime_relighting import *
 from .remove_by_size import *
 from .remove_higher_sh_attributes_86f09 import *
 from .remove_higher_sh_attributes_cb703 import *
