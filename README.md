@@ -1,13 +1,4 @@
 
-***Blender 5.2 - unsupported for now***
-
-In 5.2 - Blender completely flipped part of it's API - as it often likes to do (˃̣̣̥ᯅ˂̣̣̥)
-So any addon including Geometry Nodes - such as this one - is unsupported in Blender 5.2 until we have time to fix it.
-Thanks for you understanding.
-
-
-<img width="1280" height="720" alt="main" src="https://github.com/user-attachments/assets/1e0e669a-6505-47dd-83ed-bb39403c12dc" />
-
 
 # 3DGS Render Blender Addon by KIRI Engine
 <a href="./LICENSE">
