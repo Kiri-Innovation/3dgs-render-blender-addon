@@ -101,7 +101,7 @@ Thank you to everyone who has contributed code, testing, bug reports, documentat
 
 ## Project stewardship
 
-3DGS Render was initiated and maintained by KIRI Engine as a free tool for the 3D community. KIRI Engine is now stepping back from sole day-to-day maintenance so that the project can grow through community leadership.
+3DGS Render was initiated and maintained by KIRI Engine as a free tool for the 3D community. KIRI Engine is now stepping back from regular maintenance and updates so that the project can grow through community leadership.
 
 KIRI Engine will continue to host and steward the repository. Trusted community maintainers may triage issues, review and merge pull requests, prepare releases and help guide the roadmap. Maintainers are volunteers and do not have guaranteed working hours or response times.
 
