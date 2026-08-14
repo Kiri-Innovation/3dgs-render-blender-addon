@@ -28,7 +28,7 @@ class SNA_OT_Dgs_Render_Generate_Hq_Object_55455(bpy.types.Operator):
         for i_3F5D0 in range(len(bpy.data.objects)):
             if (property_exists("bpy.data.objects[i_3F5D0].modifiers", globals(), locals()) and 'KIRI_3DGS_Render_GN' in bpy.data.objects[i_3F5D0].modifiers):
                 bpy.data.objects[i_3F5D0].sna_dgs_object_properties.cam_update = True
-                bpy.data.objects[i_3F5D0].modifiers['KIRI_3DGS_Render_GN']['Socket_54'] = True
+                set_modifier_socket(bpy.data.objects[i_3F5D0].modifiers['KIRI_3DGS_Render_GN'], 'Socket_54', True)
 
         def delayed_CB67D():
             sna_update_camera_single_time_9EF18()
@@ -54,7 +54,7 @@ class SNA_OT_Dgs_Render_Generate_Hq_Object_55455(bpy.types.Operator):
                 appended_D9EAC = None if not new_data else new_data[0]
                 sna_move_object_to_collection_create_if_missingfunction_execute_AB682('KIRI_HQ_Merged_Object', '3DGS_HQ_Object', 'COLOR_05')
                 sna_append_and_add_geo_nodes_function_execute_6BCD7('KIRI_3DGS_Instance_HQ', 'KIRI_3DGS_Instance_HQ', bpy.data.objects['KIRI_HQ_Merged_Object'])
-                bpy.data.objects['KIRI_HQ_Merged_Object'].modifiers['KIRI_3DGS_Instance_HQ']['Socket_2'] = bpy.data.collections['3DGS_LQ_Objects']
+                set_modifier_socket(bpy.data.objects['KIRI_HQ_Merged_Object'].modifiers['KIRI_3DGS_Instance_HQ'], 'Socket_2', bpy.data.collections['3DGS_LQ_Objects'])
                 if property_exists("bpy.data.materials['KIRI_3DGS_Render_Material']", globals(), locals()):
                     pass
                 else:

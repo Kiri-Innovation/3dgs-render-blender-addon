@@ -618,8 +618,8 @@ class SNA_OT_Dgs_Render_Convert_Vert_3Dgs_To_Face_3Dgs_E6635(bpy.types.Operator)
                 print(f"Assigned material '{material_name}' to {obj.name} and removed existing material slots.")
             except Exception as e:
                 print(f"Error assigning material to {obj.name}: {e}")
-        bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_61'] = bpy.data.materials['KIRI_3DGS_Render_Material']
-        bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_54'] = bpy.context.view_layer.objects.active.sna_dgs_object_properties.cam_update
+        set_modifier_socket(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN'], 'Socket_61', bpy.data.materials['KIRI_3DGS_Render_Material'])
+        set_modifier_socket(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN'], 'Socket_54', bpy.context.view_layer.objects.active.sna_dgs_object_properties.cam_update)
         bpy.context.view_layer.objects.active.update_tag(refresh={'DATA'}, )
         if bpy.context and bpy.context.screen:
             for a in bpy.context.screen.areas:

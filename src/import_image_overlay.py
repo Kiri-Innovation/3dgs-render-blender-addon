@@ -22,7 +22,7 @@ class SNA_OT_Dgs_Render_Import_Image_Overlay_4A457(bpy.types.Operator, ImportHel
 
     def execute(self, context):
         image_AB939 = bpy.data.images.load(filepath=self.filepath, check_existing=True, )
-        bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Adjust_Colour_And_Material']['Socket_60'] = image_AB939
+        set_modifier_socket(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Adjust_Colour_And_Material'], 'Socket_60', image_AB939)
         bpy.context.view_layer.objects.active.update_tag(refresh={'DATA'}, )
         if bpy.context and bpy.context.screen:
             for a in bpy.context.screen.areas:

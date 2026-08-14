@@ -28,7 +28,7 @@ class SNA_OT_Dgs_Render_Append_Rough_Mesh_Modifier_65Da3(bpy.types.Operator):
             if self.sna_create_duplicate:
                 new_object_name_0_e557e = sna_duplicate_object_ED1F0(bpy.context.view_layer.objects.active.name)
                 if (property_exists("bpy.data.objects[new_object_name_0_e557e].modifiers", globals(), locals()) and 'KIRI_3DGS_Render_GN' in bpy.data.objects[new_object_name_0_e557e].modifiers):
-                    bpy.data.objects[new_object_name_0_e557e].modifiers['KIRI_3DGS_Render_GN']['Socket_50'] = 1
+                    set_modifier_socket(bpy.data.objects[new_object_name_0_e557e].modifiers['KIRI_3DGS_Render_GN'], 'Socket_50', 1)
                     bpy.data.objects[new_object_name_0_e557e].update_tag(refresh={'DATA'}, )
                     if bpy.context and bpy.context.screen:
                         for a in bpy.context.screen.areas:
@@ -115,7 +115,7 @@ class SNA_OT_Dgs_Render_Append_Rough_Mesh_Modifier_65Da3(bpy.types.Operator):
                             a.tag_redraw()
             else:
                 if (property_exists("bpy.context.view_layer.objects.active.modifiers", globals(), locals()) and 'KIRI_3DGS_Render_GN' in bpy.context.view_layer.objects.active.modifiers):
-                    bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_50'] = 1
+                    set_modifier_socket(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN'], 'Socket_50', 1)
                     bpy.context.view_layer.objects.active.sna_dgs_object_properties.update_mode = 'Disable Camera Updates'
                 created_modifier_0_174bb = sna_append_and_add_geo_nodes_function_execute_6BCD7('KIRI_3DGS_Convert_To_Rough_Mesh_GN', 'KIRI_3DGS_Convert_To_Rough_Mesh_GN', bpy.context.view_layer.objects.active)
                 sna_move_modifier_index_23126(bpy.context.view_layer.objects.active, 'KIRI_3DGS_Convert_To_Rough_Mesh_GN', 0)

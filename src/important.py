@@ -28,6 +28,17 @@ from .. import load_preview_icon
 __package__ = __package__.rsplit('.', 1)[0]
 
 
+def set_modifier_socket(modifier, key, value):
+    """Set modifier[key] = value, swallowing the TypeError Blender 5.2 raises for
+    Menu/Material/Image/Collection sockets (e.g. KIRI_3DGS_Render_GN's Socket_50,
+    Socket_61). Works fine on 5.1.2 — silently no-ops on 5.2 so setup continues
+    instead of aborting; the socket just keeps its node-group default."""
+    try:
+        modifier[key] = value
+    except TypeError:
+        pass
+
+
 def property_exists(prop_path, glob, loc):
     try:
         eval(prop_path, glob, loc)

@@ -56,7 +56,7 @@ class SNA_OT_Dgs_Render_Export_Mesh_As_3Dgs4Dgs_Ce2F7(bpy.types.Operator):
                             bpy.app.timers.register(delayed_C77D9, first_interval=0.10000000149011612)
                         elif bpy.context.scene.sna_dgs_scene_properties.export_single_or_sequence == "4DGS":
                             if (property_exists("bpy.context.view_layer.objects.active.modifiers", globals(), locals()) and 'KIRI_3DGS_Render_GN' in bpy.context.view_layer.objects.active.modifiers):
-                                bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_50'] = 1
+                                set_modifier_socket(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN'], 'Socket_50', 1)
                                 bpy.context.view_layer.objects.active.sna_dgs_object_properties.update_mode = 'Disable Camera Updates'
                             if (property_exists("bpy.context.view_layer.objects.active.modifiers", globals(), locals()) and 'KIRI_3DGS_Animate_GN' in bpy.context.view_layer.objects.active.modifiers):
                                 if bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN'].show_viewport:

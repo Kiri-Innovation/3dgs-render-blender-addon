@@ -9,7 +9,7 @@ __package__ = __package__.rsplit('.', 1)[0]
 
 def sna_apply_all_modifiers_for_export_B90C0(Target_Object):
     if (property_exists("bpy.data.objects[Target_Object].modifiers", globals(), locals()) and 'KIRI_3DGS_Render_GN' in bpy.data.objects[Target_Object].modifiers):
-        bpy.data.objects[Target_Object].modifiers['KIRI_3DGS_Render_GN']['Socket_50'] = 1
+        set_modifier_socket(bpy.data.objects[Target_Object].modifiers['KIRI_3DGS_Render_GN'], 'Socket_50', 1)
     if (property_exists("bpy.data.objects[Target_Object].modifiers", globals(), locals()) and 'KIRI_3DGS_Animate_GN' in bpy.data.objects[Target_Object].modifiers):
         if bpy.data.objects[Target_Object].modifiers['KIRI_3DGS_Animate_GN'].show_viewport:
             if ((bpy.data.objects[Target_Object].modifiers['KIRI_3DGS_Animate_GN']['Socket_26'] == 1) or (bpy.data.objects[Target_Object].modifiers['KIRI_3DGS_Animate_GN']['Socket_26'] == 2)):
