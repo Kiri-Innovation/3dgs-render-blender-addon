@@ -179,7 +179,7 @@ class SNA_OT_Dgs_Render_Import_Ply_E0A3A(bpy.types.Operator, ImportHelper):
         bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Adjust_Colour_And_Material'].show_render = True
         bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Write F_DC_And_Merge'].show_render = False
         bpy.context.scene.sna_dgs_scene_properties.update_mode = 'Disable Camera Updates'
-        bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_50'] = 1
+        set_modifier_socket(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN'], 'Socket_50', 1)
         bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN'].show_on_cage = (bpy.context.scene.sna_dgs_scene_properties.import_face_vert == 'Faces')
         bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN'].show_in_editmode = (bpy.context.scene.sna_dgs_scene_properties.import_face_vert == 'Faces')
         bpy.context.view_layer.objects.active.sna_dgs_object_properties.cam_update = False
@@ -221,7 +221,7 @@ class SNA_OT_Dgs_Render_Import_Ply_E0A3A(bpy.types.Operator, ImportHelper):
                 print(f"Assigned material '{material_name}' to {obj.name} and removed existing material slots.")
             except Exception as e:
                 print(f"Error assigning material to {obj.name}: {e}")
-        bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_61'] = bpy.data.materials['KIRI_3DGS_Render_Material']
+        set_modifier_socket(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN'], 'Socket_61', bpy.data.materials['KIRI_3DGS_Render_Material'])
         bpy.context.view_layer.objects.active.update_tag(refresh={'DATA'}, )
         if bpy.context and bpy.context.screen:
             for a in bpy.context.screen.areas:
