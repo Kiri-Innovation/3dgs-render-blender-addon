@@ -13,7 +13,7 @@ def sna_apply_all_modifiers_for_export_B90C0(Target_Object):
     if (property_exists("bpy.data.objects[Target_Object].modifiers", globals(), locals()) and 'KIRI_3DGS_Animate_GN' in bpy.data.objects[Target_Object].modifiers):
         if bpy.data.objects[Target_Object].modifiers['KIRI_3DGS_Animate_GN'].show_viewport:
             if ((bpy.data.objects[Target_Object].modifiers['KIRI_3DGS_Animate_GN']['Socket_26'] == 1) or (bpy.data.objects[Target_Object].modifiers['KIRI_3DGS_Animate_GN']['Socket_26'] == 2)):
-                bpy.data.objects[Target_Object].modifiers['KIRI_3DGS_Animate_GN']['Socket_26'] = 0
+                set_modifier_socket(bpy.data.objects[Target_Object].modifiers['KIRI_3DGS_Animate_GN'], 'Socket_26', 0)
     bpy.context.view_layer.objects.active.update_tag(refresh={'DATA'}, )
     if bpy.context and bpy.context.screen:
         for a in bpy.context.screen.areas:

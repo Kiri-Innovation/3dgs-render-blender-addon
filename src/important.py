@@ -28,15 +28,22 @@ from .. import load_preview_icon
 __package__ = __package__.rsplit('.', 1)[0]
 
 
+_set_modifier_socket_warned = set()
+
+
 def set_modifier_socket(modifier, key, value):
-    """Set modifier[key] = value, swallowing the TypeError Blender 5.2 raises for
-    Menu/Material/Image/Collection sockets (e.g. KIRI_3DGS_Render_GN's Socket_50,
-    Socket_61). Works fine on 5.1.2 — silently no-ops on 5.2 so setup continues
-    instead of aborting; the socket just keeps its node-group default."""
+    """Set modifier[key] = value, swallowing the TypeError Blender 5.2 raises on
+    reference-typed sockets (Menu / Material / Image / Collection) via the
+    id-property path. Works fine on 5.1.2 — on 5.2 the socket keeps its
+    node-group default so setup continues instead of aborting. Prints once per
+    (modifier, key) pair so a future silent no-op is at least visible."""
     try:
         modifier[key] = value
-    except TypeError:
-        pass
+    except TypeError as exc:
+        marker = (getattr(modifier, "name", "?"), key)
+        if marker not in _set_modifier_socket_warned:
+            _set_modifier_socket_warned.add(marker)
+            print(f"[KIRI] set_modifier_socket: skipping {marker[0]}[{key!r}] ({exc}); further warnings for this pair suppressed")
 
 
 def property_exists(prop_path, glob, loc):

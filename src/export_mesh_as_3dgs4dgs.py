@@ -61,7 +61,7 @@ class SNA_OT_Dgs_Render_Export_Mesh_As_3Dgs4Dgs_Ce2F7(bpy.types.Operator):
                             if (property_exists("bpy.context.view_layer.objects.active.modifiers", globals(), locals()) and 'KIRI_3DGS_Animate_GN' in bpy.context.view_layer.objects.active.modifiers):
                                 if bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN'].show_viewport:
                                     if ((bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN']['Socket_26'] == 1) or (bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN']['Socket_26'] == 2)):
-                                        bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN']['Socket_26'] = 0
+                                        set_modifier_socket(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN'], 'Socket_26', 0)
                             bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Write F_DC_And_Merge'].show_viewport = True
                             bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Write F_DC_And_Merge'].show_render = True
                             bpy.context.view_layer.objects.active.update_tag(refresh={'OBJECT'}, )
