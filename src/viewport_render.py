@@ -4,6 +4,7 @@ del _kiri_os
 
 from .important import *
 from .realtime_relighting import bind_relighting_uniforms
+from .texture_creation import sna_texture_creation_FD1B2
 
 __package__ = __package__.rsplit('.', 1)[0]
 
@@ -126,12 +127,18 @@ def sna_viewport_render_A3941(SH_DEGREE, SORT_THRESHOLD):
                 return False
             if not hasattr(bpy, 'gaussian_last_transforms'):
                 bpy.gaussian_last_transforms = {}
+            if not hasattr(bpy, 'gaussian_last_viewport_visibility'):
+                bpy.gaussian_last_viewport_visibility = {}
             any_changed = False
             for obj_meta in bpy.gaussian_object_metadata:
                 obj_name = obj_meta['name']
                 obj = obj_meta['object']
                 if obj_name not in bpy.data.objects:
                     continue
+                current_visibility = kiri_gaussian_viewport_visible(obj)
+                if bpy.gaussian_last_viewport_visibility.get(obj_name) != current_visibility:
+                    bpy.gaussian_last_viewport_visibility[obj_name] = current_visibility
+                    any_changed = True
                 current_transform = obj.matrix_world.copy()
                 # Check if we've stored this object's transform before
                 if obj_name not in bpy.gaussian_last_transforms:
@@ -164,30 +171,10 @@ def sna_viewport_render_A3941(SH_DEGREE, SORT_THRESHOLD):
         try:
             if not hasattr(bpy, 'gaussian_object_metadata'):
                 return False
-            num_objects = len(bpy.gaussian_object_metadata)
-            floats_per_object = 15
-            total_metadata_floats = num_objects * floats_per_object
-            max_texture_dim = 16384
-            metadata_width = min(max_texture_dim, total_metadata_floats)
-            metadata_height = (total_metadata_floats + metadata_width - 1) // metadata_width
-            expected_size = metadata_width * metadata_height
-            metadata_data = np.zeros(expected_size, dtype=np.float32)
-            # Fill metadata with CURRENT transforms for all objects
-            for obj_idx, obj_meta in enumerate(bpy.gaussian_object_metadata):
-                base_idx = obj_idx * floats_per_object
-                obj = obj_meta['object']
-                # Start index as uint32 bitcast to float32
-                uint32_start_idx = np.uint32(obj_meta['start_idx'])
-                metadata_data[base_idx + 0] = uint32_start_idx.view(np.float32)
-                metadata_data[base_idx + 1] = float(obj_meta['gaussian_count'])
-                metadata_data[base_idx + 2] = 1.0  # Visible
-                # CURRENT object transform matrix
-                current_transform = obj.matrix_world
-                matrix_idx = 0
-                for col in range(4):
-                    for row in range(3):
-                        metadata_data[base_idx + 3 + matrix_idx] = current_transform[row][col]
-                        matrix_idx += 1
+            metadata_data, metadata_width, metadata_height = kiri_build_gaussian_metadata(
+                bpy.gaussian_object_metadata,
+                for_render=False,
+            )
             # Create new metadata texture
             metadata_buffer = gpu.types.Buffer('FLOAT', len(metadata_data), metadata_data.tolist())
             bpy.gaussian_metadata_texture = gpu.types.GPUTexture(
@@ -290,19 +277,21 @@ def sna_viewport_render_A3941(SH_DEGREE, SORT_THRESHOLD):
         """Multi-object rendering with automatic cache reconstruction"""
         try:
             # ========== AUTO-RECONSTRUCTION CHECK ==========
-            cache_needs_rebuild = False
-            # Check if cache exists and has objects
+            cache_changed = kiri_sync_gaussian_object_cache()
             if not hasattr(bpy, 'gaussian_object_cache') or not bpy.gaussian_object_cache:
-                cache_needs_rebuild = auto_reconstruct_cache()
-                if not cache_needs_rebuild:
-                    return  # No gaussian objects found
-            else:
-                # Clean up any deleted objects
-                cleanup_deleted_objects()
-            # Check if global textures need rebuilding (after file load or new objects)
+                return  # No gaussian objects found
+            # A duplicated/deleted/renamed proxy changes the packed global
+            # textures. Rebuild once in the active GPU draw context so normal
+            # Blender duplication appears without requiring an Update click.
             if not hasattr(bpy, 'gaussian_texture') or getattr(bpy, 'gaussian_global_needs_update', False):
-                print("Global textures missing - run script_3 first")
-                return
+                try:
+                    sna_texture_creation_FD1B2()
+                except Exception as rebuild_error:
+                    if cache_changed:
+                        print(f"KIRI 3DGS: Could not rebuild textures after proxy duplication: {rebuild_error}")
+                    return
+                if not hasattr(bpy, 'gaussian_texture') or getattr(bpy, 'gaussian_global_needs_update', False):
+                    return
             # ========== STANDARD RENDERING CHECKS ==========
             required_attrs = [
                 'gaussian_quad_shader', 'gaussian_quad_batch', 'gaussian_composite_shader', 

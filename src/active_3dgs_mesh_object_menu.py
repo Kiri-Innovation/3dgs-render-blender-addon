@@ -136,8 +136,8 @@ def sna_active_3dgs_mesh_object_menu_9588F(layout_function, ):
             box_AA375.scale_y = 1.0
             if not True: box_AA375.operator_context = "EXEC_DEFAULT"
             attr_C8F44 = '["' + str('Socket_51' + '"]') 
-            box_AA375.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN'], attr_C8F44, text='Point Radius', icon_value=0, emboss=True)
-            box_AA375.prop_search(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN'], '["Socket_61"]', bpy.data, 'materials', text='Material', icon='NONE', item_search_property="name")
+            box_AA375.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN'], attr_C8F44), text='Point Radius', icon_value=0, emboss=True)
+            box_AA375.prop_search(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN'], '["Socket_61"]'), bpy.data, 'materials', text='Material', icon='NONE', item_search_property="name")
         if (bpy.context.view_layer.objects.active.sna_dgs_object_properties.update_mode == 'Enable Camera Updates'):
             col_75D68 = col_A4D20.column(heading='', align=False)
             col_75D68.alert = False
@@ -204,7 +204,7 @@ def sna_active_3dgs_mesh_object_menu_9588F(layout_function, ):
                 row_BAB68.alignment = 'Expand'.upper()
                 row_BAB68.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
                 attr_47247 = '["' + str('Socket_68' + '"]') 
-                row_BAB68.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN'], attr_47247, text='Frustrum Cull (Edit Mode)', icon_value=0, emboss=True)
+                row_BAB68.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN'], attr_47247), text='Frustrum Cull (Edit Mode)', icon_value=0, emboss=True)
                 if bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_68']:
                     split_06E70 = row_BAB68.split(factor=0.30000001192092896, align=False)
                     split_06E70.alert = False
@@ -217,9 +217,9 @@ def sna_active_3dgs_mesh_object_menu_9588F(layout_function, ):
                     split_06E70.alignment = 'Expand'.upper()
                     if not True: split_06E70.operator_context = "EXEC_DEFAULT"
                     attr_F00D7 = '["' + str('Socket_74' + '"]') 
-                    split_06E70.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN'], attr_F00D7, text='Invert', icon_value=0, emboss=True)
+                    split_06E70.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN'], attr_F00D7), text='Invert', icon_value=0, emboss=True)
                     attr_D8000 = '["' + str('Socket_63' + '"]') 
-                    split_06E70.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN'], attr_D8000, text='Padding', icon_value=0, emboss=True)
+                    split_06E70.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN'], attr_D8000), text='Padding', icon_value=0, emboss=True)
                 box_D224C = col_C389F.box()
                 box_D224C.alert = False
                 box_D224C.enabled = True
@@ -241,10 +241,10 @@ def sna_active_3dgs_mesh_object_menu_9588F(layout_function, ):
                 row_03A56.alignment = 'Expand'.upper()
                 row_03A56.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
                 attr_12DA6 = '["' + str('Socket_69' + '"]') 
-                row_03A56.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN'], attr_12DA6, text='Distance Cull (Edit Mode)', icon_value=0, emboss=True)
+                row_03A56.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN'], attr_12DA6), text='Distance Cull (Edit Mode)', icon_value=0, emboss=True)
                 if bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_69']:
                     attr_29452 = '["' + str('Socket_72' + '"]') 
-                    row_03A56.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN'], attr_29452, text='Use Camera Clip Range', icon_value=0, emboss=True)
+                    row_03A56.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN'], attr_29452), text='Use Camera Clip Range', icon_value=0, emboss=True)
                 if ( not bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_72'] and bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN']['Socket_69']):
                     row_050CC = box_D224C.row(heading='', align=False)
                     row_050CC.alert = False
@@ -257,6 +257,6 @@ def sna_active_3dgs_mesh_object_menu_9588F(layout_function, ):
                     row_050CC.alignment = 'Expand'.upper()
                     row_050CC.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
                     attr_47D5F = '["' + str('Socket_70' + '"]') 
-                    row_050CC.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN'], attr_47D5F, text='Near Distance', icon_value=0, emboss=True)
+                    row_050CC.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN'], attr_47D5F), text='Near Distance', icon_value=0, emboss=True)
                     attr_05FB6 = '["' + str('Socket_71' + '"]') 
-                    row_050CC.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN'], attr_05FB6, text='Far Distance', icon_value=0, emboss=True)
+                    row_050CC.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_GN'], attr_05FB6), text='Far Distance', icon_value=0, emboss=True)

@@ -69,7 +69,7 @@ def sna_animate_function_interface_57F9E(layout_function, ):
         box_797F1.scale_y = 1.0
         if not True: box_797F1.operator_context = "EXEC_DEFAULT"
         attr_C6924 = '["' + str('Socket_6' + '"]') 
-        box_797F1.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN'], attr_C6924, text='', icon_value=0, emboss=True)
+        box_797F1.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN'], attr_C6924), text='', icon_value=0, emboss=True)
         if (bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN']['Socket_6'] == 2):
             pass
         else:
@@ -85,13 +85,13 @@ def sna_animate_function_interface_57F9E(layout_function, ):
             col_44B28.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
             if (bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN']['Socket_6'] == 0):
                 attr_3F944 = '["' + str('Socket_2' + '"]') 
-                col_44B28.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN'], attr_3F944, text='', icon_value=0, emboss=True)
+                col_44B28.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN'], attr_3F944), text='', icon_value=0, emboss=True)
             if (bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN']['Socket_6'] == 0):
                 pass
             else:
-                col_44B28.prop_search(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN'], '["Socket_5"]', bpy.context.scene.collection, 'children', text='', icon='NONE', item_search_property="name")
+                col_44B28.prop_search(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN'], '["Socket_5"]'), bpy.context.scene.collection, 'children', text='', icon='NONE', item_search_property="name")
             attr_D5EE1 = '["' + str('Socket_3' + '"]') 
-            col_44B28.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN'], attr_D5EE1, text='Distance Threshold', icon_value=0, emboss=True)
+            col_44B28.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN'], attr_D5EE1), text='Distance Threshold', icon_value=0, emboss=True)
         box_3AE7F = col_03A93.box()
         box_3AE7F.alert = False
         box_3AE7F.enabled = True
@@ -103,7 +103,7 @@ def sna_animate_function_interface_57F9E(layout_function, ):
         box_3AE7F.scale_y = 1.0
         if not True: box_3AE7F.operator_context = "EXEC_DEFAULT"
         attr_A68D1 = '["' + str('Socket_37' + '"]') 
-        box_3AE7F.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN'], attr_A68D1, text='Decimate Animated', icon_value=0, emboss=True)
+        box_3AE7F.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN'], attr_A68D1), text='Decimate Animated', icon_value=0, emboss=True)
         box_F6C6C = col_03A93.box()
         box_F6C6C.alert = False
         box_F6C6C.enabled = True
@@ -115,7 +115,7 @@ def sna_animate_function_interface_57F9E(layout_function, ):
         box_F6C6C.scale_y = 1.0
         if not True: box_F6C6C.operator_context = "EXEC_DEFAULT"
         attr_FEA5B = '["' + str('Socket_26' + '"]') 
-        box_F6C6C.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN'], attr_FEA5B, text='', icon_value=0, emboss=True)
+        box_F6C6C.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN'], attr_FEA5B), text='', icon_value=0, emboss=True)
         if (bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN']['Socket_26'] == 1):
             box_6DFC4 = box_F6C6C.box()
             box_6DFC4.alert = False
@@ -127,18 +127,18 @@ def sna_animate_function_interface_57F9E(layout_function, ):
             box_6DFC4.scale_x = 1.0
             box_6DFC4.scale_y = 1.0
             if not True: box_6DFC4.operator_context = "EXEC_DEFAULT"
-            box_6DFC4.prop_search(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN'], '["Socket_44"]', bpy.data, 'materials', text='Material', icon='NONE', item_search_property="name")
+            box_6DFC4.prop_search(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN'], '["Socket_44"]'), bpy.data, 'materials', text='Material', icon='NONE', item_search_property="name")
             attr_55AA7 = '["' + str('Socket_9' + '"]') 
-            box_6DFC4.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN'], attr_55AA7, text='Point Min Radius', icon_value=0, emboss=True)
+            box_6DFC4.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN'], attr_55AA7), text='Point Min Radius', icon_value=0, emboss=True)
             if (bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN']['Socket_6'] == 2):
                 pass
             else:
                 attr_A5ADF = '["' + str('Socket_10' + '"]') 
-                box_6DFC4.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN'], attr_A5ADF, text='Point Max Radius', icon_value=0, emboss=True)
+                box_6DFC4.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN'], attr_A5ADF), text='Point Max Radius', icon_value=0, emboss=True)
             attr_D7ABF = '["' + str('Socket_11' + '"]') 
-            box_6DFC4.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN'], attr_D7ABF, text='Random Mix', icon_value=0, emboss=True)
+            box_6DFC4.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN'], attr_D7ABF), text='Random Mix', icon_value=0, emboss=True)
             attr_9A7E1 = '["' + str('Socket_12' + '"]') 
-            box_6DFC4.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN'], attr_9A7E1, text='Random Multiplier', icon_value=0, emboss=True)
+            box_6DFC4.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN'], attr_9A7E1), text='Random Multiplier', icon_value=0, emboss=True)
         if (bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN']['Socket_26'] == 2):
             box_91071 = box_F6C6C.box()
             box_91071.alert = False
@@ -150,20 +150,20 @@ def sna_animate_function_interface_57F9E(layout_function, ):
             box_91071.scale_x = 1.0
             box_91071.scale_y = 1.0
             if not True: box_91071.operator_context = "EXEC_DEFAULT"
-            box_91071.prop_search(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN'], '["Socket_44"]', bpy.data, 'materials', text='Material', icon='NONE', item_search_property="name")
+            box_91071.prop_search(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN'], '["Socket_44"]'), bpy.data, 'materials', text='Material', icon='NONE', item_search_property="name")
             attr_F4993 = '["' + str('Socket_38' + '"]') 
-            box_91071.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN'], attr_F4993, text='Curve Length', icon_value=0, emboss=True)
+            box_91071.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN'], attr_F4993), text='Curve Length', icon_value=0, emboss=True)
             attr_070CD = '["' + str('Socket_31' + '"]') 
-            box_91071.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN'], attr_070CD, text='Curve Min Radius', icon_value=0, emboss=True)
+            box_91071.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN'], attr_070CD), text='Curve Min Radius', icon_value=0, emboss=True)
             if (bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN']['Socket_6'] == 2):
                 pass
             else:
                 attr_BA37E = '["' + str('Socket_32' + '"]') 
-                box_91071.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN'], attr_BA37E, text='Curve Max Radius', icon_value=0, emboss=True)
+                box_91071.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN'], attr_BA37E), text='Curve Max Radius', icon_value=0, emboss=True)
             attr_0D707 = '["' + str('Socket_33' + '"]') 
-            box_91071.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN'], attr_0D707, text='Random Mix', icon_value=0, emboss=True)
+            box_91071.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN'], attr_0D707), text='Random Mix', icon_value=0, emboss=True)
             attr_53122 = '["' + str('Socket_34' + '"]') 
-            box_91071.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN'], attr_53122, text='Random Multiplier', icon_value=0, emboss=True)
+            box_91071.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN'], attr_53122), text='Random Multiplier', icon_value=0, emboss=True)
         box_B4084 = col_03A93.box()
         box_B4084.alert = False
         box_B4084.enabled = True
@@ -185,7 +185,7 @@ def sna_animate_function_interface_57F9E(layout_function, ):
         box_7D470.scale_y = 1.0
         if not True: box_7D470.operator_context = "EXEC_DEFAULT"
         attr_52B76 = '["' + str('Socket_28' + '"]') 
-        box_7D470.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN'], attr_52B76, text='Enable Noise Displacement', icon_value=0, emboss=True, toggle=True)
+        box_7D470.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN'], attr_52B76), text='Enable Noise Displacement', icon_value=0, emboss=True, toggle=True)
         if bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN']['Socket_28']:
             col_28235 = box_7D470.column(heading='', align=False)
             col_28235.alert = False
@@ -198,11 +198,11 @@ def sna_animate_function_interface_57F9E(layout_function, ):
             col_28235.alignment = 'Expand'.upper()
             col_28235.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
             attr_D3C6D = '["' + str('Socket_7' + '"]') 
-            col_28235.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN'], attr_D3C6D, text='Noise Strength', icon_value=0, emboss=True)
+            col_28235.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN'], attr_D3C6D), text='Noise Strength', icon_value=0, emboss=True)
             attr_6D7D3 = '["' + str('Socket_8' + '"]') 
-            col_28235.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN'], attr_6D7D3, text='Noise Scale', icon_value=0, emboss=True)
+            col_28235.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN'], attr_6D7D3), text='Noise Scale', icon_value=0, emboss=True)
             attr_18DA5 = '["' + str('Socket_4' + '"]') 
-            col_28235.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN'], attr_18DA5, text='Time Evolution Multiplier', icon_value=0, emboss=True)
+            col_28235.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN'], attr_18DA5), text='Time Evolution Multiplier', icon_value=0, emboss=True)
         box_54317 = box_B4084.box()
         box_54317.alert = False
         box_54317.enabled = True
@@ -214,7 +214,7 @@ def sna_animate_function_interface_57F9E(layout_function, ):
         box_54317.scale_y = 1.0
         if not True: box_54317.operator_context = "EXEC_DEFAULT"
         attr_FB923 = '["' + str('Socket_29' + '"]') 
-        box_54317.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN'], attr_FB923, text='Enable Voronoi Displacement', icon_value=0, emboss=True, toggle=True)
+        box_54317.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN'], attr_FB923), text='Enable Voronoi Displacement', icon_value=0, emboss=True, toggle=True)
         if bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN']['Socket_29']:
             col_E8E24 = box_54317.column(heading='', align=False)
             col_E8E24.alert = False
@@ -227,11 +227,11 @@ def sna_animate_function_interface_57F9E(layout_function, ):
             col_E8E24.alignment = 'Expand'.upper()
             col_E8E24.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
             attr_AEBD9 = '["' + str('Socket_21' + '"]') 
-            col_E8E24.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN'], attr_AEBD9, text='Voronoi Strength', icon_value=0, emboss=True)
+            col_E8E24.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN'], attr_AEBD9), text='Voronoi Strength', icon_value=0, emboss=True)
             attr_D761F = '["' + str('Socket_20' + '"]') 
-            col_E8E24.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN'], attr_D761F, text='Voronoi Scale', icon_value=0, emboss=True)
+            col_E8E24.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN'], attr_D761F), text='Voronoi Scale', icon_value=0, emboss=True)
             attr_6054A = '["' + str('Socket_22' + '"]') 
-            col_E8E24.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN'], attr_6054A, text='Time Evolution Multiplier', icon_value=0, emboss=True)
+            col_E8E24.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN'], attr_6054A), text='Time Evolution Multiplier', icon_value=0, emboss=True)
         box_554D7 = col_03A93.box()
         box_554D7.alert = False
         box_554D7.enabled = True
@@ -253,7 +253,7 @@ def sna_animate_function_interface_57F9E(layout_function, ):
         box_E2A8B.scale_y = 1.0
         if not True: box_E2A8B.operator_context = "EXEC_DEFAULT"
         attr_FE6FE = '["' + str('Socket_41' + '"]') 
-        box_E2A8B.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN'], attr_FE6FE, text='Enable Pixelate', icon_value=0, emboss=True, toggle=True)
+        box_E2A8B.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN'], attr_FE6FE), text='Enable Pixelate', icon_value=0, emboss=True, toggle=True)
         if bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN']['Socket_41']:
             col_5DE3D = box_E2A8B.column(heading='', align=False)
             col_5DE3D.alert = False
@@ -266,9 +266,9 @@ def sna_animate_function_interface_57F9E(layout_function, ):
             col_5DE3D.alignment = 'Expand'.upper()
             col_5DE3D.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
             attr_0E515 = '["' + str('Socket_40' + '"]') 
-            col_5DE3D.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN'], attr_0E515, text='Pixelate Mix', icon_value=0, emboss=True)
+            col_5DE3D.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN'], attr_0E515), text='Pixelate Mix', icon_value=0, emboss=True)
             attr_9C041 = '["' + str('Socket_39' + '"]') 
-            col_5DE3D.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN'], attr_9C041, text='Grid Scale', icon_value=0, emboss=True)
+            col_5DE3D.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Animate_GN'], attr_9C041), text='Grid Scale', icon_value=0, emboss=True)
     else:
         box_F44AB = layout_function.box()
         box_F44AB.alert = False

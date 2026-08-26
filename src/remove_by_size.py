@@ -58,9 +58,9 @@ def sna_remove_by_size_E1DB7(layout_function, ):
         col_51C8C.alignment = 'Expand'.upper()
         col_51C8C.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
         attr_8753D = '["' + str('Socket_18' + '"]') 
-        col_51C8C.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Remove_By Size_GN'], attr_8753D, text='Remove:', icon_value=0, emboss=True, toggle=True)
+        col_51C8C.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Remove_By Size_GN'], attr_8753D), text='Remove:', icon_value=0, emboss=True, toggle=True)
         attr_F212A = '["' + str('Socket_5' + '"]') 
-        col_51C8C.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Remove_By Size_GN'], attr_F212A, text='Threshold', icon_value=0, emboss=True, toggle=True)
+        col_51C8C.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Remove_By Size_GN'], attr_F212A), text='Threshold', icon_value=0, emboss=True, toggle=True)
         col_AA341 = box_3DF8E.column(heading='', align=False)
         col_AA341.alert = False
         col_AA341.enabled = True
@@ -72,7 +72,7 @@ def sna_remove_by_size_E1DB7(layout_function, ):
         col_AA341.alignment = 'Expand'.upper()
         col_AA341.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
         attr_12417 = '["' + str('Socket_13' + '"]') 
-        col_AA341.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Remove_By Size_GN'], attr_12417, text='Remove By Size Masking', icon_value=0, emboss=True, toggle=True)
+        col_AA341.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Remove_By Size_GN'], attr_12417), text='Remove By Size Masking', icon_value=0, emboss=True, toggle=True)
         if bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Remove_By Size_GN']['Socket_13']:
             col_AF706 = col_AA341.column(heading='', align=False)
             col_AF706.alert = False
@@ -85,12 +85,12 @@ def sna_remove_by_size_E1DB7(layout_function, ):
             col_AF706.alignment = 'Expand'.upper()
             col_AF706.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
             attr_952BC = '["' + str('Socket_15' + '"]') 
-            col_AF706.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Remove_By Size_GN'], attr_952BC, text='', icon_value=0, emboss=True, toggle=True)
+            col_AF706.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Remove_By Size_GN'], attr_952BC), text='', icon_value=0, emboss=True, toggle=True)
             attr_12EC2 = '["' + str('Socket_14' + '"]') 
-            col_AF706.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Remove_By Size_GN'], attr_12EC2, text='', icon_value=0, emboss=True, toggle=True)
+            col_AF706.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Remove_By Size_GN'], attr_12EC2), text='', icon_value=0, emboss=True, toggle=True)
             if ((bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Remove_By Size_GN']['Socket_15'] == 2) or (bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Remove_By Size_GN']['Socket_15'] == 3)):
                 attr_7198E = '["' + str('Socket_16' + '"]') 
-                col_AF706.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Remove_By Size_GN'], attr_7198E, text='Distance Threshold', icon_value=0, emboss=True, toggle=True)
+                col_AF706.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Remove_By Size_GN'], attr_7198E), text='Distance Threshold', icon_value=0, emboss=True, toggle=True)
     else:
         box_1F29A = layout_function.box()
         box_1F29A.alert = False

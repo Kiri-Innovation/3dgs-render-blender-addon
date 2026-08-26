@@ -58,9 +58,9 @@ def sna_colour_edit_37123(layout_function, ):
         col_836C0.alignment = 'Expand'.upper()
         col_836C0.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
         attr_64F25 = '["' + str('Socket_4' + '"]') 
-        col_836C0.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Colour_Edit_GN'], attr_64F25, text='', icon_value=0, emboss=True)
+        col_836C0.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Colour_Edit_GN'], attr_64F25), text='', icon_value=0, emboss=True)
         attr_F9B60 = '["' + str('Socket_2' + '"]') 
-        col_836C0.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Colour_Edit_GN'], attr_F9B60, text='', icon_value=0, emboss=True)
+        col_836C0.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Colour_Edit_GN'], attr_F9B60), text='', icon_value=0, emboss=True)
         if ((bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Colour_Edit_GN']['Socket_4'] == 0) or (bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Colour_Edit_GN']['Socket_4'] == 1)):
             col_A8E1B = col_836C0.column(heading='', align=False)
             col_A8E1B.alert = False
@@ -73,11 +73,11 @@ def sna_colour_edit_37123(layout_function, ):
             col_A8E1B.alignment = 'Expand'.upper()
             col_A8E1B.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
             attr_10C7C = '["' + str('Socket_3' + '"]') 
-            col_A8E1B.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Colour_Edit_GN'], attr_10C7C, text='Hue Threshold', icon_value=0, emboss=True)
+            col_A8E1B.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Colour_Edit_GN'], attr_10C7C), text='Hue Threshold', icon_value=0, emboss=True)
             attr_8DE4C = '["' + str('Socket_6' + '"]') 
-            col_A8E1B.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Colour_Edit_GN'], attr_8DE4C, text='Saturation Threshold', icon_value=0, emboss=True)
+            col_A8E1B.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Colour_Edit_GN'], attr_8DE4C), text='Saturation Threshold', icon_value=0, emboss=True)
             attr_E480B = '["' + str('Socket_7' + '"]') 
-            col_A8E1B.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Colour_Edit_GN'], attr_E480B, text='Value Threshold', icon_value=0, emboss=True)
+            col_A8E1B.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Colour_Edit_GN'], attr_E480B), text='Value Threshold', icon_value=0, emboss=True)
         col_85E9D = box_1A729.column(heading='', align=False)
         col_85E9D.alert = False
         col_85E9D.enabled = True
@@ -89,7 +89,7 @@ def sna_colour_edit_37123(layout_function, ):
         col_85E9D.alignment = 'Expand'.upper()
         col_85E9D.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
         attr_7F527 = '["' + str('Socket_11' + '"]') 
-        col_85E9D.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Colour_Edit_GN'], attr_7F527, text='Colour Edit Masking', icon_value=0, emboss=True, toggle=True)
+        col_85E9D.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Colour_Edit_GN'], attr_7F527), text='Colour Edit Masking', icon_value=0, emboss=True, toggle=True)
         if bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Colour_Edit_GN']['Socket_11']:
             col_758DD = col_85E9D.column(heading='', align=False)
             col_758DD.alert = False
@@ -102,12 +102,12 @@ def sna_colour_edit_37123(layout_function, ):
             col_758DD.alignment = 'Expand'.upper()
             col_758DD.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
             attr_C4FB4 = '["' + str('Socket_8' + '"]') 
-            col_758DD.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Colour_Edit_GN'], attr_C4FB4, text='', icon_value=0, emboss=True, toggle=True)
+            col_758DD.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Colour_Edit_GN'], attr_C4FB4), text='', icon_value=0, emboss=True, toggle=True)
             attr_0B7C4 = '["' + str('Socket_9' + '"]') 
-            col_758DD.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Colour_Edit_GN'], attr_0B7C4, text='', icon_value=0, emboss=True, toggle=True)
+            col_758DD.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Colour_Edit_GN'], attr_0B7C4), text='', icon_value=0, emboss=True, toggle=True)
             if ((bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Colour_Edit_GN']['Socket_8'] == 2) or (bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Colour_Edit_GN']['Socket_8'] == 3)):
                 attr_4B792 = '["' + str('Socket_12' + '"]') 
-                col_758DD.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Colour_Edit_GN'], attr_4B792, text='Distance Threshold', icon_value=0, emboss=True, toggle=True)
+                col_758DD.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Colour_Edit_GN'], attr_4B792), text='Distance Threshold', icon_value=0, emboss=True, toggle=True)
     else:
         box_2F40B = layout_function.box()
         box_2F40B.alert = False

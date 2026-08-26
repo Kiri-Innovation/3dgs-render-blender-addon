@@ -26,19 +26,24 @@ def sna_r2_render_menu_7AD0F(layout_function, ):
     box_3D205.prop(bpy.context.scene.sna_dgs_scene_properties, 'r2_delete_temp_files', text='Delete Temp Files', icon_value=0, emboss=True)
     relight_box = box_3D205.box()
     relight_box.label(text='Realtime Relighting')
-    relight_box.prop(bpy.context.scene.sna_dgs_scene_properties, 'r2_relight', text='Use Blender Lights')
+    relight_box.prop(bpy.context.scene.sna_dgs_scene_properties, 'r2_relight', text='Use Blender Lights (Up to 16)')
     if bpy.context.scene.sna_dgs_scene_properties.r2_relight:
         relight_box.prop(bpy.context.scene.sna_dgs_scene_properties, 'r2_relight_mode', text='Appearance')
         relight_box.prop(bpy.context.scene.sna_dgs_scene_properties, 'r2_relight_response', text='Light Response')
         relight_box.prop(bpy.context.scene.sna_dgs_scene_properties, 'r2_relight_strength', text='Direct Strength')
         relight_box.prop(bpy.context.scene.sna_dgs_scene_properties, 'r2_relight_ambient', text='Ambient')
         relight_box.prop(bpy.context.scene.sna_dgs_scene_properties, 'r2_relight_ambient_strength', text='Ambient Strength')
-        relight_box.prop(bpy.context.scene.sna_dgs_scene_properties, 'r2_shadows', text='Cached Mesh Shadows')
+        relight_box.prop(bpy.context.scene.sna_dgs_scene_properties, 'r2_world_lighting', text='Use World / HDRI (Diffuse)')
+        if bpy.context.scene.sna_dgs_scene_properties.r2_world_lighting:
+            relight_box.prop(bpy.context.scene.sna_dgs_scene_properties, 'r2_world_strength', text='World Strength')
+            relight_box.prop(bpy.context.scene.sna_dgs_scene_properties, 'r2_world_response', text='World Shading')
+        relight_box.prop(bpy.context.scene.sna_dgs_scene_properties, 'r2_shadows', text='Cached Shadows (Mesh to GS)')
         if bpy.context.scene.sna_dgs_scene_properties.r2_shadows:
+            relight_box.prop(bpy.context.scene.sna_dgs_scene_properties, 'r2_gaussian_self_shadows', text='GS Self-Shadows (Experimental)')
             relight_box.prop_search(bpy.context.scene.sna_dgs_scene_properties, 'r2_shadow_light', bpy.data, 'objects', text='Shadow Light')
             relight_box.prop(bpy.context.scene.sna_dgs_scene_properties, 'r2_shadow_light_limit', text='Shadow Lights')
             relight_box.prop(bpy.context.scene.sna_dgs_scene_properties, 'r2_shadow_update_mode', text='Animation Update')
-            relight_box.prop(bpy.context.scene.sna_dgs_scene_properties, 'r2_shadow_resolution', text='Resolution')
+            relight_box.prop(bpy.context.scene.sna_dgs_scene_properties, 'r2_shadow_resolution', text='Resolution per Face')
             relight_box.prop(bpy.context.scene.sna_dgs_scene_properties, 'r2_shadow_bias', text='Bias')
             relight_box.prop(bpy.context.scene.sna_dgs_scene_properties, 'r2_shadow_normal_bias', text='Normal Bias')
             relight_box.prop(bpy.context.scene.sna_dgs_scene_properties, 'r2_shadow_filter_radius', text='Filter Radius')
@@ -47,11 +52,16 @@ def sna_r2_render_menu_7AD0F(layout_function, ):
             shadow_status = getattr(bpy, 'dgs_shadow_cache_status', None)
             if shadow_status:
                 relight_box.label(text=f"Cached: {shadow_status['total']} lights, rebuilt {shadow_status['rebuilt']} at frame {shadow_status['frame']}")
-        relight_box.prop(bpy.context.scene.sna_dgs_scene_properties, 'r2_shadow_proxy', text='Eevee Shadow Proxies')
-        if bpy.context.scene.sna_dgs_scene_properties.r2_shadow_proxy:
-            relight_box.prop(bpy.context.scene.sna_dgs_scene_properties, 'r2_shadow_proxy_limit', text='Max Cards')
+        relight_box.prop(bpy.context.scene.sna_dgs_scene_properties, 'r2_shadow_proxy', text='GS to Mesh Shadows (Eevee)')
+        if bpy.context.scene.sna_dgs_scene_properties.r2_shadow_proxy or bpy.context.scene.sna_dgs_scene_properties.r2_gaussian_self_shadows:
+            eevee_settings = getattr(bpy.context.scene, 'eevee', None)
+            if bpy.context.scene.sna_dgs_scene_properties.r2_shadow_proxy and eevee_settings is not None and not eevee_settings.use_shadows:
+                warning_row = relight_box.row()
+                warning_row.alert = True
+                warning_row.label(text='Eevee Shadows are disabled; rebuild to enable them', icon='ERROR')
+            relight_box.prop(bpy.context.scene.sna_dgs_scene_properties, 'r2_shadow_proxy_limit', text='Total Max Cards')
             relight_box.prop(bpy.context.scene.sna_dgs_scene_properties, 'r2_shadow_proxy_cutoff', text='Alpha Cutoff')
-            relight_box.operator('sna.dgs_render_build_shadow_proxies_5b787')
+            relight_box.operator('sna.dgs_render_build_shadow_proxies_5b787', text='Rebuild Gaussian Shadow Proxies')
     split_A5CFC = box_3D205.split(factor=0.5, align=False)
     split_A5CFC.alert = False
     split_A5CFC.enabled = True

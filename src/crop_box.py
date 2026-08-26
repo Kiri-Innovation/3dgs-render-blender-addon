@@ -74,17 +74,17 @@ def sna_crop_box_F2C60(layout_function, ):
         col_3D26B.alignment = 'Expand'.upper()
         col_3D26B.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
         attr_75E1E = '["' + str('Socket_19' + '"]') 
-        col_3D26B.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Crop_Box_GN'], attr_75E1E, text='', icon_value=0, emboss=True)
+        col_3D26B.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Crop_Box_GN'], attr_75E1E), text='', icon_value=0, emboss=True)
         if (bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Crop_Box_GN']['Socket_19'] == 0):
             attr_4C8F9 = '["' + str('Socket_12' + '"]') 
-            col_3D26B.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Crop_Box_GN'], attr_4C8F9, text='', icon_value=0, emboss=True)
+            col_3D26B.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Crop_Box_GN'], attr_4C8F9), text='', icon_value=0, emboss=True)
         else:
-            col_3D26B.prop_search(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Crop_Box_GN'], '["Socket_18"]', bpy.data, 'collections', text='collection', icon='NONE', item_search_property="name")
+            col_3D26B.prop_search(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Crop_Box_GN'], '["Socket_18"]'), bpy.data, 'collections', text='collection', icon='NONE', item_search_property="name")
         attr_5E746 = '["' + str('Socket_15' + '"]') 
-        col_3D26B.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Crop_Box_GN'], attr_5E746, text='', icon_value=0, emboss=True)
+        col_3D26B.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Crop_Box_GN'], attr_5E746), text='', icon_value=0, emboss=True)
         if (bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Crop_Box_GN']['Socket_15'] >= 2):
             attr_3021D = '["' + str('Socket_16' + '"]') 
-            col_3D26B.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Crop_Box_GN'], attr_3021D, text='', icon_value=0, emboss=True)
+            col_3D26B.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Crop_Box_GN'], attr_3021D), text='', icon_value=0, emboss=True)
     else:
         box_08D76 = layout_function.box()
         box_08D76.alert = False
