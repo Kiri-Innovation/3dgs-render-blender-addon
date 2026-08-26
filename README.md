@@ -99,7 +99,7 @@ The `main` branch contains ongoing development and may not always be ready for p
 
 ## Recent community contributions
 
-- [@Hrsh-Venket](https://github.com/Hrsh-Venket) ([X profile](https://x.com/Eric4rthurBlair)): major modular codebase refactor and Blender 5.2 compatibility contributions
+- [@Hrsh-Venket](https://github.com/Hrsh-Venket) ([X profile](https://x.com/Eric4rthurBlair)): modular codebase refactor and bake-performance work, including GPU-assisted spherical-harmonic rotation, binding caching and background cache writes, as well as improved deformation quality at joints when using proxy rigging
 - ([#59](https://github.com/Kiri-Innovation/3dgs-render-blender-addon/pull/59), [#60](https://github.com/Kiri-Innovation/3dgs-render-blender-addon/pull/60)).
 - [@punk-kaos](https://github.com/punk-kaos): Blender 5.2 compatibility, real-time relighting and real-time mesh-shadow support
 -  ([#61](https://github.com/Kiri-Innovation/3dgs-render-blender-addon/pull/61)).
