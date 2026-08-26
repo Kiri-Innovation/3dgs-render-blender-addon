@@ -20,13 +20,19 @@ class SNA_OT_Dgs_Render_Bind_To_Proxy_Mesh_6C58F(bpy.types.Operator):
         return not False
 
     def execute(self, context):
-        if bpy.context.view_layer.objects.active.sna_dgs_object_properties.rig_proxy_mesh.type == 'MESH':
+        active_obj = bpy.context.view_layer.objects.active
+        if active_obj is None:
+            self.report({'WARNING'}, message='Binding cancelled: select a 3DGS mesh object first.')
+            return {'CANCELLED'}
+        proxy_mesh_object = active_obj.sna_dgs_object_properties.rig_proxy_mesh
+        if proxy_mesh_object is None:
+            self.report({'WARNING'}, message='Binding cancelled: assign a Proxy Mesh first.')
+            return {'CANCELLED'}
+        if proxy_mesh_object.type == 'MESH':
             if (bpy.context.view_layer.objects.active.sna_dgs_object_properties.rig_proxy_mesh == bpy.context.view_layer.objects.active):
-                self.report({'ERROR'}, message='The assigned Proxy Mesh and the Active Object are the same')
+                self.report({'WARNING'}, message='Binding cancelled: the Proxy Mesh cannot be the active 3DGS object.')
+                return {'CANCELLED'}
             else:
-                bpy.context.view_layer.objects.active.lock_location = (True, True, True)
-                bpy.context.view_layer.objects.active.lock_rotation = (True, True, True)
-                bpy.context.view_layer.objects.active.lock_scale = (True, True, True)
                 CHILD_NAME = bpy.context.view_layer.objects.active.name
                 PARENT_NAME = bpy.context.view_layer.objects.active.sna_dgs_object_properties.rig_proxy_mesh.name
                 # ==========================================
@@ -61,9 +67,6 @@ class SNA_OT_Dgs_Render_Bind_To_Proxy_Mesh_6C58F(bpy.types.Operator):
                     bpy.context.view_layer.update()
                     print(f"Success: '{child_name}' parented to '{parent_name}' with transforms kept.")
                 # Execute the function using the variables at the top
-                parent_keep_transform(CHILD_NAME, PARENT_NAME)
-                bpy.context.view_layer.objects.active['rig_baked_render_enabled'] = True
-                proxy_mesh_object = bpy.context.view_layer.objects.active.sna_dgs_object_properties.rig_proxy_mesh
                 proxy_binding_cache_root = bpy.context.preferences.addons[__package__].preferences.sna_cache_file_directory
                 binding_method = bpy.context.scene.sna_dgs_scene_properties.rig_bind_method
                 hybrid_surface_distance_factor = bpy.context.scene.sna_dgs_scene_properties.rig_surface_dist_factor
@@ -166,6 +169,11 @@ class SNA_OT_Dgs_Render_Bind_To_Proxy_Mesh_6C58F(bpy.types.Operator):
                     binding_root_path = proxy_utils.get_binding_root_dir()
                     binding_method_used = metadata.get("binding_method", binding_method)
                     status_message = f"Bound '{mesh_obj.name}' to proxy '{proxy_obj.name}'."
+                    mesh_obj.lock_location = (True, True, True)
+                    mesh_obj.lock_rotation = (True, True, True)
+                    mesh_obj.lock_scale = (True, True, True)
+                    parent_keep_transform(mesh_obj.name, proxy_obj.name)
+                    mesh_obj['rig_baked_render_enabled'] = True
                     print(
                         f"Bound '{mesh_obj.name}' to proxy '{proxy_obj.name}' using "
                         f"binding method '{binding_method_used}'."
@@ -183,12 +191,18 @@ class SNA_OT_Dgs_Render_Bind_To_Proxy_Mesh_6C58F(bpy.types.Operator):
                     print(f"Binding package: {binding_package_path}")
                     print(f"Binding root: {binding_root_path}")
                     print("The 3DGS object now has a rest cache and can be updated, baked, or restored later.")
+                except proxy_utils.ProxyBindingError as exc:
+                    status_message = f"Proxy bind failed: {exc}"
+                    print(status_message)
+                    self.report({'WARNING'}, message=f"Binding cancelled: {exc}")
+                    return {'CANCELLED'}
                 except Exception as exc:
                     status_message = f"Proxy bind failed: {exc}"
                     print(status_message)
                     raise
         else:
-            self.report({'ERROR'}, message='The assigned Proxy Mesh is not a Mesh type object.')
+            self.report({'WARNING'}, message='Binding cancelled: the assigned Proxy Mesh must be a mesh object.')
+            return {'CANCELLED'}
         return {"FINISHED"}
 
     def invoke(self, context, event):
