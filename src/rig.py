@@ -369,7 +369,7 @@ def sna_rig_891FC(layout_function, ):
                                             if not True: box_0F4AD.operator_context = "EXEC_DEFAULT"
                                             box_0F4AD.label(text='Rig Render Settings', icon_value=load_preview_icon(os.path.join(os.path.dirname(__file__), 'assets', 'pointer-right-fill.svg')))
                                             attr_003BE = '["' + str('rig_baked_render_enabled' + '"]') 
-                                            box_0F4AD.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active, attr_003BE), text='Enable rig updates in renders', icon_value=0, emboss=True)
+                                            box_0F4AD.prop(bpy.context.view_layer.objects.active, attr_003BE, text='Enable rig updates in renders', icon_value=0, emboss=True)
                                 else:
                                     layout_function = col_73DBB
                                     sna_rig_cache_frames_993DF(layout_function, True)
