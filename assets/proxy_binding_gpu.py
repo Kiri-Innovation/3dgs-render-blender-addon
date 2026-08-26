@@ -55,10 +55,12 @@ void main()
     vec3 R0 = imageLoad(rotation_in, ivec2(rb0 % rot_tex_w, rb0 / rot_tex_w)).rgb;
     vec3 R1 = imageLoad(rotation_in, ivec2(rb1 % rot_tex_w, rb1 / rot_tex_w)).rgb;
     vec3 R2 = imageLoad(rotation_in, ivec2(rb2 % rot_tex_w, rb2 / rot_tex_w)).rgb;
-    // CPU semantics use a row-vector product (sample_dir * R). GLSL vectors
-    // are columns, so storing the CPU rows as GLSL columns gives R^T * v,
-    // which is the equivalent column-vector operation.
-    mat3 R = mat3(R0, R1, R2);
+    // Build mat3 by columns so that R * v applies the row-major matrix R
+    mat3 R = mat3(
+        vec3(R0.x, R1.x, R2.x),
+        vec3(R0.y, R1.y, R2.y),
+        vec3(R0.z, R1.z, R2.z)
+    );
 
     // ----- Load this splat's input SH coefficients -----
     // Layout: per splat, 3*K floats packed densely as (channel * K + band).
