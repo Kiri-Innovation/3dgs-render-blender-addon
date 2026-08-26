@@ -332,6 +332,20 @@ def _world_sh_coefficients(scene, enabled):
     return result
 
 
+def world_lighting_requires_initial_analysis(scene):
+    """Return True when enabling the current HDRI will read its pixels.
+
+    Plain World colours and HDRIs already held in the session cache are fast,
+    so they do not need the first-use confirmation.
+    """
+    image, _color, _strength, _mapping, _signature = _world_background_source(scene)
+    if image is None or not image.size[0] or not image.size[1]:
+        return False
+    cache = getattr(bpy, "dgs_world_image_sh_cache", {})
+    cached = cache.get(int(image.as_pointer()))
+    return not cached or cached.get("signature") != _image_signature(image)
+
+
 def _write_matrix_to_data(data, row, matrix):
     data[row, :, :] = np.asarray(matrix, dtype=np.float32).T
 
@@ -1053,6 +1067,49 @@ class SNA_OT_Dgs_Render_Build_Shadow_Proxies_5B787(bpy.types.Operator):
         except RuntimeError as error:
             self.report({"ERROR"}, str(error))
             return {"CANCELLED"}
+
+
+class SNA_OT_Dgs_Render_Enable_World_Lighting_94C2A(bpy.types.Operator):
+    bl_idname = "sna.dgs_render_enable_world_lighting_94c2a"
+    bl_label = "Enable World / HDRI Lighting"
+    bl_description = "Enable approximate World or HDRI diffuse lighting for Gaussian splats"
+    bl_options = {"REGISTER"}
+
+    def invoke(self, context, event):
+        if not world_lighting_requires_initial_analysis(context.scene):
+            return self.execute(context)
+        return context.window_manager.invoke_confirm(
+            self,
+            event,
+            title="Prepare World / HDRI Lighting?",
+            message=(
+                "The first use analyses the current HDRI and may take some time. "
+                "Blender may appear unresponsive while it prepares the lighting. "
+                "Later toggles will be much faster. Save your project before continuing."
+            ),
+            confirm_text="Continue",
+            icon="WARNING",
+        )
+
+    def execute(self, context):
+        window = getattr(context, "window", None)
+        if window is not None:
+            window.cursor_set("WAIT")
+        try:
+            _world_sh_coefficients(context.scene, True)
+            context.scene.sna_dgs_scene_properties.r2_world_lighting = True
+        except Exception as error:
+            self.report({"ERROR"}, f"Could not prepare World / HDRI lighting: {error}")
+            return {"CANCELLED"}
+        finally:
+            if window is not None:
+                window.cursor_set("DEFAULT")
+
+        for area in context.screen.areas if context.screen else ():
+            if area.type == "VIEW_3D":
+                area.tag_redraw()
+        self.report({"INFO"}, "World / HDRI lighting enabled")
+        return {"FINISHED"}
 
 
 class SNA_OT_Dgs_Render_Refresh_Shadows_16F2B(bpy.types.Operator):

@@ -3,6 +3,7 @@ __file__ = _kiri_os.path.join(_kiri_os.path.dirname(_kiri_os.path.dirname(__file
 del _kiri_os
 
 from .important import *
+from .realtime_relighting import world_lighting_requires_initial_analysis
 
 __package__ = __package__.rsplit('.', 1)[0]
 
@@ -33,10 +34,19 @@ def sna_r2_render_menu_7AD0F(layout_function, ):
         relight_box.prop(bpy.context.scene.sna_dgs_scene_properties, 'r2_relight_strength', text='Direct Strength')
         relight_box.prop(bpy.context.scene.sna_dgs_scene_properties, 'r2_relight_ambient', text='Ambient')
         relight_box.prop(bpy.context.scene.sna_dgs_scene_properties, 'r2_relight_ambient_strength', text='Ambient Strength')
-        relight_box.prop(bpy.context.scene.sna_dgs_scene_properties, 'r2_world_lighting', text='Use World / HDRI (Diffuse)')
         if bpy.context.scene.sna_dgs_scene_properties.r2_world_lighting:
+            relight_box.prop(bpy.context.scene.sna_dgs_scene_properties, 'r2_world_lighting', text='Use World / HDRI (Diffuse)')
             relight_box.prop(bpy.context.scene.sna_dgs_scene_properties, 'r2_world_strength', text='World Strength')
             relight_box.prop(bpy.context.scene.sna_dgs_scene_properties, 'r2_world_response', text='World Shading')
+        else:
+            relight_box.operator(
+                'sna.dgs_render_enable_world_lighting_94c2a',
+                text='Use World / HDRI (Diffuse)',
+                icon='CHECKBOX_DEHLT',
+            )
+            if world_lighting_requires_initial_analysis(bpy.context.scene):
+                world_warning = relight_box.row()
+                world_warning.label(text='First use of a new HDRI may take time to prepare', icon='INFO')
         relight_box.prop(bpy.context.scene.sna_dgs_scene_properties, 'r2_shadows', text='Cached Shadows (Mesh to GS)')
         if bpy.context.scene.sna_dgs_scene_properties.r2_shadows:
             relight_box.prop(bpy.context.scene.sna_dgs_scene_properties, 'r2_gaussian_self_shadows', text='GS Self-Shadows (Experimental)')
