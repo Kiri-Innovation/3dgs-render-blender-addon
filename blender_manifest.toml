@@ -1,6 +1,6 @@
 schema_version = "1.0.0"
 id = "dgs_render_by_kiri_engine"
-version = "5.0.0"
+version = "5.1.0"
 name = "3DGS Render by KIRI Engine"
 tagline = "3DGS creation, render and editing suite"
 maintainer = "KIRI ENGINE"

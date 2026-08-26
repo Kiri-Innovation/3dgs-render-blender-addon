@@ -66,8 +66,9 @@ class SNA_OT_Dgs_Render_Import_Ply_E0A3A(bpy.types.Operator, ImportHelper):
                         else:
                             # Get the mesh data
                             mesh = obj.data
-                            # List of required 3DGS attributes
-                            required_attributes = ['f_dc_0', 'f_dc_1', 'f_dc_2', 'opacity', 'scale_0', 'scale_1', 'scale_2', 'rot_0', 'rot_1', 'rot_2', 'rot_3', 'f_rest_0']
+                            # Higher-order spherical-harmonic attributes (f_rest_*) are
+                            # optional: degree-0 Gaussian splats contain only f_dc_*.
+                            required_attributes = ['f_dc_0', 'f_dc_1', 'f_dc_2', 'opacity', 'scale_0', 'scale_1', 'scale_2', 'rot_0', 'rot_1', 'rot_2', 'rot_3']
                             # Check if all required attributes exist on the mesh
                             attributes_missing = False
                             missing_attrs = []
@@ -89,6 +90,9 @@ class SNA_OT_Dgs_Render_Import_Ply_E0A3A(bpy.types.Operator, ImportHelper):
                 attributes_missing = True
                 message = f"Error importing PLY file {os.path.basename(ply_import_path)}: {str(e)}"
                 output_object = None
+        if attributes_missing:
+            self.report({'ERROR'}, message or "The selected PLY is not a compatible 3DGS scan.")
+            return {'CANCELLED'}
         # The variables are now available for use
         # You can access 'attributes_missing' (boolean), 'message' (string), and 'output_object' (bpy.types.Object or None) in other scripts or logic
         if (bpy.context.scene.sna_dgs_scene_properties.import_face_vert == 'Faces'):
@@ -109,7 +113,7 @@ class SNA_OT_Dgs_Render_Import_Ply_E0A3A(bpy.types.Operator, ImportHelper):
             # Get the mesh data
             mesh = obj.data
             # Check if the required attributes exist
-            if not all(attr.name in mesh.attributes for attr in mesh.attributes if attr.name in ['f_dc_0', 'f_dc_1', 'f_dc_2', 'opacity']):
+            if not all(attr_name in mesh.attributes for attr_name in ['f_dc_0', 'f_dc_1', 'f_dc_2', 'opacity']):
                 print("Error: Required attributes (f_dc_0, f_dc_1, f_dc_2, opacity) not found on the mesh.")
             else:
                 # Get the number of points (vertices)

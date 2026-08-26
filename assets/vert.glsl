@@ -212,45 +212,72 @@ mat3 quaternionToMatrix(vec4 q) {
 }
 
 vec4 relightLightPosition(int index) {
-    if (index == 0) return relight_light_position_0;
-    if (index == 1) return relight_light_position_1;
-    if (index == 2) return relight_light_position_2;
-    return relight_light_position_3;
+    return texelFetch(relight_data, ivec2(0, index), 0);
 }
 
 vec4 relightLightColor(int index) {
-    if (index == 0) return relight_light_color_0;
-    if (index == 1) return relight_light_color_1;
-    if (index == 2) return relight_light_color_2;
-    return relight_light_color_3;
+    return texelFetch(relight_data, ivec2(1, index), 0);
 }
 
 vec4 relightLightSettings(int index) {
-    if (index == 0) return relight_light_settings_0;
-    if (index == 1) return relight_light_settings_1;
-    if (index == 2) return relight_light_settings_2;
-    return relight_light_settings_3;
+    return texelFetch(relight_data, ivec2(2, index), 0);
+}
+
+vec4 relightLightExtra(int index) {
+    return texelFetch(relight_data, ivec2(3, index), 0);
+}
+
+int shadowDataRow(int index) {
+    return 27 + index * 13;
+}
+
+vec4 relightGlobalMeta() {
+    return texelFetch(relight_data, ivec2(0, 25), 0);
+}
+
+vec4 relightGlobalAmbient() {
+    return texelFetch(relight_data, ivec2(1, 25), 0);
+}
+
+vec4 relightGlobalSettings() {
+    return texelFetch(relight_data, ivec2(2, 25), 0);
+}
+
+vec4 relightShadowConfig() {
+    return texelFetch(relight_data, ivec2(3, 25), 0);
+}
+
+vec2 relightProxyDepthRange() {
+    return texelFetch(relight_data, ivec2(0, 26), 0).xy;
+}
+
+int relightWorldResponse() {
+    return int(texelFetch(relight_data, ivec2(0, 26), 0).z + 0.5);
+}
+
+int shadowMapType(int index) {
+    return int(texelFetch(relight_data, ivec2(0, shadowDataRow(index)), 0).x + 0.5);
 }
 
 int shadowLightIndex(int index) {
-    if (index == 0) return shadow_light_index_0;
-    if (index == 1) return shadow_light_index_1;
-    if (index == 2) return shadow_light_index_2;
-    return shadow_light_index_3;
+    return int(texelFetch(relight_data, ivec2(0, shadowDataRow(index)), 0).y + 0.5);
 }
 
-mat4 shadowViewMatrix(int index) {
-    if (index == 0) return shadow_view_matrix_0;
-    if (index == 1) return shadow_view_matrix_1;
-    if (index == 2) return shadow_view_matrix_2;
-    return shadow_view_matrix_3;
+mat4 relightDataMatrix(int row) {
+    return mat4(
+        texelFetch(relight_data, ivec2(0, row), 0),
+        texelFetch(relight_data, ivec2(1, row), 0),
+        texelFetch(relight_data, ivec2(2, row), 0),
+        texelFetch(relight_data, ivec2(3, row), 0)
+    );
 }
 
-mat4 shadowProjectionMatrix(int index) {
-    if (index == 0) return shadow_projection_matrix_0;
-    if (index == 1) return shadow_projection_matrix_1;
-    if (index == 2) return shadow_projection_matrix_2;
-    return shadow_projection_matrix_3;
+mat4 shadowViewMatrix(int index, int face) {
+    return relightDataMatrix(shadowDataRow(index) + 1 + face * 2);
+}
+
+mat4 shadowProjectionMatrix(int index, int face) {
+    return relightDataMatrix(shadowDataRow(index) + 2 + face * 2);
 }
 
 float meshShadowDepth(int index, vec2 uv) {
@@ -260,8 +287,18 @@ float meshShadowDepth(int index, vec2 uv) {
     return texture(mesh_shadow_depth_3, uv).r;
 }
 
-float meshShadowVisibility(vec3 world_position, vec3 normal, int light_index) {
-    if (shadow_enabled == 0) return 1.0;
+ivec2 meshShadowSize(int index) {
+    if (index == 0) return textureSize(mesh_shadow_depth_0, 0);
+    if (index == 1) return textureSize(mesh_shadow_depth_1, 0);
+    if (index == 2) return textureSize(mesh_shadow_depth_2, 0);
+    return textureSize(mesh_shadow_depth_3, 0);
+}
+
+float meshShadowVisibility(vec3 world_position, vec3 light_direction, int light_index) {
+    vec4 shadow_config = relightShadowConfig();
+    if (shadow_config.x < 0.5) return 1.0;
+    int shadow_light_count = int(shadow_config.y + 0.5);
+    vec4 relight_settings = relightGlobalSettings();
     int map_index = -1;
     for (int index = 0; index < 4; index++) {
         if (index >= shadow_light_count) break;
@@ -271,18 +308,44 @@ float meshShadowVisibility(vec3 world_position, vec3 normal, int light_index) {
         }
     }
     if (map_index < 0) return 1.0;
-    vec3 biased_position = world_position + normal * relight_settings.w;
-    mat4 view_matrix = shadowViewMatrix(map_index);
-    vec4 shadow_clip = shadowProjectionMatrix(map_index) * view_matrix * vec4(biased_position, 1.0);
+    vec3 biased_position = world_position + normalize(light_direction) * relight_settings.w;
+    int face = 0;
+    mat4 view_matrix;
+    mat4 projection_matrix;
+    vec2 atlas_offset = vec2(0.0);
+    vec2 atlas_scale = vec2(1.0);
+    ivec2 filter_size = meshShadowSize(map_index);
+    if (shadowMapType(map_index) == 1) {
+        float best_depth = -1.0e20;
+        for (int candidate = 0; candidate < 6; candidate++) {
+            mat4 candidate_view = shadowViewMatrix(map_index, candidate);
+            float candidate_depth = -(candidate_view * vec4(biased_position, 1.0)).z;
+            if (candidate_depth > best_depth) {
+                best_depth = candidate_depth;
+                face = candidate;
+            }
+        }
+        view_matrix = shadowViewMatrix(map_index, face);
+        projection_matrix = shadowProjectionMatrix(map_index, face);
+        atlas_scale = vec2(1.0 / 3.0, 1.0 / 2.0);
+        atlas_offset = vec2(float(face % 3), float(face / 3)) * atlas_scale;
+        filter_size = ivec2(meshShadowSize(map_index).x / 3, meshShadowSize(map_index).y / 2);
+    } else {
+        view_matrix = shadowViewMatrix(map_index, 0);
+        projection_matrix = shadowProjectionMatrix(map_index, 0);
+    }
+    vec4 shadow_clip = projection_matrix * view_matrix * vec4(biased_position, 1.0);
     vec3 shadow_ndc = shadow_clip.xyz / shadow_clip.w;
     vec2 shadow_uv = shadow_ndc.xy * 0.5 + 0.5;
     if (any(lessThan(shadow_uv, vec2(0.0))) || any(greaterThan(shadow_uv, vec2(1.0))) || shadow_ndc.z < -1.0 || shadow_ndc.z > 1.0) return 1.0;
     float receiver_depth = -(view_matrix * vec4(biased_position, 1.0)).z;
-    vec2 texel = shadow_filter_radius / vec2(textureSize(mesh_shadow_depth_0, 0));
+    vec2 texel = shadow_config.z / vec2(filter_size);
+    vec2 half_texel = 0.5 / vec2(filter_size);
     float visibility = 0.0;
     for (int x = -1; x <= 1; x++) {
         for (int y = -1; y <= 1; y++) {
-            float caster_depth = meshShadowDepth(map_index, shadow_uv + vec2(x, y) * texel);
+            vec2 local_uv = clamp(shadow_uv + vec2(x, y) * texel, half_texel, vec2(1.0) - half_texel);
+            float caster_depth = meshShadowDepth(map_index, atlas_offset + local_uv * atlas_scale);
             visibility += receiver_depth > caster_depth + relight_settings.y ? 0.0 : 1.0;
         }
     }
@@ -297,13 +360,19 @@ vec4 proxyShadowLayer(int index, vec2 uv) {
 }
 
 float proxyShadowTransmission(vec3 world_position, vec3 normal, int light_index) {
-    if (shadow_enabled == 0 || light_index != shadow_light_index_0 || proxy_shadow_layer_count == 0) return 1.0;
+    vec4 shadow_config = relightShadowConfig();
+    int shadow_light_count = int(shadow_config.y + 0.5);
+    int proxy_shadow_layer_count = int(shadow_config.w + 0.5);
+    if (shadow_config.x < 0.5 || shadow_light_count == 0 || shadowMapType(0) != 0 || light_index != shadowLightIndex(0) || proxy_shadow_layer_count == 0) return 1.0;
+    vec4 relight_settings = relightGlobalSettings();
+    vec2 proxy_shadow_depth_range = relightProxyDepthRange();
     vec3 biased_position = world_position + normal * relight_settings.w;
-    vec4 shadow_clip = shadow_projection_matrix_0 * shadow_view_matrix_0 * vec4(biased_position, 1.0);
+    mat4 view_matrix = shadowViewMatrix(0, 0);
+    vec4 shadow_clip = shadowProjectionMatrix(0, 0) * view_matrix * vec4(biased_position, 1.0);
     vec3 shadow_ndc = shadow_clip.xyz / shadow_clip.w;
     vec2 shadow_uv = shadow_ndc.xy * 0.5 + 0.5;
     if (any(lessThan(shadow_uv, vec2(0.0))) || any(greaterThan(shadow_uv, vec2(1.0)))) return 1.0;
-    float receiver_depth = -(shadow_view_matrix_0 * vec4(biased_position, 1.0)).z;
+    float receiver_depth = -(view_matrix * vec4(biased_position, 1.0)).z;
     float layer_fraction = (receiver_depth - proxy_shadow_depth_range.x) / max(proxy_shadow_depth_range.y - proxy_shadow_depth_range.x, 0.0001);
     int receiver_layer = int(floor(layer_fraction * float(proxy_shadow_layer_count)));
     float transmission = 1.0;
@@ -314,8 +383,33 @@ float proxyShadowTransmission(vec3 world_position, vec3 normal, int light_index)
     return transmission;
 }
 
+vec3 evaluateWorldLighting(vec3 normal, int response) {
+    if (response == 2) {
+        return max(texelFetch(relight_data, ivec2(0, 16), 0).rgb * 0.2820947918, vec3(0.0));
+    }
+    float x = normal.x;
+    float y = normal.y;
+    float z = normal.z;
+    vec3 result = texelFetch(relight_data, ivec2(0, 16), 0).rgb * 0.2820947918;
+    result += texelFetch(relight_data, ivec2(0, 17), 0).rgb * (-0.4886025119 * y);
+    result += texelFetch(relight_data, ivec2(0, 18), 0).rgb * (0.4886025119 * z);
+    result += texelFetch(relight_data, ivec2(0, 19), 0).rgb * (-0.4886025119 * x);
+    result += texelFetch(relight_data, ivec2(0, 20), 0).rgb * (1.0925484306 * x * y);
+    result += texelFetch(relight_data, ivec2(0, 21), 0).rgb * (-1.0925484306 * y * z);
+    result += texelFetch(relight_data, ivec2(0, 22), 0).rgb * (0.3153915653 * (3.0 * z * z - 1.0));
+    result += texelFetch(relight_data, ivec2(0, 23), 0).rgb * (-1.0925484306 * x * z);
+    result += texelFetch(relight_data, ivec2(0, 24), 0).rgb * (0.5462742153 * (x * x - y * y));
+    return max(result, vec3(0.0));
+}
+
 vec3 evaluateRelighting(vec3 base_color, vec3 world_position, vec4 rotation, vec3 scale, mat4 object_transform) {
+    vec4 relight_meta = relightGlobalMeta();
+    int relight_mode = int(relight_meta.x + 0.5);
     if (relight_mode == 0) return base_color;
+    int relight_response = int(relight_meta.y + 0.5);
+    int relight_light_count = int(relight_meta.z + 0.5);
+    vec4 relight_ambient = relightGlobalAmbient();
+    vec4 relight_settings = relightGlobalSettings();
 
     int smallest_axis = scale.x < scale.y ? (scale.x < scale.z ? 0 : 2) : (scale.y < scale.z ? 1 : 2);
     vec3 local_normal = smallest_axis == 0 ? vec3(1.0, 0.0, 0.0) : (smallest_axis == 1 ? vec3(0.0, 1.0, 0.0) : vec3(0.0, 0.0, 1.0));
@@ -323,22 +417,65 @@ vec3 evaluateRelighting(vec3 base_color, vec3 world_position, vec4 rotation, vec
     if (dot(normal, camera_position - world_position) < 0.0) normal = -normal;
     vec3 irradiance = vec3(0.0);
 
-    for (int index = 0; index < 4; index++) {
+    for (int index = 0; index < 16; index++) {
         if (index >= relight_light_count) break;
         vec4 light_position = relightLightPosition(index);
         vec4 light_color = relightLightColor(index);
         vec4 light_settings = relightLightSettings(index);
+        vec4 light_extra = relightLightExtra(index);
         vec3 light_dir;
         float attenuation = 1.0;
         if (light_position.w < 0.5) {
             light_dir = normalize(light_position.xyz);
-        } else {
+        } else if (light_position.w < 1.5) {
             vec3 light_delta = light_position.xyz - world_position;
             float distance_to_light = length(light_delta);
             light_dir = light_delta / max(distance_to_light, 0.0001);
-            attenuation = 1.0 / max(distance_to_light * distance_to_light, 1.0);
+            float effective_distance = max(distance_to_light - light_settings.y, 0.0001);
+            attenuation = 1.0 / max(effective_distance * effective_distance, 1.0);
             if (light_settings.x > 0.0) {
                 attenuation *= clamp(1.0 - distance_to_light / light_settings.x, 0.0, 1.0);
+            }
+        } else if (light_position.w < 2.5) {
+            // Approximate an area emitter as a one-sided disk. Its local -Z
+            // direction controls which side emits; its Blender size controls
+            // the disk radius and therefore the nearest emitting point.
+            vec3 emission_direction = normalize(light_settings.xyz);
+            vec3 receiver_delta = world_position - light_position.xyz;
+            float axial_distance = dot(receiver_delta, emission_direction);
+            vec3 radial_delta = receiver_delta - emission_direction * axial_distance;
+            float radial_distance = length(radial_delta);
+            float radius = max(light_settings.w, 0.0);
+            vec3 closest_offset = radial_delta;
+            if (radial_distance > radius) {
+                closest_offset *= radius / max(radial_distance, 0.0001);
+            }
+            vec3 light_delta = light_position.xyz + closest_offset - world_position;
+            float distance_to_light = length(light_delta);
+            light_dir = light_delta / max(distance_to_light, 0.0001);
+            vec3 receiver_direction = receiver_delta / max(length(receiver_delta), 0.0001);
+            float facing = max(dot(emission_direction, receiver_direction), 0.0);
+            float spread = light_extra.y > 0.0 ? smoothstep(light_extra.y, min(light_extra.y + 0.1, 1.0), facing) : 1.0;
+            attenuation = axial_distance > 0.0
+                ? facing * spread / max(distance_to_light * distance_to_light, 1.0)
+                : 0.0;
+            if (light_extra.x > 0.0) {
+                attenuation *= clamp(1.0 - length(receiver_delta) / light_extra.x, 0.0, 1.0);
+            }
+        } else {
+            vec3 emission_direction = normalize(light_settings.xyz);
+            vec3 receiver_delta = world_position - light_position.xyz;
+            float distance_to_light = length(receiver_delta);
+            vec3 receiver_direction = receiver_delta / max(distance_to_light, 0.0001);
+            light_dir = -receiver_direction;
+            float cone_cosine = dot(emission_direction, receiver_direction);
+            float cone = light_extra.z > light_extra.y + 0.00001
+                ? smoothstep(light_extra.y, light_extra.z, cone_cosine)
+                : step(light_extra.y, cone_cosine);
+            float effective_distance = max(distance_to_light - light_settings.w, 0.0001);
+            attenuation = cone / max(effective_distance * effective_distance, 1.0);
+            if (light_extra.x > 0.0) {
+                attenuation *= clamp(1.0 - distance_to_light / light_extra.x, 0.0, 1.0);
             }
         }
         float normal_light = dot(normal, light_dir);
@@ -352,9 +489,14 @@ vec3 evaluateRelighting(vec3 base_color, vec3 world_position, vec4 rotation, vec
             // Standard 3DGS has no trustworthy normal/albedo decomposition. Preserve its appearance and relight by visibility.
             normal_light = 1.0;
         }
-        irradiance += light_color.rgb * light_color.a * normal_light * attenuation * meshShadowVisibility(world_position, normal, index) * proxyShadowTransmission(world_position, normal, index);
+        irradiance += light_color.rgb * light_color.a * normal_light * attenuation * meshShadowVisibility(world_position, light_dir, index) * proxyShadowTransmission(world_position, normal, index);
     }
-    return base_color * (relight_ambient.rgb * relight_ambient.a + irradiance * relight_settings.x);
+    int world_response = relightWorldResponse();
+    vec3 world_direction = world_response == 0
+        ? normalize(camera_position - world_position)
+        : normal;
+    vec3 world_lighting = evaluateWorldLighting(world_direction, world_response) * relight_meta.w;
+    return base_color * (relight_ambient.rgb * relight_ambient.a + irradiance * relight_settings.x + world_lighting);
 }
 
 void main()
@@ -449,7 +591,7 @@ void main()
     
     if (render_mode != 1) {
         vec3 view_dir = normalize(g_pos - camera_position);
-        g_color = relight_mode == 2
+        g_color = int(relightGlobalMeta().x + 0.5) == 2
             ? SH_C0 * getSHCoeff(gaussian_index, 0, texture_width, texture_height) + 0.5
             : evaluateSH(gaussian_index, view_dir, texture_width, texture_height);
         g_color = evaluateRelighting(g_color, g_pos, g_rot, g_scale, obj_metadata.transform);

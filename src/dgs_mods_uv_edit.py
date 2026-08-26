@@ -58,9 +58,9 @@ def sna_dgs_mods_uv_edit_7D8A8(layout_function, ):
         box_E2654.scale_y = 1.0
         if not True: box_E2654.operator_context = "EXEC_DEFAULT"
         attr_B95E2 = '["' + str('Socket_101' + '"]') 
-        box_E2654.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_UV_Edit_GN'], attr_B95E2, text='UV Name', icon_value=0, emboss=True, toggle=True)
+        box_E2654.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_UV_Edit_GN'], attr_B95E2), text='UV Name', icon_value=0, emboss=True, toggle=True)
         attr_5057A = '["' + str('Socket_81' + '"]') 
-        box_E2654.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_UV_Edit_GN'], attr_5057A, text='', icon_value=0, emboss=True, toggle=True)
+        box_E2654.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_UV_Edit_GN'], attr_5057A), text='', icon_value=0, emboss=True, toggle=True)
         if (bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_UV_Edit_GN']['Socket_81'] == 1):
             col_B844C = box_E2654.column(heading='', align=True)
             col_B844C.alert = False
@@ -73,12 +73,12 @@ def sna_dgs_mods_uv_edit_7D8A8(layout_function, ):
             col_B844C.alignment = 'Expand'.upper()
             col_B844C.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
             attr_09238 = '["' + str('Socket_79' + '"]') 
-            col_B844C.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_UV_Edit_GN'], attr_09238, text='', icon_value=0, emboss=True, toggle=True)
+            col_B844C.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_UV_Edit_GN'], attr_09238), text='', icon_value=0, emboss=True, toggle=True)
             if (bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_UV_Edit_GN']['Socket_79'] == 1):
                 attr_67DDE = '["' + str('Socket_80' + '"]') 
-                col_B844C.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_UV_Edit_GN'], attr_67DDE, text='', icon_value=0, emboss=True, toggle=True)
+                col_B844C.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_UV_Edit_GN'], attr_67DDE), text='', icon_value=0, emboss=True, toggle=True)
             attr_BB6E4 = '["' + str('Socket_105' + '"]') 
-            col_B844C.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_UV_Edit_GN'], attr_BB6E4, text='', icon_value=0, emboss=True, toggle=True)
+            col_B844C.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_UV_Edit_GN'], attr_BB6E4), text='', icon_value=0, emboss=True, toggle=True)
         box_06FCC = box_9FF77.box()
         box_06FCC.alert = False
         box_06FCC.enabled = True
@@ -90,7 +90,7 @@ def sna_dgs_mods_uv_edit_7D8A8(layout_function, ):
         box_06FCC.scale_y = 1.0
         if not True: box_06FCC.operator_context = "EXEC_DEFAULT"
         attr_86FBB = '["' + str('Socket_83' + '"]') 
-        box_06FCC.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_UV_Edit_GN'], attr_86FBB, text='Align to direction', icon_value=0, emboss=True)
+        box_06FCC.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_UV_Edit_GN'], attr_86FBB), text='Align to direction', icon_value=0, emboss=True)
         if bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_UV_Edit_GN']['Socket_83']:
             col_9BFFE = box_06FCC.column(heading='', align=True)
             col_9BFFE.alert = False
@@ -114,11 +114,11 @@ def sna_dgs_mods_uv_edit_7D8A8(layout_function, ):
             row_A1034.alignment = 'Expand'.upper()
             row_A1034.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
             attr_9CCDE = '["' + str('Socket_85' + '"]') 
-            row_A1034.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_UV_Edit_GN'], attr_9CCDE, text='.', icon_value=0, emboss=True, expand=True)
+            row_A1034.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_UV_Edit_GN'], attr_9CCDE), text='.', icon_value=0, emboss=True, expand=True)
             attr_1E2BC = '["' + str('Socket_84' + '"]') 
-            col_9BFFE.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_UV_Edit_GN'], attr_1E2BC, text='Direction', icon_value=0, emboss=True)
+            col_9BFFE.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_UV_Edit_GN'], attr_1E2BC), text='Direction', icon_value=0, emboss=True)
             attr_81350 = '["' + str('Socket_86' + '"]') 
-            col_9BFFE.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_UV_Edit_GN'], attr_81350, text='Rotation', icon_value=0, emboss=True, toggle=True)
+            col_9BFFE.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_UV_Edit_GN'], attr_81350), text='Rotation', icon_value=0, emboss=True, toggle=True)
         box_3BC41 = box_9FF77.box()
         box_3BC41.alert = False
         box_3BC41.enabled = True
@@ -130,7 +130,7 @@ def sna_dgs_mods_uv_edit_7D8A8(layout_function, ):
         box_3BC41.scale_y = 1.0
         if not True: box_3BC41.operator_context = "EXEC_DEFAULT"
         attr_6A5D2 = '["' + str('Socket_106' + '"]') 
-        box_3BC41.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_UV_Edit_GN'], attr_6A5D2, text='Transform', icon_value=0, emboss=True)
+        box_3BC41.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_UV_Edit_GN'], attr_6A5D2), text='Transform', icon_value=0, emboss=True)
         if bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_UV_Edit_GN']['Socket_106']:
             col_A8AB9 = box_3BC41.column(heading='', align=False)
             col_A8AB9.alert = False
@@ -143,11 +143,11 @@ def sna_dgs_mods_uv_edit_7D8A8(layout_function, ):
             col_A8AB9.alignment = 'Expand'.upper()
             col_A8AB9.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
             attr_082AE = '["' + str('Socket_87' + '"]') 
-            col_A8AB9.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_UV_Edit_GN'], attr_082AE, text='Translation', icon_value=0, emboss=True, expand=True)
+            col_A8AB9.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_UV_Edit_GN'], attr_082AE), text='Translation', icon_value=0, emboss=True, expand=True)
             attr_1AE94 = '["' + str('Socket_88' + '"]') 
-            col_A8AB9.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_UV_Edit_GN'], attr_1AE94, text='Rotation', icon_value=0, emboss=True)
+            col_A8AB9.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_UV_Edit_GN'], attr_1AE94), text='Rotation', icon_value=0, emboss=True)
             attr_0F93F = '["' + str('Socket_89' + '"]') 
-            col_A8AB9.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_UV_Edit_GN'], attr_0F93F, text='Scale', icon_value=0, emboss=True, toggle=True)
+            col_A8AB9.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_UV_Edit_GN'], attr_0F93F), text='Scale', icon_value=0, emboss=True, toggle=True)
             row_77081 = col_A8AB9.row(heading='', align=False)
             row_77081.alert = False
             row_77081.enabled = True
@@ -159,11 +159,11 @@ def sna_dgs_mods_uv_edit_7D8A8(layout_function, ):
             row_77081.alignment = 'Expand'.upper()
             row_77081.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
             attr_20D92 = '["' + str('Socket_91' + '"]') 
-            row_77081.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_UV_Edit_GN'], attr_20D92, text='Flip U', icon_value=0, emboss=True, toggle=True)
+            row_77081.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_UV_Edit_GN'], attr_20D92), text='Flip U', icon_value=0, emboss=True, toggle=True)
             attr_55098 = '["' + str('Socket_92' + '"]') 
-            row_77081.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_UV_Edit_GN'], attr_55098, text='Flip V', icon_value=0, emboss=True, toggle=True)
+            row_77081.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_UV_Edit_GN'], attr_55098), text='Flip V', icon_value=0, emboss=True, toggle=True)
             attr_65309 = '["' + str('Socket_95' + '"]') 
-            col_A8AB9.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_UV_Edit_GN'], attr_65309, text='Randomize', icon_value=0, emboss=True, toggle=False)
+            col_A8AB9.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_UV_Edit_GN'], attr_65309), text='Randomize', icon_value=0, emboss=True, toggle=False)
             if bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_UV_Edit_GN']['Socket_95']:
                 col_06A74 = col_A8AB9.column(heading='', align=False)
                 col_06A74.alert = False
@@ -176,11 +176,11 @@ def sna_dgs_mods_uv_edit_7D8A8(layout_function, ):
                 col_06A74.alignment = 'Expand'.upper()
                 col_06A74.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
                 attr_38294 = '["' + str('Socket_96' + '"]') 
-                col_06A74.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_UV_Edit_GN'], attr_38294, text='Offset', icon_value=0, emboss=True, toggle=True)
+                col_06A74.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_UV_Edit_GN'], attr_38294), text='Offset', icon_value=0, emboss=True, toggle=True)
                 attr_850DC = '["' + str('Socket_97' + '"]') 
-                col_06A74.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_UV_Edit_GN'], attr_850DC, text='Rotation', icon_value=0, emboss=True, toggle=True)
+                col_06A74.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_UV_Edit_GN'], attr_850DC), text='Rotation', icon_value=0, emboss=True, toggle=True)
                 attr_CF180 = '["' + str('Socket_98' + '"]') 
-                col_06A74.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_UV_Edit_GN'], attr_CF180, text='Seed', icon_value=0, emboss=True, toggle=True)
+                col_06A74.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Render_UV_Edit_GN'], attr_CF180), text='Seed', icon_value=0, emboss=True, toggle=True)
     else:
         box_01F2C = layout_function.box()
         box_01F2C.alert = False

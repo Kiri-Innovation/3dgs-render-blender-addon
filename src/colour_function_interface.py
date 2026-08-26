@@ -34,9 +34,9 @@ def sna_colour_function_interface_3A6A5(layout_function, ):
     box_E0430.scale_y = 1.0
     if not True: box_E0430.operator_context = "EXEC_DEFAULT"
     attr_17916 = '["' + str('Socket_54' + '"]') 
-    box_E0430.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Adjust_Colour_And_Material'], attr_17916, text='Shadeless', icon_value=0, emboss=True, toggle=False)
+    box_E0430.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Adjust_Colour_And_Material'], attr_17916), text='Shadeless', icon_value=0, emboss=True, toggle=False)
     attr_787E3 = '["' + str('Socket_71' + '"]') 
-    box_E0430.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Adjust_Colour_And_Material'], attr_787E3, text='Create Extra Attributes', icon_value=0, emboss=True, toggle=False)
+    box_E0430.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Adjust_Colour_And_Material'], attr_787E3), text='Create Extra Attributes', icon_value=0, emboss=True, toggle=False)
     col_EB8EB.separator(factor=1.0)
     box_47A8F = col_EB8EB.box()
     box_47A8F.alert = False
@@ -59,13 +59,13 @@ def sna_colour_function_interface_3A6A5(layout_function, ):
     col_89B6E.alignment = 'Expand'.upper()
     col_89B6E.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
     attr_032D8 = '["' + str('Socket_6' + '"]') 
-    col_89B6E.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Adjust_Colour_And_Material'], attr_032D8, text='Brightness', icon_value=0, emboss=True)
+    col_89B6E.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Adjust_Colour_And_Material'], attr_032D8), text='Brightness', icon_value=0, emboss=True)
     attr_18662 = '["' + str('Socket_2' + '"]') 
-    col_89B6E.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Adjust_Colour_And_Material'], attr_18662, text='Contrast', icon_value=0, emboss=True)
+    col_89B6E.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Adjust_Colour_And_Material'], attr_18662), text='Contrast', icon_value=0, emboss=True)
     attr_000D9 = '["' + str('Socket_4' + '"]') 
-    col_89B6E.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Adjust_Colour_And_Material'], attr_000D9, text='Hue', icon_value=0, emboss=True)
+    col_89B6E.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Adjust_Colour_And_Material'], attr_000D9), text='Hue', icon_value=0, emboss=True)
     attr_9DF33 = '["' + str('Socket_3' + '"]') 
-    col_89B6E.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Adjust_Colour_And_Material'], attr_9DF33, text='Saturation', icon_value=0, emboss=True)
+    col_89B6E.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Adjust_Colour_And_Material'], attr_9DF33), text='Saturation', icon_value=0, emboss=True)
     col_EB8EB.separator(factor=1.0)
     box_A85FA = col_EB8EB.box()
     box_A85FA.alert = False

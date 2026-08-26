@@ -424,6 +424,11 @@ def sna_texture_creation_FD1B2():
             reconstruction_success = auto_reconstruct_cache_for_script3()
             if not reconstruction_success:
                 raise ValueError("No gaussian objects found in scene - run script_1 first")
+        # Blender's Duplicate command copies the proxy object but cannot copy
+        # this separate Python cache. Reconcile it before every texture build.
+        kiri_sync_gaussian_object_cache()
+        if not bpy.gaussian_object_cache:
+            raise ValueError("No usable gaussian objects found in the current scene")
         print(f"Building global textures from {len(bpy.gaussian_object_cache)} objects:")
         # ========== MERGE DATA FROM ALL OBJECTS ==========
         all_gaussian_data = []
@@ -491,27 +496,10 @@ def sna_texture_creation_FD1B2():
         )
         # ========== CREATE MULTI-OBJECT METADATA TEXTURE ==========
         num_objects = len(all_object_metadata)
-        floats_per_object = 15
-        total_metadata_floats = num_objects * floats_per_object
-        metadata_width = min(max_texture_dim, total_metadata_floats)
-        metadata_height = (total_metadata_floats + metadata_width - 1) // metadata_width
-        expected_size = metadata_width * metadata_height
-        metadata_data = np.zeros(expected_size, dtype=np.float32)
-        # Fill metadata for each object
-        for obj_idx, obj_meta in enumerate(all_object_metadata):
-            base_idx = obj_idx * floats_per_object
-            # Start index (uint32 bitcast to float32)
-            uint32_start_idx = np.uint32(obj_meta['start_idx'])
-            metadata_data[base_idx + 0] = uint32_start_idx.view(np.float32)
-            metadata_data[base_idx + 1] = float(obj_meta['gaussian_count'])
-            metadata_data[base_idx + 2] = 1.0  # Visible
-            # Object transform matrix (3x4 = 12 floats)
-            transform = obj_meta['object'].matrix_world
-            matrix_idx = 0
-            for col in range(4):
-                for row in range(3):
-                    metadata_data[base_idx + 3 + matrix_idx] = transform[row][col]
-                    matrix_idx += 1
+        metadata_data, metadata_width, metadata_height = kiri_build_gaussian_metadata(
+            all_object_metadata,
+            for_render=False,
+        )
         metadata_buffer = gpu.types.Buffer('FLOAT', len(metadata_data), metadata_data.tolist())
         metadata_texture = gpu.types.GPUTexture(
             (metadata_width, metadata_height), 

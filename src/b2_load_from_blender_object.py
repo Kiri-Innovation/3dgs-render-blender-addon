@@ -230,6 +230,8 @@ def sna_b2_load_from_blender_object_F0CCB(OBJECT_BASE_NAME):
         empty_object["gaussian_count"] = num_gaussians
         empty_object["sh_degree"] = gaussian_data_info['sh_dim']
         empty_object["is_gaussian_splat"] = True
+        empty_object["kiri_gaussian_proxy_uuid"] = str(uuid.uuid4())
+        empty_object["kiri_gaussian_instance"] = False
         empty_object["is_mesh_source"] = True
         empty_object["is_evaluated_mesh"] = True  # Mark as using evaluated mesh
         empty_object["source_mesh_uuid"] = source_uuid  # Store UUID instead of name

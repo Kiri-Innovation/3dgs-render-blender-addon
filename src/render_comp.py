@@ -511,24 +511,10 @@ def sna_render_comp_0DAEE(RENDER_ANIMATION, RENDER_COLOR, RENDER_DEPTH, COMP_WIT
             # Create metadata texture
             metadata_start = time.perf_counter() if DEBUG_TIMING else 0
             num_objects = len(all_object_metadata)
-            floats_per_object = 15
-            total_metadata_floats = num_objects * floats_per_object
-            metadata_width = min(max_texture_dim, total_metadata_floats)
-            metadata_height = (total_metadata_floats + metadata_width - 1) // metadata_width
-            expected_size = metadata_width * metadata_height
-            metadata_data = np.zeros(expected_size, dtype=np.float32)
-            for obj_idx, obj_meta in enumerate(all_object_metadata):
-                base_idx = obj_idx * floats_per_object
-                uint32_start_idx = np.uint32(obj_meta['start_idx'])
-                metadata_data[base_idx + 0] = uint32_start_idx.view(np.float32)
-                metadata_data[base_idx + 1] = float(obj_meta['gaussian_count'])
-                metadata_data[base_idx + 2] = 1.0  # Visible
-                transform = obj_meta['object'].matrix_world
-                matrix_idx = 0
-                for col in range(4):
-                    for row in range(3):
-                        metadata_data[base_idx + 3 + matrix_idx] = transform[row][col]
-                        matrix_idx += 1
+            metadata_data, metadata_width, metadata_height = kiri_build_gaussian_metadata(
+                all_object_metadata,
+                for_render=True,
+            )
             metadata_buffer = gpu.types.Buffer('FLOAT', len(metadata_data), metadata_data.tolist())
             metadata_texture = gpu.types.GPUTexture(
                 (metadata_width, metadata_height), 
@@ -579,6 +565,8 @@ def sna_render_comp_0DAEE(RENDER_ANIMATION, RENDER_COLOR, RENDER_DEPTH, COMP_WIT
             updated_count = 0
             for obj_name, obj_data in bpy.gaussian_object_cache.items():
                 obj = obj_data['object']
+                if kiri_gaussian_is_instance(obj):
+                    continue  # Duplicated proxies keep their independent transform
                 # Check if this object has a Blender source
                 source_uuid = obj.get("source_mesh_uuid")
                 if not source_uuid:
@@ -1200,30 +1188,10 @@ def sna_render_comp_0DAEE(RENDER_ANIMATION, RENDER_COLOR, RENDER_DEPTH, COMP_WIT
             if not hasattr(bpy, 'gaussian_object_metadata') or not bpy.gaussian_object_metadata:
                 debug_print("No object metadata found for update")
                 return False
-            num_objects = len(bpy.gaussian_object_metadata)
-            floats_per_object = 15
-            total_metadata_floats = num_objects * floats_per_object
-            max_texture_dim = 16384
-            metadata_width = min(max_texture_dim, total_metadata_floats)
-            metadata_height = (total_metadata_floats + metadata_width - 1) // metadata_width
-            expected_size = metadata_width * metadata_height
-            metadata_data = np.zeros(expected_size, dtype=np.float32)
-            # Fill metadata with CURRENT transforms for all objects
-            for obj_idx, obj_meta in enumerate(bpy.gaussian_object_metadata):
-                base_idx = obj_idx * floats_per_object
-                obj = obj_meta['object']
-                # Start index as uint32 bitcast to float32
-                uint32_start_idx = np.uint32(obj_meta['start_idx'])
-                metadata_data[base_idx + 0] = uint32_start_idx.view(np.float32)
-                metadata_data[base_idx + 1] = float(obj_meta['gaussian_count'])
-                metadata_data[base_idx + 2] = 1.0  # Visible
-                # CURRENT object transform matrix
-                current_transform = obj.matrix_world
-                matrix_idx = 0
-                for col in range(4):
-                    for row in range(3):
-                        metadata_data[base_idx + 3 + matrix_idx] = current_transform[row][col]
-                        matrix_idx += 1
+            metadata_data, metadata_width, metadata_height = kiri_build_gaussian_metadata(
+                bpy.gaussian_object_metadata,
+                for_render=True,
+            )
             # Create new metadata texture
             metadata_buffer = gpu.types.Buffer('FLOAT', len(metadata_data), metadata_data.tolist())
             bpy.gaussian_metadata_texture = gpu.types.GPUTexture(
@@ -1390,9 +1358,10 @@ def sna_render_comp_0DAEE(RENDER_ANIMATION, RENDER_COLOR, RENDER_DEPTH, COMP_WIT
             if frame_num is not None:
                 scene.frame_set(frame_num)
                 bpy.context.evaluated_depsgraph_get().update()
-                # Update metadata texture for animated objects
-                if is_animation:
-                    update_metadata_texture()
+            # Offline rendering follows the proxy's animated camera/render
+            # toggle, not its viewport-only eye state. Refresh this for single
+            # frames as well as animation frames.
+            update_metadata_texture()
             # Determine render resolution
             if RENDER_WIDTH > 0 and RENDER_HEIGHT > 0:
                 width = RENDER_WIDTH
@@ -1838,10 +1807,12 @@ def sna_render_comp_0DAEE(RENDER_ANIMATION, RENDER_COLOR, RENDER_DEPTH, COMP_WIT
                 return False
             # Auto-reconstruct dependencies if needed
             debug_print("Checking dependencies...", force=True)
+            kiri_sync_gaussian_object_cache()
             if not hasattr(bpy, 'gaussian_object_cache') or not bpy.gaussian_object_cache:
                 if not auto_reconstruct_cache():
                     debug_print("ERROR: No gaussian objects found - run script_1 first", force=True)
                     return False
+                kiri_sync_gaussian_object_cache()
             if not auto_reconstruct_shaders():
                 debug_print("ERROR: Failed to create/load shaders - check shader paths", force=True)
                 return False

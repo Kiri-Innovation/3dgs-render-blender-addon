@@ -21,6 +21,7 @@ Created by [KIRI Engine](https://www.kiriengine.app/) and moving into community-
 - Edit splats using Blender selections, modifiers, cropping and colour tools.
 - Switch between an editable mesh-based workflow and a faster render workflow.
 - Render Gaussian Splats and composite them with native Blender scene elements.
+- Create sampled Eevee shadow proxies so splats can cast approximate shadows onto Blender meshes. *(Experimental.)*
 - Create proxy-based animation and bake rigged splat sequences. *(Experimental.)*
 - Bake lighting information into splats. *(Experimental.)*
 - Export edited 3DGS files and animated `.ply` sequences.
@@ -59,6 +60,12 @@ For a basic import:
 5. Use **Edit** mode for selections, modifiers and other changes, or switch to **Render** mode for rendering workflows.
 
 Names, controls and available features may differ between releases.
+
+In **Render** mode, each Gaussian-splat proxy follows Blender's normal visibility controls. Use the Outliner **eye** or **monitor** controls to show or hide a splat in the live viewport. Use its **camera/render** control to include or exclude it from offline stills and animations. Render-disabled collections and animated render-visibility values are also respected.
+
+Gaussian-splat proxies can also be duplicated with Blender's normal **Shift+D** workflow. Each copy is rendered with its own transform, visibility and animation, and a duplicate created from a Blender mesh source keeps its independent placement when source transforms are refreshed. Each copy is currently packed as another complete set of splats on the GPU, so VRAM use, sorting work and render cost increase with every duplicate. Use duplicates carefully with large scans.
+
+When using **GS to Mesh Shadows (Eevee)**, rebuilding creates one unselectable shadow-proxy object for each Gaussian-splat source. Each proxy is parented to its source so it follows the source transform. **Total Max Cards** is a single scene-wide sampling budget shared between all of those proxies.
 
 ## Getting help and reporting problems
 

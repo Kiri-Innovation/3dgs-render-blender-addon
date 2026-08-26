@@ -401,9 +401,11 @@ def sna_c2_refresh_all_4D367(REFRESH_ALL_OBJECTS, UPDATE_TRANSFORMS, USE_EVALUAT
             if USE_EVALUATED_MESH:
                 obj["is_evaluated_mesh"] = True
             # Update transform if requested
-            if UPDATE_TRANSFORMS:
+            if UPDATE_TRANSFORMS and not kiri_gaussian_is_instance(obj):
                 transform_updated = update_empty_transform(obj, source_obj)
                 transform_status = " (transform updated)" if transform_updated else " (transform update failed)"
+            elif UPDATE_TRANSFORMS:
+                transform_status = " (instance transform preserved)"
             else:
                 transform_status = ""
             # Update cache if it exists
@@ -437,6 +439,8 @@ def sna_c2_refresh_all_4D367(REFRESH_ALL_OBJECTS, UPDATE_TRANSFORMS, USE_EVALUAT
     def refresh_gaussian_objects():
         """Main refresh function - handles both PLY and Blender object sources"""
         try:
+            # Include newly duplicated proxies before refreshing source data.
+            kiri_sync_gaussian_object_cache()
             # Find gaussian objects to refresh
             objects_to_refresh = get_objects_to_refresh()
             if not objects_to_refresh:

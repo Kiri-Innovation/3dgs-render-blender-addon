@@ -58,9 +58,9 @@ def sna_decimate_D742E(layout_function, ):
         col_49D7B.alignment = 'Expand'.upper()
         col_49D7B.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
         attr_C43B9 = '["' + str('Socket_15' + '"]') 
-        col_49D7B.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Decimate_GN'], attr_C43B9, text='Decimate Percentage', icon_value=0, emboss=True)
+        col_49D7B.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Decimate_GN'], attr_C43B9), text='Decimate Percentage', icon_value=0, emboss=True)
         attr_97660 = '["' + str('Socket_16' + '"]') 
-        col_49D7B.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Decimate_GN'], attr_97660, text='Decimate Seed', icon_value=0, emboss=True)
+        col_49D7B.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Decimate_GN'], attr_97660), text='Decimate Seed', icon_value=0, emboss=True)
         col_CB092 = box_D6E89.column(heading='', align=False)
         col_CB092.alert = False
         col_CB092.enabled = True
@@ -72,7 +72,7 @@ def sna_decimate_D742E(layout_function, ):
         col_CB092.alignment = 'Expand'.upper()
         col_CB092.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
         attr_93B93 = '["' + str('Socket_18' + '"]') 
-        col_CB092.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Decimate_GN'], attr_93B93, text='Decimate Masking', icon_value=0, emboss=True, toggle=True)
+        col_CB092.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Decimate_GN'], attr_93B93), text='Decimate Masking', icon_value=0, emboss=True, toggle=True)
         if bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Decimate_GN']['Socket_18']:
             col_70B17 = col_CB092.column(heading='', align=False)
             col_70B17.alert = False
@@ -85,12 +85,12 @@ def sna_decimate_D742E(layout_function, ):
             col_70B17.alignment = 'Expand'.upper()
             col_70B17.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
             attr_B0634 = '["' + str('Socket_20' + '"]') 
-            col_70B17.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Decimate_GN'], attr_B0634, text='', icon_value=0, emboss=True, toggle=True)
+            col_70B17.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Decimate_GN'], attr_B0634), text='', icon_value=0, emboss=True, toggle=True)
             attr_BD569 = '["' + str('Socket_21' + '"]') 
-            col_70B17.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Decimate_GN'], attr_BD569, text='', icon_value=0, emboss=True, toggle=True)
+            col_70B17.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Decimate_GN'], attr_BD569), text='', icon_value=0, emboss=True, toggle=True)
             if ((bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Decimate_GN']['Socket_20'] == 2) or (bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Decimate_GN']['Socket_20'] == 3)):
                 attr_2288A = '["' + str('Socket_22' + '"]') 
-                col_70B17.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Decimate_GN'], attr_2288A, text='Distance Threshold', icon_value=0, emboss=True, toggle=True)
+                col_70B17.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Decimate_GN'], attr_2288A), text='Distance Threshold', icon_value=0, emboss=True, toggle=True)
     else:
         box_2EA63 = layout_function.box()
         box_2EA63.alert = False

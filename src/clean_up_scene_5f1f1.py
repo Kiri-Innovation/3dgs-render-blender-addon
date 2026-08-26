@@ -98,6 +98,7 @@ def sna_clean_up_scene_5F1F1(REMOVE_ALL_GAUSSIAN_OBJECTS):
                 # Transform tracking
                 'gaussian_last_transforms',        # Per-object transform tracking
                 'gaussian_last_transform',         # Single object transform (legacy)
+                'gaussian_last_viewport_visibility', # Per-object viewport visibility tracking
                 # Camera tracking  
                 'gaussian_last_camera_pos',        # Camera position for depth sorting
                 # Update flags

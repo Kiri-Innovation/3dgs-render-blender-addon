@@ -58,17 +58,17 @@ def sna_convert_to_rough_mesh_BF549(layout_function, ):
         col_D3A3B.alignment = 'Expand'.upper()
         col_D3A3B.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
         attr_8B7BC = '["' + str('Socket_3' + '"]') 
-        col_D3A3B.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Convert_To_Rough_Mesh_GN'], attr_8B7BC, text='Voxel Amount', icon_value=0, emboss=True, toggle=True)
+        col_D3A3B.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Convert_To_Rough_Mesh_GN'], attr_8B7BC), text='Voxel Amount', icon_value=0, emboss=True, toggle=True)
         attr_A4FBE = '["' + str('Socket_4' + '"]') 
-        col_D3A3B.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Convert_To_Rough_Mesh_GN'], attr_A4FBE, text='Voxel Threshold', icon_value=0, emboss=True, toggle=True)
+        col_D3A3B.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Convert_To_Rough_Mesh_GN'], attr_A4FBE), text='Voxel Threshold', icon_value=0, emboss=True, toggle=True)
         attr_47308 = '["' + str('Socket_7' + '"]') 
-        col_D3A3B.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Convert_To_Rough_Mesh_GN'], attr_47308, text='Simplify', icon_value=0, emboss=True, toggle=True)
+        col_D3A3B.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Convert_To_Rough_Mesh_GN'], attr_47308), text='Simplify', icon_value=0, emboss=True, toggle=True)
         attr_F2260 = '["' + str('Socket_6' + '"]') 
-        col_D3A3B.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Convert_To_Rough_Mesh_GN'], attr_F2260, text='Smoothing', icon_value=0, emboss=True, toggle=True)
+        col_D3A3B.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Convert_To_Rough_Mesh_GN'], attr_F2260), text='Smoothing', icon_value=0, emboss=True, toggle=True)
         attr_C0C06 = '["' + str('Socket_9' + '"]') 
-        col_D3A3B.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Convert_To_Rough_Mesh_GN'], attr_C0C06, text='Point Volume Radius', icon_value=0, emboss=True, toggle=True)
+        col_D3A3B.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Convert_To_Rough_Mesh_GN'], attr_C0C06), text='Point Volume Radius', icon_value=0, emboss=True, toggle=True)
         attr_6E61B = '["' + str('Socket_11' + '"]') 
-        col_D3A3B.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Convert_To_Rough_Mesh_GN'], attr_6E61B, text='Filter Islands', icon_value=0, emboss=True, toggle=False)
+        col_D3A3B.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Convert_To_Rough_Mesh_GN'], attr_6E61B), text='Filter Islands', icon_value=0, emboss=True, toggle=False)
         if bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Convert_To_Rough_Mesh_GN']['Socket_11']:
             col_B8A6E = col_D3A3B.column(heading='', align=False)
             col_B8A6E.alert = False
@@ -81,9 +81,9 @@ def sna_convert_to_rough_mesh_BF549(layout_function, ):
             col_B8A6E.alignment = 'Expand'.upper()
             col_B8A6E.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
             attr_65366 = '["' + str('Socket_12' + '"]') 
-            col_B8A6E.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Convert_To_Rough_Mesh_GN'], attr_65366, text='', icon_value=0, emboss=True, toggle=False)
+            col_B8A6E.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Convert_To_Rough_Mesh_GN'], attr_65366), text='', icon_value=0, emboss=True, toggle=False)
             attr_0DE62 = '["' + str('Socket_10' + '"]') 
-            col_B8A6E.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Convert_To_Rough_Mesh_GN'], attr_0DE62, text='Island Threshold', icon_value=0, emboss=True, toggle=False)
+            col_B8A6E.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Convert_To_Rough_Mesh_GN'], attr_0DE62), text='Island Threshold', icon_value=0, emboss=True, toggle=False)
     else:
         box_8332A = layout_function.box()
         box_8332A.alert = False

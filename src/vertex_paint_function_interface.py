@@ -36,7 +36,7 @@ def sna_vertex_paint_function_interface_BEA3E(layout_function, ):
     col_453E1.label(text='Vertex Painting', icon_value=0)
     col_453E1.separator(factor=1.0)
     attr_C4F4C = '["' + str('Socket_55' + '"]') 
-    col_453E1.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Adjust_Colour_And_Material'], attr_C4F4C, text='Enable Vertex Painting', icon_value=0, emboss=True, toggle=True)
+    col_453E1.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Adjust_Colour_And_Material'], attr_C4F4C), text='Enable Vertex Painting', icon_value=0, emboss=True, toggle=True)
     col_453E1.separator(factor=1.0)
     col_86FB7 = col_453E1.column(heading='', align=False)
     col_86FB7.alert = False
@@ -86,9 +86,9 @@ def sna_vertex_paint_function_interface_BEA3E(layout_function, ):
     if not True: box_7E936.operator_context = "EXEC_DEFAULT"
     box_7E936.label(text='Blend Mode', icon_value=0)
     attr_97713 = '["' + str('Socket_62' + '"]') 
-    box_7E936.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Adjust_Colour_And_Material'], attr_97713, text='', icon_value=0, emboss=True)
+    box_7E936.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Adjust_Colour_And_Material'], attr_97713), text='', icon_value=0, emboss=True)
     attr_2A320 = '["' + str('Socket_57' + '"]') 
-    box_7E936.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Adjust_Colour_And_Material'], attr_2A320, text='Mix Factor', icon_value=0, emboss=True)
+    box_7E936.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Adjust_Colour_And_Material'], attr_2A320), text='Mix Factor', icon_value=0, emboss=True)
     box_55BC3 = col_86FB7.box()
     box_55BC3.alert = bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Adjust_Colour_And_Material']['Socket_64']
     box_55BC3.enabled = True
@@ -101,7 +101,7 @@ def sna_vertex_paint_function_interface_BEA3E(layout_function, ):
     if not True: box_55BC3.operator_context = "EXEC_DEFAULT"
     box_55BC3.label(text='Masking', icon_value=0)
     attr_03413 = '["' + str('Socket_64' + '"]') 
-    box_55BC3.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Adjust_Colour_And_Material'], attr_03413, text='Mask By Object', icon_value=0, emboss=True, toggle=True)
+    box_55BC3.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Adjust_Colour_And_Material'], attr_03413), text='Mask By Object', icon_value=0, emboss=True, toggle=True)
     if bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Adjust_Colour_And_Material']['Socket_64']:
         col_DC970 = box_55BC3.column(heading='', align=False)
         col_DC970.alert = False
@@ -114,8 +114,8 @@ def sna_vertex_paint_function_interface_BEA3E(layout_function, ):
         col_DC970.alignment = 'Expand'.upper()
         col_DC970.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
         attr_7340F = '["' + str('Socket_65' + '"]') 
-        col_DC970.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Adjust_Colour_And_Material'], attr_7340F, text='', icon_value=0, emboss=True, toggle=True)
+        col_DC970.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Adjust_Colour_And_Material'], attr_7340F), text='', icon_value=0, emboss=True, toggle=True)
         attr_34BD5 = '["' + str('Socket_66' + '"]') 
-        col_DC970.prop(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Adjust_Colour_And_Material'], attr_34BD5, text='', icon_value=0, emboss=True, toggle=True)
+        col_DC970.prop(*kiri_geometry_nodes_ui_target(bpy.context.view_layer.objects.active.modifiers['KIRI_3DGS_Adjust_Colour_And_Material'], attr_34BD5), text='', icon_value=0, emboss=True, toggle=True)
     layout_function = col_86FB7
     sna_append_wire_effectors_D3038(layout_function, )

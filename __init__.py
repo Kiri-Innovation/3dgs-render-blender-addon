@@ -16,7 +16,7 @@ bl_info = {
     "author" : "KIRI ENGINE", 
     "description" : "3DGS creation, render and editing suite",
     "blender" : (5, 1, 0),
-    "version" : (5, 0, 0),
+    "version" : (5, 1, 0),
     "location" : "N Panel",
     "warning" : "",
     "doc_url": "https://www.kiriengine.app/blender-addon/3dgs-render", 
@@ -259,23 +259,33 @@ class SNA_GROUP_sna_dgs_scene_properties_group(bpy.types.PropertyGroup):
     r2_render_rig_cache_mode: bpy.props.EnumProperty(name='R2_Render_Rig_Cache_Mode', description='', items=[('None', 'None', '', 0, 0), ('Enabled Baked', 'Enabled Baked', '', 0, 1)])
     r2_sh_degree: bpy.props.IntProperty(name='R2_SH_Degree', description='', default=3, subtype='NONE', min=0, max=3)
     r2_sort_threshold: bpy.props.FloatProperty(name='R2_Sort_Threshold', description='', default=0.05000000074505806, subtype='NONE', unit='NONE', min=0.0, max=1.0, step=3, precision=2)
-    r2_relight: bpy.props.BoolProperty(name='Relight', description='Use Blender lights in the Gaussian renderer', default=False)
+    r2_relight: bpy.props.BoolProperty(name='Relight', description='Evaluate up to 16 enabled Sun, Point, Spot and Area lights in the Gaussian renderer', default=False)
     r2_relight_mode: bpy.props.EnumProperty(name='Relight_Mode', items=[('1', 'Multiply SH', 'Preserve learned appearance and modulate it with new light'), ('2', 'DC Albedo', 'Use DC color as approximate diffuse albedo')], default='1')
     r2_relight_response: bpy.props.EnumProperty(name='Relight_Response', items=[('3', 'Captured', 'Relight by visibility without inferred normals'), ('0', 'Solid', 'One-sided inferred Gaussian normals'), ('1', 'Thin', 'Controlled rear-light transmission'), ('2', 'Two-Sided', 'Two-sided inferred Gaussian normals')], default='3')
     r2_relight_strength: bpy.props.FloatProperty(name='Relight_Strength', default=0.01, min=0.0, max=10.0, precision=3)
     r2_relight_ambient: bpy.props.FloatVectorProperty(name='Relight_Ambient', subtype='COLOR', default=(0.05, 0.05, 0.05), min=0.0, max=1.0)
     r2_relight_ambient_strength: bpy.props.FloatProperty(name='Relight_Ambient_Strength', default=1.0, min=0.0, max=10.0)
-    r2_shadows: bpy.props.BoolProperty(name='Shadows', description='Use cached shadow maps when available', default=False)
+    r2_world_lighting: bpy.props.BoolProperty(name='World_Lighting', description='Use the World color or an Environment Texture connected through an optional Mapping node as low-frequency diffuse lighting; the first use of a new HDRI may take time to prepare, and complex World node chains are not evaluated', default=False)
+    r2_world_strength: bpy.props.FloatProperty(name='World_Lighting_Strength', description='Additional multiplier for low-frequency World and HDRI diffuse lighting', default=1.0, min=0.0, max=10.0)
+    r2_world_response: bpy.props.EnumProperty(name='World_Response', description='Choose how the approximate World lighting direction is derived for Gaussian splats', items=[('0', 'Smooth', 'Use a stable view-facing direction; recommended for scans and noisy splat orientations'), ('1', 'Gaussian Normals', 'Use covariance-inferred splat normals; more geometric but can look noisy or splotchy'), ('2', 'Uniform', 'Use only the average World illumination without directional shading')], default='0')
+    r2_shadows: bpy.props.BoolProperty(name='Shadows', description='Use cached scene-shadow maps for up to four enabled Blender lights; native meshes cast by default and experimental Gaussian self-shadow proxies can be included', default=False)
+    r2_gaussian_self_shadows: bpy.props.BoolProperty(name='Gaussian_Self_Shadows', description='Include sampled Gaussian proxy cards in cached shadow maps so splats can approximately shadow other splats; experimental and potentially expensive', default=False)
     r2_shadow_bias: bpy.props.FloatProperty(name='Shadow_Bias', default=0.002, min=0.0, max=0.1, precision=4)
     r2_shadow_normal_bias: bpy.props.FloatProperty(name='Shadow_Normal_Bias', default=0.01, min=0.0, max=0.25, precision=4)
     r2_shadow_filter_radius: bpy.props.FloatProperty(name='Shadow_Filter_Radius', default=1.5, min=0.0, max=4.0, precision=2)
     r2_shadow_density: bpy.props.FloatProperty(name='Shadow_Density', default=1.0, min=0.0, max=4.0)
     r2_shadow_light: bpy.props.PointerProperty(name='Shadow_Light', type=bpy.types.Object)
-    r2_shadow_resolution: bpy.props.IntProperty(name='Shadow_Resolution', default=1024, min=256, max=4096)
-    r2_shadow_light_limit: bpy.props.IntProperty(name='Shadow_Light_Limit', default=4, min=1, max=4)
+    r2_shadow_resolution: bpy.props.IntProperty(name='Shadow_Resolution', description='Shadow resolution per view; Point lights render six views into an atlas', default=1024, min=256, max=4096)
+    r2_shadow_light_limit: bpy.props.IntProperty(name='Shadow_Light_Limit', description='Maximum number of Blender lights with cached native-mesh shadows', default=4, min=1, max=4)
     r2_shadow_update_mode: bpy.props.EnumProperty(name='Shadow_Update_Mode', items=[('Auto', 'Auto', 'Rebuild only dirty light maps after frame evaluation', 0, 0), ('Every Frame', 'Every Frame', 'Rebuild all active shadow maps every frame', 0, 1), ('Manual', 'Manual', 'Only rebuild from Refresh Gaussian Shadows', 0, 2)], default='Auto')
-    r2_shadow_proxy: bpy.props.BoolProperty(name='Shadow_Proxy', description='Build Eevee shadow cards for Gaussian splats', default=False)
-    r2_shadow_proxy_limit: bpy.props.IntProperty(name='Shadow_Proxy_Limit', default=50000, min=1000, max=1000000)
+    r2_shadow_proxy: bpy.props.BoolProperty(name='Shadow_Proxy', description='Use sampled Gaussian cards to cast Eevee shadows from splats onto native Blender geometry', default=False)
+    r2_shadow_proxy_limit: bpy.props.IntProperty(
+        name='Shadow_Proxy_Limit',
+        description='Maximum total number of shadow cards distributed across all Gaussian splat objects',
+        default=50000,
+        min=1000,
+        max=1000000,
+    )
     r2_shadow_proxy_cutoff: bpy.props.FloatProperty(name='Shadow_Proxy_Cutoff', default=0.02, min=0.0, max=1.0, precision=3)
     select_select_by_obj: bpy.props.PointerProperty(name='Select_select_by_obj', description='', type=bpy.types.Object)
     select_obj_select_mode: bpy.props.EnumProperty(name='Select_obj_select_mode', description='', items=[('INSIDE', 'INSIDE', '', 0, 0), ('OUTSIDE', 'OUTSIDE', '', 0, 1)])
@@ -432,6 +442,7 @@ def register():
     _safe_register_class(SNA_OT_Dgs_Render_Mesh23Dgs_3Dfed)
     _safe_register_class(SNA_OT_Dgs_Render_Clean_Up_Scene_80052)
     _safe_register_class(SNA_OT_Dgs_Render_Create_Proxy_From_Mesh_Eafbb)
+    _safe_register_class(SNA_OT_Dgs_Render_Enable_World_Lighting_94C2A)
     _safe_register_class(SNA_OT_Dgs_Render_Build_Shadow_Proxies_5B787)
     _safe_register_class(SNA_OT_Dgs_Render_Refresh_Shadows_16F2B)
     _safe_register_class(SNA_OT_Dgs_Render_Advanced_Render_147Af)
@@ -509,6 +520,7 @@ def unregister():
     _safe_unregister_class(SNA_OT_Dgs_Render_Mesh23Dgs_3Dfed)
     _safe_unregister_class(SNA_OT_Dgs_Render_Clean_Up_Scene_80052)
     _safe_unregister_class(SNA_OT_Dgs_Render_Create_Proxy_From_Mesh_Eafbb)
+    _safe_unregister_class(SNA_OT_Dgs_Render_Enable_World_Lighting_94C2A)
     _safe_unregister_class(SNA_OT_Dgs_Render_Build_Shadow_Proxies_5B787)
     _safe_unregister_class(SNA_OT_Dgs_Render_Refresh_Shadows_16F2B)
     _safe_unregister_class(SNA_OT_Dgs_Render_Advanced_Render_147Af)
