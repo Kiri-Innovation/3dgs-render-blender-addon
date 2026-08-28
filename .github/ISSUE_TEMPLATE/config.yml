@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Ask a question or start a discussion
+    url: https://github.com/Kiri-Innovation/3dgs-render-blender-addon/discussions
+    about: Use Discussions for how-tos, troubleshooting, and open-ended questions. The issue tracker is for confirmed bugs and concrete feature requests.
+  - name: Written user guide
+    url: https://www.kiriengine.app/3d-tools/3dgs-render
+    about: Feature walkthroughs and usage guidance from KIRI Engine.
+  - name: Video tutorials
+    url: https://www.youtube.com/@3D-Tools-by-KIRI-Engine
+    about: Official KIRI Engine video tutorials.
