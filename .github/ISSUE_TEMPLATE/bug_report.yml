@@ -1,0 +1,111 @@
+name: Bug report
+description: Something is broken. Please fill in every field so we don't have to ask.
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug. The more of the fields below you fill in, the faster this can be triaged.
+
+        Before opening: please check the [Releases page](https://github.com/Kiri-Innovation/3dgs-render-blender-addon/releases) — the issue may already be fixed in a newer version — and search existing issues for duplicates.
+
+        If you're not sure whether it's a bug, ask in [Discussions](https://github.com/Kiri-Innovation/3dgs-render-blender-addon/discussions) first.
+
+  - type: input
+    id: addon-version
+    attributes:
+      label: Addon version
+      description: From `Edit → Preferences → Get Extensions → 3DGS Render by KIRI Engine`.
+      placeholder: "5.1.0"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: blender-version
+    attributes:
+      label: Blender version
+      options:
+        - "5.2.x"
+        - "5.1.x"
+        - "Other (specify in Notes)"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options:
+        - macOS (Apple Silicon)
+        - macOS (Intel)
+        - Windows
+        - Linux
+    validations:
+      required: true
+
+  - type: input
+    id: gpu
+    attributes:
+      label: GPU
+      description: Model and (if you know it) driver version. Some issues are GPU-specific.
+      placeholder: "e.g. NVIDIA RTX 4070, driver 555.85"
+    validations:
+      required: false
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: A numbered list is ideal. Include the exact `.ply` or `.blend` file used if you can share it.
+      placeholder: |
+        1. Open a fresh Blender scene.
+        2. Import my.ply via 3DGS Ply Import.
+        3. Toggle Update Mode to "Show As Point Cloud".
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: console
+    attributes:
+      label: System console output
+      description: |
+        Errors from Blender's system console. Launch Blender from a terminal to see them.
+        Paste as-is — the form renders it as a code block.
+      render: shell
+    validations:
+      required: false
+
+  - type: dropdown
+    id: tested-on
+    attributes:
+      label: Which version did you test?
+      options:
+        - Latest release
+        - Latest main
+        - Both
+        - Older release (specify in Notes)
+    validations:
+      required: true
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      description: Anything else — screenshots, hypotheses, related issues, workarounds you've tried.
+    validations:
+      required: false

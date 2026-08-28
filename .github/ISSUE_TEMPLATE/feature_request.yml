@@ -1,0 +1,45 @@
+name: Feature request
+description: Suggest a new capability or an improvement to an existing one.
+title: "[feat] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the suggestion. For open-ended ideas or discussion, [Discussions](https://github.com/Kiri-Innovation/3dgs-render-blender-addon/discussions) is often a better first stop than an issue — that way we can shape the idea before anyone commits to building it.
+
+  - type: textarea
+    id: goal
+    attributes:
+      label: What are you trying to do?
+      description: Describe the user goal, not the technical solution. What's the outcome you want?
+    validations:
+      required: true
+
+  - type: textarea
+    id: workaround
+    attributes:
+      label: Current workaround (if any)
+      description: What do you do today to get close to this outcome?
+    validations:
+      required: false
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed change
+      description: If you have a specific implementation idea, describe it. If not, leave blank.
+    validations:
+      required: false
+
+  - type: dropdown
+    id: contribute
+    attributes:
+      label: Would you be willing to contribute this?
+      options:
+        - "Yes, I'd like to implement it"
+        - "Yes, with guidance"
+        - "No, but I'd help test"
+        - "No"
+    validations:
+      required: true
