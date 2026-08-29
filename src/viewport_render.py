@@ -9,14 +9,16 @@ from .texture_creation import sna_texture_creation_FD1B2
 __package__ = __package__.rsplit('.', 1)[0]
 
 
-def sna_viewport_render_A3941(SH_DEGREE, SORT_THRESHOLD):
+def sna_viewport_render_A3941(SH_DEGREE, SORT_THRESHOLD, ROTATION_THRESHOLD):
     SH_DEGREE = SH_DEGREE
     SORT_THRESHOLD = SORT_THRESHOLD
+    ROTATION_THRESHOLD = ROTATION_THRESHOLD
     # ========== VARIABLES (EDIT THESE) ==========
     ENABLE_RENDERING = True
     RENDER_MODE = 0  # 0=Gaussian, 1=Depth, 2=Surfel
     #SH_DEGREE = 3    # 0, 1, 2, or 3
-    #SORT_THRESHOLD = 0.05  # Camera movement threshold for re-sorting
+    #SORT_THRESHOLD = 0.05  # Camera movement threshold (kept for compatibility, no longer gates sorting)
+    #ROTATION_THRESHOLD = 0.02  # View direction change threshold for re-sorting
     # ============================================
     #import bpy
     #import gpu
@@ -199,16 +201,22 @@ def sna_viewport_render_A3941(SH_DEGREE, SORT_THRESHOLD):
                 camera_world_matrix.translation.y,
                 camera_world_matrix.translation.z,
             ]
+            # Depth of a splat is (r . p) + d, where r is row 2 of the view matrix
+            # and d is the same constant for every splat. Camera translation only
+            # shifts every depth by that constant, so it cannot change the sort
+            # order -- only a change of view direction can. Track the direction.
+            current_camera_dir = [view_matrix[2][0], view_matrix[2][1], view_matrix[2][2]]
             # NEW: Check if forced depth sort is requested by script_3
             force_sort = getattr(bpy, 'gaussian_needs_depth_sort', False)
-            # Check if camera moved enough to require re-sorting
+            # Check if the view rotated enough to require re-sorting
             update_needed = force_sort  # Start with force flag
-            if not force_sort and hasattr(bpy, 'gaussian_last_camera_pos'):
-                last_pos = bpy.gaussian_last_camera_pos
-                movement = sum((a-b)**2 for a,b in zip(last_pos, current_camera_pos))**0.5
-                update_needed = movement > SORT_THRESHOLD
-            elif not force_sort:
-                update_needed = True  # First time, no stored camera position
+            if not force_sort:
+                last_dir = getattr(bpy, 'gaussian_last_view_dir', None)
+                if last_dir is None:
+                    update_needed = True  # First time, no stored view direction
+                else:
+                    turn = sum((a-b)**2 for a,b in zip(last_dir, current_camera_dir))**0.5
+                    update_needed = turn > ROTATION_THRESHOLD
             if update_needed:
                 # Clear the force sort flag if it was set
                 if force_sort:
@@ -267,6 +275,7 @@ def sna_viewport_render_A3941(SH_DEGREE, SORT_THRESHOLD):
                         data=indices_buffer
                     )
                 bpy.gaussian_last_camera_pos = current_camera_pos
+                bpy.gaussian_last_view_dir = current_camera_dir
                 return True
             return False
         except Exception as e:

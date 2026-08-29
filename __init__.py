@@ -199,13 +199,13 @@ def sna_update_active_mode_86E6B(self, context):
                 sna_c2_refresh_all_4D367(True, bpy.context.scene.sna_dgs_scene_properties.r2_transforms, True)
                 sna_shader_system_A4AED()
                 sna_texture_creation_FD1B2()
-                sna_viewport_render_A3941(bpy.context.scene.sna_dgs_scene_properties.r2_sh_degree, bpy.context.scene.sna_dgs_scene_properties.r2_sort_threshold)
+                sna_viewport_render_A3941(bpy.context.scene.sna_dgs_scene_properties.r2_sh_degree, bpy.context.scene.sna_dgs_scene_properties.r2_sort_threshold, bpy.context.scene.sna_dgs_scene_properties.rt_rotation_sort_threshold)
             elif bpy.context.scene.sna_dgs_scene_properties.r2_render_rig_cache_mode == "Enabled Baked":
                 sna_rig_5_apply_baked_cache_5656F('All Bound', None)
                 sna_clean_up_scene_5F1F1(False)
                 sna_shader_system_A4AED()
                 sna_texture_creation_FD1B2()
-                sna_viewport_render_A3941(bpy.context.scene.sna_dgs_scene_properties.r2_sh_degree, bpy.context.scene.sna_dgs_scene_properties.r2_sort_threshold)
+                sna_viewport_render_A3941(bpy.context.scene.sna_dgs_scene_properties.r2_sh_degree, bpy.context.scene.sna_dgs_scene_properties.r2_sort_threshold, bpy.context.scene.sna_dgs_scene_properties.rt_rotation_sort_threshold)
             else:
                 pass
     elif sna_updated_prop == "Mesh 2 3DGS":
@@ -259,6 +259,7 @@ class SNA_GROUP_sna_dgs_scene_properties_group(bpy.types.PropertyGroup):
     r2_render_rig_cache_mode: bpy.props.EnumProperty(name='R2_Render_Rig_Cache_Mode', description='', items=[('None', 'None', '', 0, 0), ('Enabled Baked', 'Enabled Baked', '', 0, 1)])
     r2_sh_degree: bpy.props.IntProperty(name='R2_SH_Degree', description='', default=3, subtype='NONE', min=0, max=3)
     r2_sort_threshold: bpy.props.FloatProperty(name='R2_Sort_Threshold', description='', default=0.05000000074505806, subtype='NONE', unit='NONE', min=0.0, max=1.0, step=3, precision=2)
+    rt_rotation_sort_threshold: bpy.props.FloatProperty(name='RT_Rotation_Sort_Threshold', description='How far the view direction must change before the splats are re-sorted by depth. Lower values re-sort more often', default=0.02, subtype='NONE', unit='NONE', min=0.0, max=1.0, step=1, precision=3)
     r2_relight: bpy.props.BoolProperty(name='Relight', description='Evaluate up to 16 enabled Sun, Point, Spot and Area lights in the Gaussian renderer', default=False)
     r2_relight_mode: bpy.props.EnumProperty(name='Relight_Mode', items=[('1', 'Multiply SH', 'Preserve learned appearance and modulate it with new light'), ('2', 'DC Albedo', 'Use DC color as approximate diffuse albedo')], default='1')
     r2_relight_response: bpy.props.EnumProperty(name='Relight_Response', items=[('3', 'Captured', 'Relight by visibility without inferred normals'), ('0', 'Solid', 'One-sided inferred Gaussian normals'), ('1', 'Thin', 'Controlled rear-light transmission'), ('2', 'Two-Sided', 'Two-sided inferred Gaussian normals')], default='3')
