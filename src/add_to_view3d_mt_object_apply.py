@@ -12,15 +12,6 @@ def sna_add_to_view3d_mt_object_apply_4C860(self, context):
         layout = self.layout
         if '3DGS_Mesh_Type' in bpy.context.view_layer.objects.active:
             col_B3C28 = layout.column(heading='', align=False)
-            col_B3C28.alert = False
-            col_B3C28.enabled = True
-            col_B3C28.active = True
-            col_B3C28.use_property_split = False
-            col_B3C28.use_property_decorate = False
-            col_B3C28.scale_x = 1.0
-            col_B3C28.scale_y = 1.0
-            col_B3C28.alignment = 'Expand'.upper()
-            col_B3C28.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
             op = col_B3C28.operator('sna.dgs_render_apply_3dgs_tranforms_5b665', text='Apply 3DGS Transforms', icon_value=load_preview_icon(os.path.join(os.path.dirname(__file__), 'assets', 'pointer-right-fill.svg')), emboss=True, depress=False)
             op.sna_apply_location = False
             if bpy.context.view_layer.objects.active['3DGS_Mesh_Type'] == "face":

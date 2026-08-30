@@ -19,9 +19,9 @@ class SNA_OT_Dgs_Render_Generate_Hq_Object_55455(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        if bpy.app.version >= (3, 0, 0) and True:
+        if bpy.app.version >= (3, 0, 0):
             cls.poll_message_set('')
-        return not False
+        return True
 
     def execute(self, context):
         dgs_render__hq_mode['sna_lq_object_list'] = []
@@ -102,15 +102,6 @@ class SNA_OT_Dgs_Render_Generate_Hq_Object_55455(bpy.types.Operator):
     def draw(self, context):
         layout = self.layout
         box_B5524 = layout.box()
-        box_B5524.alert = False
-        box_B5524.enabled = True
-        box_B5524.active = True
-        box_B5524.use_property_split = False
-        box_B5524.use_property_decorate = False
-        box_B5524.alignment = 'Expand'.upper()
-        box_B5524.scale_x = 1.0
-        box_B5524.scale_y = 1.0
-        if not True: box_B5524.operator_context = "EXEC_DEFAULT"
         box_B5524.label(text="All original 'LQ' objects will be moved into '3DGS_LQ_Objects' collection", icon_value=load_preview_icon(os.path.join(os.path.dirname(__file__), 'assets', 'warning.svg')))
         box_B5524.label(text="        A new object -'KIRI_HQ_Merged_Object' - will be created", icon_value=0)
         box_B5524.label(text='        Use the LQ / HQ drop down to toggle between original and HQ object visibilities', icon_value=0)

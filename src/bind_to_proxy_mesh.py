@@ -15,9 +15,9 @@ class SNA_OT_Dgs_Render_Bind_To_Proxy_Mesh_6C58F(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        if bpy.app.version >= (3, 0, 0) and True:
+        if bpy.app.version >= (3, 0, 0):
             cls.poll_message_set('')
-        return not False
+        return True
 
     def execute(self, context):
         active_obj = bpy.context.view_layer.objects.active

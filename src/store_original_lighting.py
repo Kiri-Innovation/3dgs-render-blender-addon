@@ -16,9 +16,9 @@ class SNA_OT_Dgs_Render_Store_Original_Lighting_99939(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        if bpy.app.version >= (3, 0, 0) and True:
+        if bpy.app.version >= (3, 0, 0):
             cls.poll_message_set('')
-        return not False
+        return True
 
     def execute(self, context):
         sna_relight2_0_save_original_3dgs_color_76EB6()
@@ -27,15 +27,6 @@ class SNA_OT_Dgs_Render_Store_Original_Lighting_99939(bpy.types.Operator):
     def draw(self, context):
         layout = self.layout
         box_44ADA = layout.box()
-        box_44ADA.alert = False
-        box_44ADA.enabled = True
-        box_44ADA.active = True
-        box_44ADA.use_property_split = False
-        box_44ADA.use_property_decorate = False
-        box_44ADA.alignment = 'Expand'.upper()
-        box_44ADA.scale_x = 1.0
-        box_44ADA.scale_y = 1.0
-        if not True: box_44ADA.operator_context = "EXEC_DEFAULT"
         box_44ADA.label(text='Any existing stored base light data will be overwritten', icon_value=load_preview_icon(os.path.join(os.path.dirname(__file__), 'assets', 'warning.svg')))
         box_44ADA.label(text='The current state will be set as the new base light state', icon_value=0)
         box_44ADA.label(text="This action will not respond to 'undo' commands", icon_value=0)

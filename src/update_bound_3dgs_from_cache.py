@@ -16,9 +16,9 @@ class SNA_OT_Dgs_Render_Update_Bound_3Dgs_From_Cache_385Ec(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        if bpy.app.version >= (3, 0, 0) and True:
+        if bpy.app.version >= (3, 0, 0):
             cls.poll_message_set('')
-        return not False
+        return True
 
     def execute(self, context):
         bpy.context.scene.sna_dgs_scene_properties.rig_interval_stop = False

@@ -15,9 +15,9 @@ class SNA_OT_Dgs_Render_Remove_Higher_Sh_Attributes_Cb703(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        if bpy.app.version >= (3, 0, 0) and True:
+        if bpy.app.version >= (3, 0, 0):
             cls.poll_message_set('')
-        return not False
+        return True
 
     def execute(self, context):
         TARGET_OBJECT_NAME = bpy.context.view_layer.objects.active.name
@@ -227,15 +227,6 @@ class SNA_OT_Dgs_Render_Remove_Higher_Sh_Attributes_Cb703(bpy.types.Operator):
     def draw(self, context):
         layout = self.layout
         box_DCA59 = layout.box()
-        box_DCA59.alert = False
-        box_DCA59.enabled = True
-        box_DCA59.active = True
-        box_DCA59.use_property_split = False
-        box_DCA59.use_property_decorate = False
-        box_DCA59.alignment = 'Expand'.upper()
-        box_DCA59.scale_x = 1.0
-        box_DCA59.scale_y = 1.0
-        if not True: box_DCA59.operator_context = "EXEC_DEFAULT"
         box_DCA59.label(text='This action is destructive and not reversible', icon_value=load_preview_icon(os.path.join(os.path.dirname(__file__), 'assets', 'warning.svg')))
         box_DCA59.label(text='Removing higher SH attributes can save memory and increase performance in some areas.', icon_value=0)
         box_DCA59.label(text='If you are unsure about what to do, try working on a duplicate.', icon_value=0)

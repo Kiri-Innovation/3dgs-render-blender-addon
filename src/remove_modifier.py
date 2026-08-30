@@ -17,9 +17,9 @@ class SNA_OT_Dgs_Render_Remove_Modifier_9Cf0D(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        if bpy.app.version >= (3, 0, 0) and True:
+        if bpy.app.version >= (3, 0, 0):
             cls.poll_message_set('')
-        return not False
+        return True
 
     def execute(self, context):
         bpy.data.objects[self.sna_target_object].modifiers.remove(modifier=bpy.data.objects[self.sna_target_object].modifiers[self.sna_target_modifier], )

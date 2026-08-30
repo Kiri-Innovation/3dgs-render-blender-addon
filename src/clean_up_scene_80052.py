@@ -16,9 +16,9 @@ class SNA_OT_Dgs_Render_Clean_Up_Scene_80052(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        if bpy.app.version >= (3, 0, 0) and True:
+        if bpy.app.version >= (3, 0, 0):
             cls.poll_message_set('')
-        return not False
+        return True
 
     def execute(self, context):
         sna_clean_up_scene_5F1F1(bpy.context.scene.sna_dgs_scene_properties.r2_clear_empties)

@@ -19,9 +19,9 @@ class SNA_OT_Dgs_Render_Export_Mesh_As_3Dgs4Dgs_Ce2F7(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        if bpy.app.version >= (3, 0, 0) and True:
+        if bpy.app.version >= (3, 0, 0):
             cls.poll_message_set('')
-        return not False
+        return True
 
     def execute(self, context):
         if os.path.isdir(bpy.context.scene.sna_dgs_scene_properties.export_output_path):
@@ -393,42 +393,15 @@ class SNA_OT_Dgs_Render_Export_Mesh_As_3Dgs4Dgs_Ce2F7(bpy.types.Operator):
         layout = self.layout
         if (bpy.context.scene.sna_dgs_scene_properties.export_single_or_sequence == '4DGS'):
             box_5A7F8 = layout.box()
-            box_5A7F8.alert = False
-            box_5A7F8.enabled = True
-            box_5A7F8.active = True
-            box_5A7F8.use_property_split = False
-            box_5A7F8.use_property_decorate = False
-            box_5A7F8.alignment = 'Expand'.upper()
-            box_5A7F8.scale_x = 1.0
-            box_5A7F8.scale_y = 1.0
-            if not True: box_5A7F8.operator_context = "EXEC_DEFAULT"
             box_5A7F8.label(text='Exporting large scans as .PLY sequences is not recommended,', icon_value=load_preview_icon(os.path.join(os.path.dirname(__file__), 'assets', 'warning.svg')))
             box_5A7F8.label(text='        it can be best to export a cropped subset of points', icon_value=0)
             box_5A7F8.label(text='        Exporting large numbers of frames can take a while', icon_value=0)
         box_44942 = layout.box()
-        box_44942.alert = False
-        box_44942.enabled = True
-        box_44942.active = True
-        box_44942.use_property_split = False
-        box_44942.use_property_decorate = False
-        box_44942.alignment = 'Expand'.upper()
-        box_44942.scale_x = 1.0
-        box_44942.scale_y = 1.0
-        if not True: box_44942.operator_context = "EXEC_DEFAULT"
         box_44942.label(text='Camera updates will be set to Disabled', icon_value=load_preview_icon(os.path.join(os.path.dirname(__file__), 'assets', 'warning.svg')))
         box_44942.label(text='        Any enabled Animate modifiers found will be set to Displace Only', icon_value=0)
         box_44942.label(text='        3DGS Transforms will be applied to the input object', icon_value=0)
         box_44942.label(text='        The World Centre will be the exported model origin', icon_value=0)
         box_2A27F = layout.box()
-        box_2A27F.alert = False
-        box_2A27F.enabled = True
-        box_2A27F.active = True
-        box_2A27F.use_property_split = False
-        box_2A27F.use_property_decorate = False
-        box_2A27F.alignment = 'Expand'.upper()
-        box_2A27F.scale_x = 1.0
-        box_2A27F.scale_y = 1.0
-        if not True: box_2A27F.operator_context = "EXEC_DEFAULT"
         box_2A27F.prop(self, 'sna_send_to_world_centre', text='Reset Position (Rig locked objects ignore this)', icon_value=0, emboss=True)
 
     def invoke(self, context, event):

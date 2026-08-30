@@ -15,9 +15,9 @@ class SNA_OT_Dgs_Render_Bake_Frames_To_Cache_90885(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        if bpy.app.version >= (3, 0, 0) and True:
+        if bpy.app.version >= (3, 0, 0):
             cls.poll_message_set('')
-        return not False
+        return True
 
     def execute(self, context):
         proxy_binding_cache_root = bpy.context.preferences.addons[__package__].preferences.sna_cache_file_directory

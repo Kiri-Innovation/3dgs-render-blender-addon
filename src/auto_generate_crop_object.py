@@ -23,9 +23,9 @@ class SNA_OT_Dgs_Render_Auto_Generate_Crop_Object_F20D5(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        if bpy.app.version >= (3, 0, 0) and True:
+        if bpy.app.version >= (3, 0, 0):
             cls.poll_message_set('')
-        return not False
+        return True
 
     def execute(self, context):
         OPEN3D_AVAILABLE = None
@@ -816,47 +816,11 @@ class SNA_OT_Dgs_Render_Auto_Generate_Crop_Object_F20D5(bpy.types.Operator):
     def draw(self, context):
         layout = self.layout
         col_AFE45 = layout.column(heading='', align=False)
-        col_AFE45.alert = False
-        col_AFE45.enabled = True
-        col_AFE45.active = True
-        col_AFE45.use_property_split = False
-        col_AFE45.use_property_decorate = False
-        col_AFE45.scale_x = 1.0
-        col_AFE45.scale_y = 1.0
-        col_AFE45.alignment = 'Expand'.upper()
-        col_AFE45.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
         box_E9B63 = col_AFE45.box()
-        box_E9B63.alert = False
-        box_E9B63.enabled = True
-        box_E9B63.active = True
-        box_E9B63.use_property_split = False
-        box_E9B63.use_property_decorate = False
-        box_E9B63.alignment = 'Expand'.upper()
-        box_E9B63.scale_x = 1.0
-        box_E9B63.scale_y = 1.0
-        if not True: box_E9B63.operator_context = "EXEC_DEFAULT"
         box_E9B63.label(text="There is no 'one size fits all' setting.", icon_value=load_preview_icon(os.path.join(os.path.dirname(__file__), 'assets', 'warning.svg')))
         box_E9B63.label(text='You may need to play with different values.', icon_value=0)
         box_AC64A = col_AFE45.box()
-        box_AC64A.alert = False
-        box_AC64A.enabled = True
-        box_AC64A.active = True
-        box_AC64A.use_property_split = False
-        box_AC64A.use_property_decorate = False
-        box_AC64A.alignment = 'Expand'.upper()
-        box_AC64A.scale_x = 1.0
-        box_AC64A.scale_y = 1.0
-        if not True: box_AC64A.operator_context = "EXEC_DEFAULT"
         row_A0C33 = box_AC64A.row(heading='', align=False)
-        row_A0C33.alert = False
-        row_A0C33.enabled = True
-        row_A0C33.active = True
-        row_A0C33.use_property_split = False
-        row_A0C33.use_property_decorate = False
-        row_A0C33.scale_x = 1.0
-        row_A0C33.scale_y = 1.0
-        row_A0C33.alignment = 'Expand'.upper()
-        row_A0C33.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
         row_A0C33.label(text='Mode', icon_value=0)
         row_A0C33.prop(self, 'sna_filter_mode', text=self.sna_filter_mode, icon_value=0, emboss=True, expand=True)
         box_AC64A.prop(self, 'sna_filter_epsilon', text='Filter Epsilon', icon_value=0, emboss=True, slider=True)

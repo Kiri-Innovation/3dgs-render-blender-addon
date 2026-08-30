@@ -19,9 +19,9 @@ class SNA_OT_Dgs_Render_Create_Proxy_From_Mesh_Eafbb(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        if bpy.app.version >= (3, 0, 0) and True:
+        if bpy.app.version >= (3, 0, 0):
             cls.poll_message_set('')
-        return not False
+        return True
 
     def execute(self, context):
         exec('import os')

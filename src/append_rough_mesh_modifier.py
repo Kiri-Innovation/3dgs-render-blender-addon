@@ -19,9 +19,9 @@ class SNA_OT_Dgs_Render_Append_Rough_Mesh_Modifier_65Da3(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        if bpy.app.version >= (3, 0, 0) and True:
+        if bpy.app.version >= (3, 0, 0):
             cls.poll_message_set('')
-        return not False
+        return True
 
     def execute(self, context):
         if (bpy.context.view_layer.objects.active.type == 'MESH' or bpy.context.view_layer.objects.active.type == 'CURVE'):
@@ -126,26 +126,8 @@ class SNA_OT_Dgs_Render_Append_Rough_Mesh_Modifier_65Da3(bpy.types.Operator):
     def draw(self, context):
         layout = self.layout
         box_48B99 = layout.box()
-        box_48B99.alert = False
-        box_48B99.enabled = True
-        box_48B99.active = True
-        box_48B99.use_property_split = False
-        box_48B99.use_property_decorate = False
-        box_48B99.alignment = 'Expand'.upper()
-        box_48B99.scale_x = 1.0
-        box_48B99.scale_y = 1.0
-        if not True: box_48B99.operator_context = "EXEC_DEFAULT"
         box_48B99.label(text='Objects imported as Verts will produce smoother meshes', icon_value=load_preview_icon(os.path.join(os.path.dirname(__file__), 'assets', 'warning.svg')))
         box_F6B46 = layout.box()
-        box_F6B46.alert = False
-        box_F6B46.enabled = True
-        box_F6B46.active = True
-        box_F6B46.use_property_split = False
-        box_F6B46.use_property_decorate = False
-        box_F6B46.alignment = 'Expand'.upper()
-        box_F6B46.scale_x = 1.0
-        box_F6B46.scale_y = 1.0
-        if not True: box_F6B46.operator_context = "EXEC_DEFAULT"
         box_F6B46.prop(self, 'sna_create_duplicate', text='Create a duplicate object', icon_value=0, emboss=True)
         if self.sna_create_duplicate:
             pass

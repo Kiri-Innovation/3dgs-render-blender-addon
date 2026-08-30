@@ -16,9 +16,9 @@ class SNA_OT_Dgs_Render_Import_Image_Overlay_4A457(bpy.types.Operator, ImportHel
 
     @classmethod
     def poll(cls, context):
-        if bpy.app.version >= (3, 0, 0) and True:
+        if bpy.app.version >= (3, 0, 0):
             cls.poll_message_set('')
-        return not False
+        return True
 
     def execute(self, context):
         image_AB939 = bpy.data.images.load(filepath=self.filepath, check_existing=True, )

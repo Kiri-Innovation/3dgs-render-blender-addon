@@ -30,9 +30,9 @@ class SNA_OT_Dgs_Render_Attribute_Select_51C86(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        if bpy.app.version >= (3, 0, 0) and True:
+        if bpy.app.version >= (3, 0, 0):
             cls.poll_message_set('')
-        return not False
+        return True
 
     def execute(self, context):
         TARGET_OBJ = bpy.context.view_layer.objects.active
@@ -220,74 +220,20 @@ class SNA_OT_Dgs_Render_Attribute_Select_51C86(bpy.types.Operator):
         layout = self.layout
         if bpy.context.scene.sna_dgs_scene_properties.select_attribute_type == "SCALE":
             col_94F1A = layout.column(heading='', align=False)
-            col_94F1A.alert = False
-            col_94F1A.enabled = True
-            col_94F1A.active = True
-            col_94F1A.use_property_split = False
-            col_94F1A.use_property_decorate = False
-            col_94F1A.scale_x = 1.0
-            col_94F1A.scale_y = 1.0
-            col_94F1A.alignment = 'Expand'.upper()
-            col_94F1A.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
             col_94F1A.prop(self, 'sna_scale_target_attr', text=self.sna_scale_target_attr, icon_value=0, emboss=True, expand=True)
             col_94F1A.prop(self, 'sna_scale_factor', text='Factor', icon_value=0, emboss=True, expand=False)
             row_0FEBA = col_94F1A.row(heading='', align=False)
-            row_0FEBA.alert = False
-            row_0FEBA.enabled = True
-            row_0FEBA.active = True
-            row_0FEBA.use_property_split = False
-            row_0FEBA.use_property_decorate = False
-            row_0FEBA.scale_x = 1.0
-            row_0FEBA.scale_y = 1.0
-            row_0FEBA.alignment = 'Expand'.upper()
-            row_0FEBA.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
             row_0FEBA.prop(self, 'sna_scale_compare', text=self.sna_scale_compare, icon_value=0, emboss=True, expand=True)
         elif bpy.context.scene.sna_dgs_scene_properties.select_attribute_type == "ROT":
             col_50BE3 = layout.column(heading='', align=False)
-            col_50BE3.alert = False
-            col_50BE3.enabled = True
-            col_50BE3.active = True
-            col_50BE3.use_property_split = False
-            col_50BE3.use_property_decorate = False
-            col_50BE3.scale_x = 1.0
-            col_50BE3.scale_y = 1.0
-            col_50BE3.alignment = 'Expand'.upper()
-            col_50BE3.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
             col_50BE3.prop(self, 'sna_rot_target_euler', text='Target Rotation', icon_value=0, emboss=True)
             col_50BE3.prop(self, 'sna_rot_tolerance_deg', text='Tolerance', icon_value=0, emboss=True, expand=False)
             row_9826B = col_50BE3.row(heading='', align=False)
-            row_9826B.alert = False
-            row_9826B.enabled = True
-            row_9826B.active = True
-            row_9826B.use_property_split = False
-            row_9826B.use_property_decorate = False
-            row_9826B.scale_x = 1.0
-            row_9826B.scale_y = 1.0
-            row_9826B.alignment = 'Expand'.upper()
-            row_9826B.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
             row_9826B.prop(self, 'sna_rot_compare', text=self.sna_rot_compare, icon_value=0, emboss=True, expand=True)
         elif bpy.context.scene.sna_dgs_scene_properties.select_attribute_type == "STRETCH":
             col_0EDB7 = layout.column(heading='', align=False)
-            col_0EDB7.alert = False
-            col_0EDB7.enabled = True
-            col_0EDB7.active = True
-            col_0EDB7.use_property_split = False
-            col_0EDB7.use_property_decorate = False
-            col_0EDB7.scale_x = 1.0
-            col_0EDB7.scale_y = 1.0
-            col_0EDB7.alignment = 'Expand'.upper()
-            col_0EDB7.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
             col_0EDB7.prop(self, 'sna_scale_factor', text='Factor', icon_value=0, emboss=True, expand=False)
             row_1AE6E = col_0EDB7.row(heading='', align=False)
-            row_1AE6E.alert = False
-            row_1AE6E.enabled = True
-            row_1AE6E.active = True
-            row_1AE6E.use_property_split = False
-            row_1AE6E.use_property_decorate = False
-            row_1AE6E.scale_x = 1.0
-            row_1AE6E.scale_y = 1.0
-            row_1AE6E.alignment = 'Expand'.upper()
-            row_1AE6E.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
             row_1AE6E.prop(self, 'sna_scale_compare', text=self.sna_scale_compare, icon_value=0, emboss=True, expand=True)
         else:
             pass

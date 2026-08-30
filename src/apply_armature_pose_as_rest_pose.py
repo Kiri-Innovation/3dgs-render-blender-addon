@@ -15,9 +15,9 @@ class SNA_OT_Dgs_Render_Apply_Armature_Pose_As_Rest_Pose_A8C68(bpy.types.Operato
 
     @classmethod
     def poll(cls, context):
-        if bpy.app.version >= (3, 0, 0) and True:
+        if bpy.app.version >= (3, 0, 0):
             cls.poll_message_set('')
-        return not False
+        return True
 
     def execute(self, context):
         """Bake an armature's current pose into the rest pose without losing animation.

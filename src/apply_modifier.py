@@ -17,9 +17,9 @@ class SNA_OT_Dgs_Render_Apply_Modifier_0F5F2(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        if bpy.app.version >= (3, 0, 0) and True:
+        if bpy.app.version >= (3, 0, 0):
             cls.poll_message_set('')
-        return not False
+        return True
 
     def execute(self, context):
         object_name = self.sna_target_object

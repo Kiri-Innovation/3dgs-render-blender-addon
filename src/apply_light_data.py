@@ -17,9 +17,9 @@ class SNA_OT_Dgs_Render_Apply_Light_Data_6C5Ad(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        if bpy.app.version >= (3, 0, 0) and True:
+        if bpy.app.version >= (3, 0, 0):
             cls.poll_message_set('')
-        return not False
+        return True
 
     def execute(self, context):
         sna_relight2_3_commit_proxy_relight_to_3dgs_6E60F()

@@ -15,9 +15,9 @@ class SNA_OT_Dgs_Render_Select_Proxy_Mesh_E76B7(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        if bpy.app.version >= (3, 0, 0) and True:
+        if bpy.app.version >= (3, 0, 0):
             cls.poll_message_set('')
-        return not False
+        return True
 
     def execute(self, context):
         input_object = bpy.context.view_layer.objects.active.sna_dgs_object_properties.rig_proxy_mesh

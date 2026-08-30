@@ -16,9 +16,9 @@ class SNA_OT_Dgs_Render_Apply_3Dgs_Tranforms_5B665(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        if bpy.app.version >= (3, 0, 0) and True:
+        if bpy.app.version >= (3, 0, 0):
             cls.poll_message_set('')
-        return not False
+        return True
 
     def execute(self, context):
         target_obj_name = bpy.context.view_layer.objects.active.name
@@ -29,15 +29,6 @@ class SNA_OT_Dgs_Render_Apply_3Dgs_Tranforms_5B665(bpy.types.Operator):
     def draw(self, context):
         layout = self.layout
         box_84D03 = layout.box()
-        box_84D03.alert = False
-        box_84D03.enabled = True
-        box_84D03.active = True
-        box_84D03.use_property_split = False
-        box_84D03.use_property_decorate = False
-        box_84D03.alignment = 'Expand'.upper()
-        box_84D03.scale_x = 1.0
-        box_84D03.scale_y = 1.0
-        if not True: box_84D03.operator_context = "EXEC_DEFAULT"
         box_84D03.prop(self, 'sna_apply_location', text='Apply Location', icon_value=0, emboss=True)
 
     def invoke(self, context, event):

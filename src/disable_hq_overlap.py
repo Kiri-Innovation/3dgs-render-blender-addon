@@ -15,9 +15,9 @@ class SNA_OT_Dgs_Render_Disable_Hq_Overlap_34678(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        if bpy.app.version >= (3, 0, 0) and True:
+        if bpy.app.version >= (3, 0, 0):
             cls.poll_message_set('')
-        return not False
+        return True
 
     def execute(self, context):
         bpy.data.objects.remove(object=bpy.data.objects['KIRI_HQ_Merged_Object'], do_unlink=True, do_id_user=True, do_ui_user=True, )
@@ -35,15 +35,6 @@ class SNA_OT_Dgs_Render_Disable_Hq_Overlap_34678(bpy.types.Operator):
     def draw(self, context):
         layout = self.layout
         box_2D485 = layout.box()
-        box_2D485.alert = False
-        box_2D485.enabled = True
-        box_2D485.active = True
-        box_2D485.use_property_split = False
-        box_2D485.use_property_decorate = False
-        box_2D485.alignment = 'Expand'.upper()
-        box_2D485.scale_x = 1.0
-        box_2D485.scale_y = 1.0
-        if not True: box_2D485.operator_context = "EXEC_DEFAULT"
         box_2D485.label(text='HQ Object Found In Scene', icon_value=load_preview_icon(os.path.join(os.path.dirname(__file__), 'assets', 'warning.svg')))
         box_2D485.label(text='        Remove It?', icon_value=0)
 

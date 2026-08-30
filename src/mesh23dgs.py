@@ -16,9 +16,9 @@ class SNA_OT_Dgs_Render_Mesh23Dgs_3Dfed(bpy.types.Operator, ImportHelper):
 
     @classmethod
     def poll(cls, context):
-        if bpy.app.version >= (3, 0, 0) and True:
+        if bpy.app.version >= (3, 0, 0):
             cls.poll_message_set('')
-        return not False
+        return True
 
     def execute(self, context):
         if bpy.context.scene.sna_dgs_scene_properties.mesh2gs_validate:

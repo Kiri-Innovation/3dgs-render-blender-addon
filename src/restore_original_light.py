@@ -17,9 +17,9 @@ class SNA_OT_Dgs_Render_Restore_Original_Light_9A7Fe(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        if bpy.app.version >= (3, 0, 0) and True:
+        if bpy.app.version >= (3, 0, 0):
             cls.poll_message_set('')
-        return not False
+        return True
 
     def execute(self, context):
         sna_relight2_4_restore_original_3dgs_color_08334()

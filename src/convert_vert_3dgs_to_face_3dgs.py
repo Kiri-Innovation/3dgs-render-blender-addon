@@ -18,9 +18,9 @@ class SNA_OT_Dgs_Render_Convert_Vert_3Dgs_To_Face_3Dgs_E6635(bpy.types.Operator)
 
     @classmethod
     def poll(cls, context):
-        if bpy.app.version >= (3, 0, 0) and True:
+        if bpy.app.version >= (3, 0, 0):
             cls.poll_message_set('')
-        return not False
+        return True
 
     def execute(self, context):
         target_obj_name = bpy.context.view_layer.objects.active.name
