@@ -28,7 +28,7 @@ class SNA_OT_Dgs_Render_Create_Proxy_From_Mesh_Eafbb(bpy.types.Operator):
         sna_b2_load_from_blender_object_F0CCB(bpy.context.view_layer.objects.active.name + 'Splat_Proxy')
         sna_shader_system_A4AED()
         sna_texture_creation_FD1B2()
-        sna_viewport_render_A3941(bpy.context.scene.sna_dgs_scene_properties.r2_sh_degree, bpy.context.scene.sna_dgs_scene_properties.r2_sort_threshold)
+        sna_viewport_render_A3941(bpy.context.scene.sna_dgs_scene_properties.r2_sh_degree, bpy.context.scene.sna_dgs_scene_properties.r2_sort_threshold, bpy.context.scene.sna_dgs_scene_properties.rt_rotation_sort_threshold)
         return {"FINISHED"}
 
     def invoke(self, context, event):

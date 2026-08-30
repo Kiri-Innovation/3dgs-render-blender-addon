@@ -19,10 +19,10 @@ def sna_r2_viewport_update_BA246():
         sna_clean_up_scene_5F1F1(False)
         sna_shader_system_A4AED()
         sna_texture_creation_FD1B2()
-        sna_viewport_render_A3941(bpy.context.scene.sna_dgs_scene_properties.r2_sh_degree, bpy.context.scene.sna_dgs_scene_properties.r2_sort_threshold)
+        sna_viewport_render_A3941(bpy.context.scene.sna_dgs_scene_properties.r2_sh_degree, bpy.context.scene.sna_dgs_scene_properties.r2_sort_threshold, bpy.context.scene.sna_dgs_scene_properties.rt_rotation_sort_threshold)
     else:
         pass
     sna_c2_refresh_all_4D367((not bpy.context.scene.sna_dgs_scene_properties.r2_selected), bpy.context.scene.sna_dgs_scene_properties.r2_transforms, True)
     sna_shader_system_A4AED()
     sna_texture_creation_FD1B2()
-    sna_viewport_render_A3941(bpy.context.scene.sna_dgs_scene_properties.r2_sh_degree, bpy.context.scene.sna_dgs_scene_properties.r2_sort_threshold)
+    sna_viewport_render_A3941(bpy.context.scene.sna_dgs_scene_properties.r2_sh_degree, bpy.context.scene.sna_dgs_scene_properties.r2_sort_threshold, bpy.context.scene.sna_dgs_scene_properties.rt_rotation_sort_threshold)

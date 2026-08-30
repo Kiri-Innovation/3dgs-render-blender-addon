@@ -65,6 +65,7 @@ def sna_r2_update_menu_6A492(layout_function, ):
     col_9BE62.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
     col_9BE62.prop(bpy.context.scene.sna_dgs_scene_properties, 'r2_sh_degree', text='SH Degrees', icon_value=0, emboss=True, expand=True)
     col_9BE62.prop(bpy.context.scene.sna_dgs_scene_properties, 'r2_sort_threshold', text='Camera Move Sort Threshold', icon_value=0, emboss=True, expand=True)
+    col_9BE62.prop(bpy.context.scene.sna_dgs_scene_properties, 'rt_rotation_sort_threshold', text='Camera Turn Sort Threshold', icon_value=0, emboss=True, expand=True)
     box_4B521 = box_EB86E.box()
     box_4B521.alert = False
     box_4B521.enabled = (not ((bpy.context.scene.sna_dgs_scene_properties.r2_update_type == 'Interval') and (not bpy.context.scene.sna_dgs_scene_properties.r2_interval_stop)))

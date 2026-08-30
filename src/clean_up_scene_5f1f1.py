@@ -101,6 +101,7 @@ def sna_clean_up_scene_5F1F1(REMOVE_ALL_GAUSSIAN_OBJECTS):
                 'gaussian_last_viewport_visibility', # Per-object viewport visibility tracking
                 # Camera tracking  
                 'gaussian_last_camera_pos',        # Camera position for depth sorting
+                'gaussian_last_view_dir',          # Camera view direction for depth sorting
                 # Update flags
                 'gaussian_global_needs_update',    # Global data update flag
             ]
