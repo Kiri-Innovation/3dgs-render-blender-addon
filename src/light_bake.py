@@ -45,6 +45,7 @@ def sna_light_bake_8F346(layout_function, ):
                 row_18A3E.prop(bpy.context.scene.sna_dgs_scene_properties, 'light_bake_active_menu', text=bpy.context.scene.sna_dgs_scene_properties.light_bake_active_menu, icon_value=0, emboss=True, expand=True)
                 if bpy.context.scene.sna_dgs_scene_properties.light_bake_active_menu == "1. Store Light":
                     col_56E5A = col_DA035.column(heading='', align=False)
+                    col_56E5A.alert = True
                     if 'proxy_deferred_relight_stage_saved' in bpy.context.view_layer.objects.active:
                         if bpy.context.view_layer.objects.active['proxy_deferred_relight_stage_saved']:
                             box_D56BA = col_56E5A.box()
@@ -62,6 +63,7 @@ def sna_light_bake_8F346(layout_function, ):
                     pass
                 box_82787 = col_DA035.box()
                 col_9B44F = box_82787.column(heading='', align=False)
+                col_9B44F.alert = True
                 op = col_9B44F.operator('sna.dgs_render_restore_original_light_9a7fe', text='Restore Lighting', icon_value=0, emboss=True, depress=False)
         else:
             box_B787A = col_3F618.box()

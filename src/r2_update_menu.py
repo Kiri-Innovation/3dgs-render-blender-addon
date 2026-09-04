@@ -33,6 +33,7 @@ def sna_r2_update_menu_6A492(layout_function, ):
     op = col_A95B5.operator('sna.dgs_render_refresh_scene_a6719', text='Update Scene', icon_value=(load_preview_icon(os.path.join(os.path.dirname(__file__), 'assets', 'play.svg')) if (bpy.context.scene.sna_dgs_scene_properties.r2_update_type == 'Interval') else load_preview_icon(os.path.join(os.path.dirname(__file__), 'assets', 'update.svg'))), emboss=True, depress=False)
     if ((bpy.context.scene.sna_dgs_scene_properties.r2_update_type == 'Interval') and (not bpy.context.scene.sna_dgs_scene_properties.r2_interval_stop)):
         col_9AB35 = box_EB86E.column(heading='', align=False)
+        col_9AB35.alert = True
         col_9AB35.scale_y = 2.0
         op = col_9AB35.operator('sna.dgs_render_stop_interval_updates_83370', text='Stop', icon_value=load_preview_icon(os.path.join(os.path.dirname(__file__), 'assets', 'stop.svg')), emboss=True, depress=False)
     if bpy.context.preferences.addons[__package__].preferences.sna_show_tips:

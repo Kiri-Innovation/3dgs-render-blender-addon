@@ -11,6 +11,7 @@ __package__ = __package__.rsplit('.', 1)[0]
 def sna_vertex_paint_function_interface_BEA3E(layout_function, ):
     if (bpy.context.view_layer.objects.active['3DGS_Mesh_Type'] == 'vert'):
         box_2FB04 = layout_function.box()
+        box_2FB04.alert = True
         box_2FB04.label(text='Painting is only available for Face based', icon_value=load_preview_icon(os.path.join(os.path.dirname(__file__), 'assets', 'warning.svg')))
         box_2FB04.label(text='3DGS objects. You can convert this object', icon_value=0)
         box_2FB04.label(text='from the Ctrl+A menu', icon_value=0)

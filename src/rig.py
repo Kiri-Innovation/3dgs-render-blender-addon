@@ -40,6 +40,7 @@ def sna_rig_891FC(layout_function, ):
                     if 'proxy_binding_active' in bpy.context.view_layer.objects.active:
                         if bpy.context.view_layer.objects.active['proxy_binding_active']:
                             box_B68AA = col_29EE2.box()
+                            box_B68AA.alert = True
                             op = box_B68AA.operator('sna.dgs_render_unbind_from_proxy_mesh_7648d', text='Unbind', icon_value=0, emboss=True, depress=False)
                         else:
                             box_485E0 = col_29EE2.box()
@@ -131,6 +132,7 @@ def sna_rig_891FC(layout_function, ):
                                                 op = col_16CA7.operator('sna.dgs_render_update_bound_3dgs_from_cache_385ec', text='Update from cache', icon_value=load_preview_icon(os.path.join(os.path.dirname(__file__), 'assets', 'play.svg')), emboss=True, depress=False)
                                             else:
                                                 col_BE41C = col_16CA7.column(heading='', align=False)
+                                                col_BE41C.alert = True
                                                 op = col_BE41C.operator('sna.dgs_render_end_proxy_rig_updates_60c6a', text='Stop', icon_value=load_preview_icon(os.path.join(os.path.dirname(__file__), 'assets', 'stop.svg')), emboss=True, depress=False)
                                 else:
                                     pass

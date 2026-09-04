@@ -11,6 +11,7 @@ def sna_rig_update_settings_88DF0(layout_function, alert, enabled):
     if 'proxy_sequence_binding' in bpy.context.view_layer.objects.active:
         if bpy.context.view_layer.objects.active['proxy_sequence_binding']:
             box_3ABA6 = layout_function.box()
+            box_3ABA6.alert = True
             box_3ABA6.label(text='Active Object has baked data', icon_value=load_preview_icon(''))
             op = box_3ABA6.operator('sna.dgs_render_clear_rig_cache_f38be', text='Clear Cache', icon_value=0, emboss=True, depress=False)
     col_8A21A = layout_function.column(heading='', align=True)
