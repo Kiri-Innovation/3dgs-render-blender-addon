@@ -17,7 +17,6 @@ def sna_light_bake_build_8B9DD(layout_function, ):
         col_AD78B = layout_function.column(heading='', align=True)
         box_4882E = col_AD78B.box()
         col_3E710 = box_4882E.column(heading='', align=True)
-        col_3E710.operator_context = "INVOKE_DEFAULT" if False else "EXEC_DEFAULT"
         col_3E710.label(text='Interpolation', icon_value=load_preview_icon(os.path.join(os.path.dirname(__file__), 'assets', 'pointer-right-fill.svg')))
         col_3E710.prop(bpy.context.scene.sna_dgs_scene_properties, 'normal_smoothing', text='Proxy Normal Smoothing', icon_value=0, emboss=True)
         col_3E710.prop(bpy.context.scene.sna_dgs_scene_properties, 'pre_light_smoothing', text='Pre-Light Smoothing', icon_value=0, emboss=True)
@@ -32,7 +31,6 @@ def sna_light_bake_build_8B9DD(layout_function, ):
         if bpy.context.scene.sna_dgs_scene_properties.relight_include_world_environment:
             box_018E2 = col_AD78B.box()
             col_12C25 = box_018E2.column(heading='', align=True)
-            col_12C25.operator_context = "INVOKE_DEFAULT" if False else "EXEC_DEFAULT"
             col_12C25.label(text='World Light', icon_value=load_preview_icon(os.path.join(os.path.dirname(__file__), 'assets', 'pointer-right-fill.svg')))
             col_12C25.prop(bpy.context.scene.sna_dgs_scene_properties, 'hdri_max_width', text='HDRI Max Width', icon_value=0, emboss=True)
             col_12C25.prop(bpy.context.scene.sna_dgs_scene_properties, 'irradiance_resolution', text='Irradiance Resolution', icon_value=0, emboss=True)
@@ -50,7 +48,6 @@ def sna_light_bake_build_8B9DD(layout_function, ):
         if bpy.context.scene.sna_dgs_scene_properties.relight_include_scene_lights:
             box_8F86C = col_AD78B.box()
             col_548B3 = box_8F86C.column(heading='', align=True)
-            col_548B3.operator_context = "INVOKE_DEFAULT" if False else "EXEC_DEFAULT"
             col_548B3.label(text='Light Objects', icon_value=load_preview_icon(os.path.join(os.path.dirname(__file__), 'assets', 'pointer-right-fill.svg')))
             col_548B3.prop(bpy.context.scene.sna_dgs_scene_properties, 'include_hidden_lights', text='Include Hidden Lights', icon_value=0, emboss=True)
             col_548B3.prop(bpy.context.scene.sna_dgs_scene_properties, 'relight_scene_light_gain', text='Light Gain', icon_value=0, emboss=True)

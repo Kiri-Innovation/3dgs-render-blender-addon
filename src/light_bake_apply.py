@@ -20,7 +20,6 @@ def sna_light_bake_apply_A5653(layout_function, ):
     box_FCA92 = layout_function.box()
     box_FCA92.label(text='Light Pass Mix', icon_value=load_preview_icon(os.path.join(os.path.dirname(__file__), 'assets', 'pointer-right-fill.svg')))
     col_55C97 = box_FCA92.column(heading='', align=True)
-    col_55C97.operator_context = "INVOKE_DEFAULT" if False else "EXEC_DEFAULT"
     col_55C97.prop(bpy.context.scene.sna_dgs_scene_properties, 'indirect_strength', text='Indirect Strength', icon_value=0, emboss=True)
     col_55C97.prop(bpy.context.scene.sna_dgs_scene_properties, 'direct_strength', text='Direct Strength', icon_value=0, emboss=True)
     col_55C97.prop(bpy.context.scene.sna_dgs_scene_properties, 'occlusion_strength', text='Occlusion Strength', icon_value=0, emboss=True)
@@ -29,7 +28,6 @@ def sna_light_bake_apply_A5653(layout_function, ):
         col_2D53F = layout_function.column(heading='', align=True)
         box_C2FE8 = col_2D53F.box()
         col_A17CD = box_C2FE8.column(heading='', align=True)
-        col_A17CD.operator_context = "INVOKE_DEFAULT" if False else "EXEC_DEFAULT"
         col_A17CD.label(text='Color Mix', icon_value=load_preview_icon(os.path.join(os.path.dirname(__file__), 'assets', 'pointer-right-fill.svg')))
         split_C326C = col_A17CD.split(factor=0.5, align=False)
         split_C326C.label(text='Factor Curve', icon_value=0)
@@ -41,7 +39,6 @@ def sna_light_bake_apply_A5653(layout_function, ):
             pass
         else:
             col_D67D0 = col_A17CD.column(heading='', align=True)
-            col_D67D0.operator_context = "INVOKE_DEFAULT" if False else "EXEC_DEFAULT"
             col_D67D0.prop(bpy.context.scene.sna_dgs_scene_properties, 'relight_colorize_mix', text='Color Mix', icon_value=0, emboss=True)
             split_18C65 = col_D67D0.split(factor=0.4000000059604645, align=True)
             split_18C65.prop(bpy.context.scene.sna_dgs_scene_properties, 'relight_max_color_tint', text='Max Tint', icon_value=0, emboss=True)
@@ -49,7 +46,6 @@ def sna_light_bake_apply_A5653(layout_function, ):
         box_85BFD = col_2D53F.box()
         box_85BFD.label(text='Global Strength', icon_value=load_preview_icon(os.path.join(os.path.dirname(__file__), 'assets', 'pointer-right-fill.svg')))
         col_B19E2 = box_85BFD.column(heading='', align=True)
-        col_B19E2.operator_context = "INVOKE_DEFAULT" if False else "EXEC_DEFAULT"
         col_B19E2.prop(bpy.context.scene.sna_dgs_scene_properties, 'ambient_floor', text='Ambient Base', icon_value=0, emboss=True)
         col_B19E2.prop(bpy.context.scene.sna_dgs_scene_properties, 'light_gain', text='Light Gain', icon_value=0, emboss=True)
         col_B19E2.prop(bpy.context.scene.sna_dgs_scene_properties, 'light_power', text='Light Contrast', icon_value=0, emboss=True)
