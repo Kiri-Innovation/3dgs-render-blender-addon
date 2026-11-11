@@ -1,3 +1,5 @@
+Releasem supporting blender 5.3 coming soon
+
 # 3DGS Render for Blender
 
 Free, open-source tools for importing, editing, animating and rendering 3D Gaussian Splats in Blender.
